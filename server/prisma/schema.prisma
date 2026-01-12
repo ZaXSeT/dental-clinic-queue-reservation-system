@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  PATIENT
+  DENTIST
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum QueueStatus {
+  WAITING
+  CALLED
+  IN_TREATMENT
+  COMPLETED
+  SKIPPED
+}
+
+// Core Models
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed
+  role      Role     @default(PATIENT)
+  name      String
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  patientProfile PatientProfile?
+  dentistProfile DentistProfile?
+  appointments   Appointment[] // As patient
+}
+
+model PatientProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  dob         DateTime
+  address     String?
+  medicalHistory String? // Simplified text for now
+}
+
+model DentistProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  specialization String
+  licenseNumber  String
+  bio            String?
+  
+  // Schedule availability logic would go here (or simplified)
+  // relationships
+  appointments   Appointment[] // As doctor
+}
+
+model Appointment {
+  id          String            @id @default(uuid())
+  patientId   String
+  dentistId   String
+  dateTime    DateTime
+  status      AppointmentStatus @default(PENDING)
+  reason      String?
+  
+  // Relations
+  patient     User              @relation(fields: [patientId], references: [id])
+  dentist     DentistProfile    @relation(fields: [dentistId], references: [id])
+  queueEntry  QueueEntry?
+  treatment   Treatment?
+  invoice     Invoice?
+  
+  qrToken     String?           @unique // Generated unique token for QR
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model QueueEntry {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique
+  queueNumber   Int         // Daily sequential number (e.g. 1, 2, 3)
+  status        QueueStatus @default(WAITING)
+  checkInTime   DateTime    @default(now())
+  startTime     DateTime?   // When treatment started
+  endTime       DateTime?   // When completed
+  
+  // Relations
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// --- Phase 3: Medical & Billing ---
+
+model Treatment {
+  id            String    @id @default(uuid())
+  appointmentId String    @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  diagnosis     String
+  notes         String?
+  cost          Decimal?   // Basic cost tracking if Items not used
+  createdAt     DateTime   @default(now())
+}
+
+model Invoice {
+  id            String         @id @default(uuid())
+  appointmentId String         @unique
+  appointment   Appointment    @relation(fields: [appointmentId], references: [id])
+  totalAmount   Decimal
+  status        InvoiceStatus  @default(DRAFT)
+  issuedAt      DateTime       @default(now())
+  paidAt        DateTime?
+  
+  items         InvoiceItem[]
+  payments      Payment[]
+}
+
+model InvoiceItem {
+  id            String    @id @default(uuid())
+  invoiceId     String
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id])
+  description   String
+  quantity      Int       @default(1)
+  unitPrice     Decimal
+  total         Decimal
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  invoiceId     String
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id])
+  amount        Decimal
+  method        PaymentMethod
+  referenceId   String?       // External Transaction ID
+  paidAt        DateTime      @default(now())
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  INSURANCE
+  QRIS
+}

@@ -1,0 +1,54 @@
+# ===============================
+# Dependencies
+# ===============================
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# ===============================
+# Build & Cache
+# ===============================
+.next/
+client/.next/
+dist/
+server/dist/
+
+# ===============================
+# Environment variables
+# ===============================
+.env
+.env.*
+!.env.example
+
+# ===============================
+# Logs
+# ===============================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===============================
+# OS / Editor
+# ===============================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ===============================
+# Antigravity Documentation
+# ===============================
+*.md
+!README.md
+
+# ===============================
+# Prisma
+# ===============================
+prisma/migrations/
+
+# ===============================
+# Misc
+# ===============================
+coverage/
+.tmp/
+.cache/
