@@ -1,6 +1,6 @@
 export default function TreatmentsSection() {
     return (
-        <section id="treatments" className="py-12 px-6 w-full bg-white text-slate-900">
+        <section id="treatments" className="py-12 px-6 w-full bg-white text-slate-900 scroll-mt-28">
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
                     <h2 className="text-primary font-bold uppercase tracking-widest mb-2">Our Services</h2>

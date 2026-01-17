@@ -63,7 +63,7 @@ export default function Home() {
             const attemptScroll = (retries = 0) => {
                 const element = document.getElementById(targetSection!); // targetSection is definitely string here
                 if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
+                    element.scrollIntoView({ behavior: 'auto' });
                     // Only clean URL if it was a param
                     if (paramSection) {
                         router.replace('/', { scroll: false });

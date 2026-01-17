@@ -111,6 +111,7 @@ export default function DentistsPage() {
         <main className="min-h-screen bg-slate-50 text-slate-800 p-6 md:p-12">
             <Link
                 href="/?scrollTo=dentists"
+                scroll={false}
                 className="inline-flex items-center text-slate-500 hover:text-primary mb-8 transition-colors font-medium"
             >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back

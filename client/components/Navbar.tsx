@@ -28,9 +28,9 @@ export default function Navbar() {
                             </>
                         ) : (
                             <>
-                                <Link href="/?scrollTo=workflow" className="hover:text-primary transition-colors cursor-pointer">About</Link>
-                                <Link href="/?scrollTo=dentists" className="hover:text-primary transition-colors cursor-pointer">Dentists</Link>
-                                <Link href="/?scrollTo=contact" className="hover:text-primary transition-colors cursor-pointer">Contact</Link>
+                                <Link href="/?scrollTo=workflow" scroll={false} className="hover:text-primary transition-colors cursor-pointer">About</Link>
+                                <Link href="/?scrollTo=dentists" scroll={false} className="hover:text-primary transition-colors cursor-pointer">Dentists</Link>
+                                <Link href="/?scrollTo=contact" scroll={false} className="hover:text-primary transition-colors cursor-pointer">Contact</Link>
                             </>
                         )}
                     </div>
