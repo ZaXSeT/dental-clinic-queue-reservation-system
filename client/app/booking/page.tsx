@@ -31,7 +31,7 @@ export default function BookingPage() {
                 dateObj: date,
                 dayName: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), // e.g., WED
                 dayNumber: date.getDate(), // e.g., 25
-                fullDate: date.toISOString().split('T')[0] // YYYY-MM-DD
+                fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` // YYYY-MM-DD (Local)
             });
         }
         return days;
@@ -72,14 +72,22 @@ export default function BookingPage() {
     };
 
     const handleBooking = (dentistId: string, date: string, time: string) => {
-        setBookingData({ dentistId, date, time });
-        setStep(4);
+        if (bookingData?.dentistId === dentistId && bookingData?.date === date && bookingData?.time === time) {
+            setBookingData(null); // Unselect if clicking the same slot
+        } else {
+            setBookingData({ dentistId, date, time });
+        }
+    };
+
+    const handleNextStep = () => {
+        if (step === 3 && bookingData) {
+            setStep(4);
+        }
     };
 
     const handleBack = () => {
         if (step === 4) {
             setStep(3);
-            setBookingData(null);
         } else if (step === 3) {
             setStep(2);
             setAppointmentType(null);
@@ -208,12 +216,23 @@ export default function BookingPage() {
                         {step === 3 && (
                             <div className="flex flex-col space-y-8 animate-in slide-in-from-right-8 duration-500 w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
 
-                                <div className="text-center pb-4 relative">
-                                    <button onClick={handleBack} className="absolute left-0 top-1 text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-2">
+                                <div className="text-center pb-4 relative flex items-center justify-between">
+                                    <button onClick={handleBack} className="text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-2">
                                         <ArrowLeft className="w-4 h-4" /> Back
                                     </button>
-                                    <span className="text-primary font-bold text-xs uppercase tracking-[0.2em] bg-primary/5 px-4 py-2 rounded-full">Final Phase 3/3</span>
-                                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mt-4">Select a date and time</h1>
+
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-primary font-bold text-xs uppercase tracking-[0.2em] bg-primary/5 px-4 py-2 rounded-full">Final Phase 3/3</span>
+                                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mt-4">Select a date and time</h1>
+                                    </div>
+
+                                    <button
+                                        onClick={handleNextStep}
+                                        disabled={!bookingData}
+                                        className={`px-6 py-2 rounded-full font-bold text-white text-sm transition-all shadow-lg flex items-center gap-2 ${bookingData ? 'bg-primary hover:bg-sky-600 hover:shadow-primary/30' : 'bg-slate-300 cursor-not-allowed opacity-50'}`}
+                                    >
+                                        Next <Check className="w-4 h-4" />
+                                    </button>
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8">
@@ -260,7 +279,10 @@ export default function BookingPage() {
                                                                         <button
                                                                             key={tIdx}
                                                                             onClick={() => handleBooking(dentist.id, day.fullDate, time)}
-                                                                            className="w-full max-w-[100px] py-2 px-1 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:border-primary hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95 group/time"
+                                                                            className={`w-full max-w-[100px] py-2 px-1 rounded-lg border text-xs font-bold transition-all shadow-sm active:scale-95 group/time ${bookingData?.dentistId === dentist.id && bookingData?.date === day.fullDate && bookingData?.time === time
+                                                                                ? 'bg-primary border-primary text-white shadow-md ring-2 ring-primary ring-offset-2'
+                                                                                : 'border-slate-200 bg-white text-slate-600 hover:border-primary hover:bg-primary hover:text-white'
+                                                                                }`}
                                                                         >
                                                                             {time}
                                                                         </button>
@@ -268,9 +290,7 @@ export default function BookingPage() {
                                                                 ) : (
                                                                     <span className="text-xs text-slate-300 font-medium mt-4">-</span>
                                                                 )}
-                                                                {slots.length > 3 && (
-                                                                    <span className="text-[10px] text-slate-300 font-medium">+more</span>
-                                                                )}
+
                                                             </div>
                                                         );
                                                     })}
@@ -289,6 +309,8 @@ export default function BookingPage() {
                                             referrerPolicy="no-referrer-when-downgrade"
                                         ></iframe>
                                     </div>
+
+                                    {/* Action Bar for Step 3 - Mobile/Desktop - REMOVED */}
                                 </div>
                             </div>
                         )}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Calendar, User, Clock, CheckCircle2, ShieldCheck, Mail, MapPin, Phone, Users, Trophy, Star, Zap, Sparkles, Monitor, Anchor, RefreshCw, Gamepad2, Heart, Fingerprint } from "lucide-react";
+import { ArrowRight, Calendar, User, Clock, CheckCircle2, ShieldCheck, Mail, MapPin, Phone, Users, Trophy, Star, Zap, Sparkles, Monitor, Anchor, RefreshCw, Gamepad2, Heart, Fingerprint, ClipboardList, Stethoscope, MinusCircle, Smile, Component, Activity, Crown, Sun, Gem, Syringe, Scan, Layers } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -119,7 +119,7 @@ export default function Home() {
             </section>
 
             {/* About Section */}
-            <section id="about" className="py-24 px-6 w-full bg-white">
+            <section id="about" className="py-12 px-6 w-full bg-white">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-primary font-bold uppercase tracking-widest mb-2">Our Workflow</h2>
@@ -182,31 +182,45 @@ export default function Home() {
             </section>
 
             {/* Treatments Section */}
-            <section id="treatments" className="py-24 px-6 w-full bg-white text-slate-900">
+            <section id="treatments" className="py-12 px-6 w-full bg-white text-slate-900">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-primary font-bold uppercase tracking-widest mb-2">Our Services</h2>
                         <h3 className="text-4xl font-bold text-slate-900">Comprehensive Care</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {[
-                            { title: "Single Visit Dentistry", icon: Zap, desc: "Complete procedures in just one visit using advanced technology." },
-                            { title: "Invisalign", icon: Sparkles, desc: "Clear aligners for a perfect smile without traditional braces." },
-                            { title: "Digital Smile Design", icon: Monitor, desc: "Preview your new smile digitally before we even begin." },
-                            { title: "Orthodontic Treatment", icon: Fingerprint, desc: "Correcting teeth and jaw alignment for long-term health." },
-                            { title: "Restorative Dentistry", icon: RefreshCw, desc: "Restore the function and integrity of your teeth." },
-                            { title: "Dental Implant", icon: Anchor, desc: "Permanent, natural-looking solution for missing teeth." },
-                            { title: "Smile Makeover", icon: Star, desc: "A comprehensive approach to improving your smile aesthetics." },
-                            { title: "Laser Dentistry", icon: Heart, desc: "Minimally invasive treatments with faster healing times." },
-                            { title: "Fun Treatments For Kids", icon: Gamepad2, desc: "A gentle, fun, and fear-free experience for children." },
+                            { title: "Dental Check Up", image: "/dental_checkup.png", desc: "Ensure your dental health with regular dental check-ups. Schedule now for a beautiful and problem-free smile." },
+                            { title: "Teeth Scaling", image: "/teeth_scaling.png", desc: "Optimize your dental health with regular scaling. Remove plaque and tartar for a shining smile." },
+                            { title: "Dental Fillings", image: "/dental_fillings.png", desc: "Dental fillings help repair damage and maintain tooth strength. Get treatment immediately for a healthy charm." },
+                            { title: "Tooth Extraction", image: "/tooth_extraction.png", desc: "Afraid of extraction? Don't worry! This procedure can help overcome pain, and the process is painless." },
+                            { title: "Dental Braces", image: "/dental_braces.png", desc: "Dental braces help straighten teeth and boost confidence. Discover modern solutions for a perfect smile." },
+                            { title: "Dentures", image: "/dentures.png", desc: "Dentures provide a practical solution to replace missing teeth, restoring your smile and comfort." },
+                            { title: "Root Canal", image: "/root_canal.png", desc: "Disturbed tooth nerves can be very painful. Root canal treatment helps relieve pain and improve health." },
+                            { title: "Dental Crowns", image: "/dental_crowns.png", desc: "Dental crowns are strong and aesthetic tooth protectors. Get durable restoration with high-quality crowns." },
+                            { title: "Teeth Whitening", image: "/teeth_whitening.png", desc: "Teeth whitening is an effective way to whiten teeth. Get a bright smile and higher self-confidence." },
+                            { title: "Dental Veneers", image: "/dental_veneers.png", desc: "Improve your teeth's appearance with stunning dental veneers. Get a perfect smile and high self-confidence." },
+                            { title: "Dental Implants", image: "/dental_implants.png", desc: "Dental implants are a permanent solution for missing teeth. Don't let tooth loss hinder your quality of life." },
+                            { title: "Tooth Diamond", image: "/tooth_diamond.png", desc: "Tooth diamonds highlight your smile with the sparkle of a diamond. Find your unique style." },
+                            { title: "Wisdom Surgery", image: "/wisdom_surgery.png", desc: "Wisdom teeth surgery is an important surgical procedure to address abnormally growing wisdom teeth." },
+                            { title: "Dental X-Ray", image: "/dental_xray.png", desc: "Early detection of problems, visualizing tooth structure, roots, and bone condition for accurate diagnosis." },
                         ].map((item, i) => (
-                            <div key={i} className="bg-slate-50 border border-slate-100 p-8 rounded-2xl hover:bg-white hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all hover:-translate-y-1 group">
-                                <div className="bg-white border border-slate-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
-                                    <item.icon className="h-7 w-7 text-primary" />
+                            <div key={i} className="bg-slate-50 border border-slate-100 p-6 rounded-2xl hover:bg-white hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all hover:-translate-y-1 group">
+                                <div className="w-20 h-20 mb-4 group-hover:scale-110 transition-transform">
+                                    <div
+                                        className="w-full h-full bg-primary"
+                                        style={{
+                                            maskImage: `url(${item.image})`,
+                                            WebkitMaskImage: `url(${item.image})`,
+                                            maskSize: 'contain',
+                                            maskRepeat: 'no-repeat',
+                                            maskPosition: 'center'
+                                        }}
+                                    />
                                 </div>
-                                <h4 className="text-xl font-bold mb-3 text-slate-900">{item.title}</h4>
-                                <p className="text-slate-500 leading-relaxed">{item.desc}</p>
+                                <h4 className="text-lg font-bold mb-2 text-slate-900">{item.title}</h4>
+                                <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -233,7 +247,7 @@ export default function Home() {
                                     <img
                                         src={dentist.image}
                                         alt={dentist.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                        className={`w-full h-full object-cover transform transition-transform duration-700 ${dentist.id === '1' ? 'object-[50%_100%] scale-125 group-hover:scale-[1.4]' : 'object-top group-hover:scale-110'}`}
                                     />
                                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1 text-sm font-bold shadow-sm">
                                         <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
@@ -268,51 +282,72 @@ export default function Home() {
 
 
 
-            {/* Visit Us Section */}
-            <section className="py-24 px-6 w-full bg-white">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    {/* Left: Hexagon Collage */}
-                    <div className="relative h-[750px] w-full hidden lg:block flex items-center justify-center">
-                        <img src="/clinic_collage.png" alt="Clinic Interior" className="w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+            {/* Contact Section */}
+            <section id="contact" className="py-24 px-6 w-full bg-white">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    {/* Left: Contact Form */}
+                    <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100 h-full flex flex-col justify-center">
+                        <h2 className="text-3xl font-bold text-slate-900 mb-2">Get in Touch</h2>
+                        <p className="text-slate-500 mb-8">Have questions? Send us a message and we'll reply as soon as possible.</p>
+
+                        <form className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                                <input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-primary focus:outline-none bg-white" placeholder="Your name" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                                <input type="tel" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-primary focus:outline-none bg-white" placeholder="(021) 555-0123" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Message</label>
+                                <textarea className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-primary focus:outline-none bg-white h-32 resize-none" placeholder="How can we help you?"></textarea>
+                            </div>
+                            <button type="button" className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-sky-600 transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                                Send Message <ArrowRight className="h-5 w-5" />
+                            </button>
+                        </form>
                     </div>
 
-                    {/* Right: Info */}
+                    {/* Right: Info & Map */}
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Visit Our Clinic</h2>
-                        <p className="text-slate-500 text-lg mb-10 leading-relaxed">
-                            Conveniently book online or give us a call at <span className="font-bold text-slate-900">(021) 555-0123</span>. Same-day appointments and ample free parking are available. We look forward to welcoming you!
-                        </p>
+                        <h2 className="text-3xl font-bold text-slate-900 mb-6">Contact Information</h2>
 
                         <div className="space-y-6 mb-10">
                             <div className="flex gap-4">
-                                <MapPin className="h-6 w-6 text-slate-400 shrink-0 mt-1" />
+                                <MapPin className="h-6 w-6 text-primary shrink-0 mt-1" />
                                 <div>
+                                    <h4 className="font-bold text-slate-900 mb-1">Our Location</h4>
                                     <p className="text-slate-500">
                                         Jl. Bantaran Sungai, Hutan, Kec. Percut Sei Tuan,<br />
-                                        Kabupaten Deli Serdang, Sumatera Utara 20371<br />
-                                        <a href="https://www.google.com/maps/search/?api=1&query=Go+Dental+Clinic+(Part+Of+Medan+Dental+Center)" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-900 hover:text-primary transition-colors">Get Directions</a>
+                                        Kabupaten Deli Serdang, Sumatera Utara 20371
                                     </p>
+                                    <a href="https://www.google.com/maps/search/?api=1&query=Go+Dental+Clinic+(Part+Of+Medan+Dental+Center)" target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-primary font-bold hover:underline text-sm">Get Directions</a>
                                 </div>
                             </div>
                             <div className="flex gap-4">
-                                <Clock className="h-6 w-6 text-slate-400 shrink-0 mt-1" />
+                                <Clock className="h-6 w-6 text-primary shrink-0 mt-1" />
                                 <div>
+                                    <h4 className="font-bold text-slate-900 mb-1">Opening Hours</h4>
                                     <p className="text-slate-500">
-                                        Monday - Thursday - Saturday: 9-5<br />
-                                        Tuesday - Wednesday - Friday: 9-7
+                                        Monday - Saturday: 09:00 - 21:00<br />
+                                        Sunday: Closed
                                     </p>
                                 </div>
                             </div>
                             <div className="flex gap-4">
-                                <Phone className="h-6 w-6 text-slate-400 shrink-0 mt-1" />
-                                <p className="text-slate-500 font-medium">(021) 555-0123</p>
+                                <Phone className="h-6 w-6 text-primary shrink-0 mt-1" />
+                                <div>
+                                    <h4 className="font-bold text-slate-900 mb-1">Phone</h4>
+                                    <p className="text-slate-500 font-medium">(021) 555-0123</p>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Map Image Placeholder */}
-                        <div className="w-full h-[300px] bg-slate-200 rounded-3xl overflow-hidden shadow-inner border border-slate-300 relative group">
+                        {/* Map */}
+                        <div className="w-full h-[300px] bg-slate-200 rounded-3xl overflow-hidden shadow-inner border border-slate-300 relative">
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d995.4896415238836!2d98.74482824264963!3d3.596970486717747!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x303131d0d6826859%3A0xd4b27636dae03e17!2sGo%20Dental%20Clinic%20(Part%20Of%20Medan%20Dental%20Center)!5e0!3m2!1sen!2sid!4v1768412918223!5m2!1sen!2sid"
+                                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d995.4896822145192!2d98.74468189569045!3d3.596933230626246!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x303131d0d6826859%3A0xd4b27636dae03e17!2sGo%20Dental%20Clinic%20(Part%20Of%20Medan%20Dental%20Center)!5e0!3m2!1sen!2sid!4v1768415380457!5m2!1sen!2sid"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}
