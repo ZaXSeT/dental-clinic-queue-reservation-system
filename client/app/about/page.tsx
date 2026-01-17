@@ -4,7 +4,7 @@ import { CheckCircle2, ShieldCheck, Users, Trophy } from "lucide-react";
 export default function AboutPage() {
     return (
         <main className="min-h-screen bg-white text-slate-800">
-            {/* Hero Section */}
+            
             <section className="relative py-20 px-6 text-center bg-gradient-to-b from-sky-50 to-white">
                 <h1 className="text-4xl md:text-5xl font-bold mb-6 text-slate-900">Redefining Dental Care</h1>
                 <p className="text-xl text-slate-500 max-w-2xl mx-auto">
@@ -12,7 +12,6 @@ export default function AboutPage() {
                 </p>
             </section>
 
-            {/* Mission Section */}
             <section className="py-16 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div>
                     <img
@@ -42,7 +41,6 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* Stats Section */}
             <section className="bg-slate-50 py-16 border-y border-slate-200">
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                     {[
@@ -60,7 +58,6 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* CTA */}
             <section className="py-20 text-center">
                 <h2 className="text-3xl font-bold mb-6">Ready for a checkup?</h2>
                 <Link

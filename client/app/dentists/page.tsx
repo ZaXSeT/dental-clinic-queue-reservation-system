@@ -78,32 +78,32 @@ export default function DentistsPage() {
         {
             id: '1',
             name: 'Dr. Alexander Buygin',
-            specialization: 'Orthodontist',
+            specialization: 'General Dentist',
             image: '/sarah_wilson.jpg',
             rating: 4.9,
             experience: '15 Years',
             schedule: ['Mon', 'Wed', 'Fri'],
-            about: 'Dr. Alexander is a renowned orthodontist with over 15 years of experience in creating beautiful smiles. He specializes in traditional braces, clear aligners, and complex jaw corrections. He is committed to staying updated with the latest advancements in orthodontics to provide the best care for his patients.'
+            about: 'Dr. Alexander is an experienced General Dentist dedicated to providing comprehensive care for all patients. With over 15 years of practice, he focuses on preventative dentistry and maintaining long-term oral health.'
         },
         {
             id: '2',
-            name: 'Dr. Dan Kirky',
-            specialization: 'Cosmetic Dentist',
-            image: '/michael_chen.png',
+            name: 'Dr. Dan Adler',
+            specialization: 'General Dentist',
+            image: '/dan_adler.png',
             rating: 4.8,
             experience: '12 Years',
             schedule: ['Tue', 'Thu', 'Sat'],
-            about: 'Dedicated to aesthetic perfection, Dr. Dan Kirky transforms smiles with veneers, bonding, and whitening. He believes every patient deserves a smile they are proud to show off. His artistic eye and precision ensure natural-looking results that enhance facial aesthetics.'
+            about: 'Dr. Dan Adler provides high-quality general dental services with a gentle touch. He is committed to ensuring every patient feels comfortable and confident in their smile through personalized care plans.'
         },
         {
             id: '3',
             name: 'Dr. F. Khani',
-            specialization: 'Pediatric Dentist',
+            specialization: 'General Dentist',
             image: '/emily_parker.jpg',
             rating: 5.0,
             experience: '8 Years',
             schedule: ['Mon', 'Tue', 'Thu'],
-            about: 'Dr. F. Khani creates a fun and safe environment for children. Her gentle approach and patience make dental visits a positive experience for kids of all ages. She focuses on preventive care and education to help children establish healthy oral hygiene habits for life.'
+            about: 'Dr. F. Khani offers expert dental care for the whole family. She emphasizes patient education and preventive treatments to help you achieve and maintain a healthy, beautiful smile for life.'
         }
     ];
 

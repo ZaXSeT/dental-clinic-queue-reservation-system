@@ -12,15 +12,14 @@ export default function BookingPage() {
     const [appointmentType, setAppointmentType] = useState<string | null>(null);
     const [bookingData, setBookingData] = useState<{ dentistId: string; date: string; time: string } | null>(null);
     const [bookingFor, setBookingFor] = useState<'myself' | 'child' | 'other'>('myself');
+    const [mobileDateIdx, setMobileDateIdx] = useState(0);
 
-    // Mock Dentists
     const dentists = [
-        { id: '1', name: 'Dr. Alexander Buygin', specialization: 'Orthodontist', image: '/sarah_wilson.jpg' },
-        { id: '2', name: 'Dr. Dan Kirky', specialization: 'Cosmetic Dentist', image: '/michael_chen.png' },
-        { id: '3', name: 'Dr. F. Khani', specialization: 'Pediatric Dentist', image: '/emily_parker.jpg' }
+        { id: '1', name: 'Dr. Alexander Buygin', specialization: 'General Dentist', image: '/sarah_wilson.jpg' },
+        { id: '2', name: 'Dr. Dan Adler', specialization: 'General Dentist', image: '/dan_adler.png' },
+        { id: '3', name: 'Dr. F. Khani', specialization: 'General Dentist', image: '/emily_parker.jpg' }
     ];
 
-    // Mock Date Generation (Next 4 days)
     const getNextDays = (numDays: number) => {
         const days = [];
         const today = new Date();
@@ -29,9 +28,9 @@ export default function BookingPage() {
             date.setDate(today.getDate() + i);
             days.push({
                 dateObj: date,
-                dayName: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), // e.g., WED
-                dayNumber: date.getDate(), // e.g., 25
-                fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` // YYYY-MM-DD (Local)
+                dayName: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), 
+                dayNumber: date.getDate(), 
+                fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` 
             });
         }
         return days;
@@ -39,21 +38,20 @@ export default function BookingPage() {
 
     const dates = getNextDays(4);
 
-    // Mock Availability Data: { dentistId: { dateString: [times] } }
     const doctorAvailability: Record<string, Record<string, string[]>> = {
-        '1': { // Dr. Sarah
+        '1': { 
             [dates[0].fullDate]: ['09:00 AM', '11:40 AM', '02:00 PM', '04:00 PM'],
             [dates[1].fullDate]: ['09:00 AM', '10:00 AM', '03:00 PM'],
             [dates[2].fullDate]: ['11:00 AM', '01:00 PM'],
             [dates[3].fullDate]: ['09:00 AM', '12:00 PM', '04:00 PM'],
         },
-        '2': { // Dr. Michael
+        '2': { 
             [dates[0].fullDate]: ['10:00 AM', '12:00 PM'],
             [dates[1].fullDate]: ['09:00 AM', '11:00 AM', '02:00 PM', '05:00 PM'],
             [dates[2].fullDate]: ['09:00 AM', '10:00 AM', '11:00 AM'],
             [dates[3].fullDate]: [],
         },
-        '3': { // Dr. Emily
+        '3': { 
             [dates[0].fullDate]: ['02:00 PM', '04:00 PM'],
             [dates[1].fullDate]: [],
             [dates[2].fullDate]: ['09:00 AM', '12:00 PM', '03:00 PM'],
@@ -73,7 +71,7 @@ export default function BookingPage() {
 
     const handleBooking = (dentistId: string, date: string, time: string) => {
         if (bookingData?.dentistId === dentistId && bookingData?.date === date && bookingData?.time === time) {
-            setBookingData(null); // Unselect if clicking the same slot
+            setBookingData(null); 
         } else {
             setBookingData({ dentistId, date, time });
         }
@@ -97,7 +95,6 @@ export default function BookingPage() {
         }
     };
 
-    // Helper to get dentist details
     const selectedDentist = bookingData ? dentists.find(d => d.id === bookingData.dentistId) : null;
 
     const newPatientOptions = [
@@ -116,7 +113,7 @@ export default function BookingPage() {
 
     return (
         <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-primary/20 flex flex-col">
-            {/* Header */}
+            
             <header className="grid grid-cols-3 items-center px-6 md:px-12 py-6 w-full relative z-20">
                 <Link href="/" className="justify-self-start p-2 -ml-2 rounded-full hover:bg-white hover:shadow-sm text-slate-500 transition-all group flex items-center gap-2">
                     <div className="bg-white p-2 rounded-full border border-slate-200 shadow-sm group-hover:border-primary/20 group-hover:text-primary transition-colors">
@@ -216,91 +213,164 @@ export default function BookingPage() {
                         {step === 3 && (
                             <div className="flex flex-col space-y-8 animate-in slide-in-from-right-8 duration-500 w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
 
-                                <div className="text-center pb-4 relative flex items-center justify-between">
-                                    <button onClick={handleBack} className="text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-2">
-                                        <ArrowLeft className="w-4 h-4" /> Back
+                                <div className="text-center pb-2 md:pb-4 relative flex items-center justify-between gap-2 md:gap-4">
+                                    <button onClick={handleBack} className="text-xs md:text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-1 md:gap-2">
+                                        <ArrowLeft className="w-4 h-4" /> <span className="hidden xs:inline">Back</span>
                                     </button>
 
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-primary font-bold text-xs uppercase tracking-[0.2em] bg-primary/5 px-4 py-2 rounded-full">Final Phase 3/3</span>
-                                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mt-4">Select a date and time</h1>
+                                    <div className="flex flex-col items-center flex-1">
+                                        <span className="text-primary font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] bg-primary/5 px-3 py-1.5 md:px-4 md:py-2 rounded-full whitespace-nowrap">Final Phase 3/3</span>
+                                        <h1 className="text-lg md:text-3xl font-bold text-slate-900 tracking-tight mt-2 md:mt-4 leading-tight">Select Date & Time</h1>
                                     </div>
 
                                     <button
                                         onClick={handleNextStep}
                                         disabled={!bookingData}
-                                        className={`px-6 py-2 rounded-full font-bold text-white text-sm transition-all shadow-lg flex items-center gap-2 ${bookingData ? 'bg-primary hover:bg-sky-600 hover:shadow-primary/30' : 'bg-slate-300 cursor-not-allowed opacity-50'}`}
+                                        className={`px-4 py-2 md:px-6 md:py-2 rounded-full font-bold text-white text-xs md:text-sm transition-all shadow-lg flex items-center gap-2 ${bookingData ? 'bg-primary hover:bg-sky-600 hover:shadow-primary/30' : 'bg-slate-300 cursor-not-allowed opacity-50'}`}
                                     >
                                         Next <Check className="w-4 h-4" />
                                     </button>
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8">
-                                    {/* Calendar View Container */}
-                                    <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
+                                    
+                                    <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
 
-                                        {/* Date Header Row */}
-                                        <div className="grid grid-cols-[1fr_repeat(4,1fr)] bg-slate-50 border-b border-slate-100 divide-x divide-slate-100">
-                                            <div className="p-4 flex items-center justify-center text-slate-400 font-medium italic">
-                                                <span className="text-xs uppercase tracking-wider">Doctor</span>
+                                        <div className="md:hidden flex flex-col h-full bg-slate-50/50">
+                                            
+                                            <div className="flex overflow-x-auto py-4 px-4 gap-3 snap-x no-scrollbar bg-white border-b border-slate-100 sticky top-0 z-10">
+                                                {dates.map((day, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => setMobileDateIdx(idx)}
+                                                        className={`flex-shrink-0 snap-center flex flex-col items-center justify-center w-20 h-24 rounded-2xl border-2 transition-all duration-300 ${mobileDateIdx === idx
+                                                            ? 'bg-primary border-primary text-white shadow-lg shadow-primary/30 scale-105'
+                                                            : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                                                            }`}
+                                                    >
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest">{day.dayName}</span>
+                                                        <span className="text-2xl font-black mt-1">{day.dayNumber}</span>
+                                                    </button>
+                                                ))}
                                             </div>
-                                            {dates.map((day, idx) => (
-                                                <div key={idx} className="p-4 text-center">
-                                                    <div className="text-xs font-bold text-slate-400 uppercase mb-1">{day.dayName}</div>
-                                                    <div className="text-xl font-bold text-slate-900">{day.dayNumber}</div>
-                                                </div>
-                                            ))}
+
+                                            <div className="flex flex-col gap-4 p-4">
+                                                {dentists.map((dentist) => {
+                                                    const selectedDate = dates[mobileDateIdx];
+                                                    const slots = doctorAvailability[dentist.id][selectedDate.fullDate] || [];
+
+                                                    return (
+                                                        <div key={dentist.id} className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm">
+                                                            <div className="flex items-center gap-4 mb-5 border-b border-slate-50 pb-4">
+                                                                <div className="relative">
+                                                                    <div className={`h-14 w-14 rounded-2xl overflow-hidden ${dentist.id === '2' ? 'shadow-sm' : ''}`}>
+                                                                        <img
+                                                                            src={dentist.image}
+                                                                            alt={dentist.name}
+                                                                            className={`h-full w-full object-cover ${dentist.id === '2' ? 'scale-[1.7] object-top translate-y-3.5' : ''}`}
+                                                                        />
+                                                                    </div>
+                                                                    <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white z-10"></div>
+                                                                </div>
+                                                                <div>
+                                                                    <h3 className="font-bold text-slate-900 leading-tight">{dentist.name}</h3>
+                                                                    <p className="text-xs text-primary font-bold uppercase tracking-wider mt-1">{dentist.specialization}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div>
+                                                                {slots.length > 0 ? (
+                                                                    <div className="grid grid-cols-3 gap-2">
+                                                                        {slots.map((time, tIdx) => (
+                                                                            <button
+                                                                                key={tIdx}
+                                                                                onClick={() => handleBooking(dentist.id, selectedDate.fullDate, time)}
+                                                                                className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border-2 ${bookingData?.dentistId === dentist.id && bookingData?.date === selectedDate.fullDate && bookingData?.time === time
+                                                                                    ? 'bg-primary border-primary text-white shadow-md'
+                                                                                    : 'bg-slate-50 border-transparent text-slate-600 hover:bg-white hover:border-slate-200'
+                                                                                    }`}
+                                                                            >
+                                                                                {time}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                                                                        <span className="text-xs text-slate-400 font-medium">No slots available</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
 
-                                        {/* Doctors Rows */}
-                                        <div className="divide-y divide-slate-100">
-                                            {dentists.map((dentist) => (
-                                                <div key={dentist.id} className="grid grid-cols-[1fr_repeat(4,1fr)] min-h-[150px] divide-x divide-slate-100 group hover:bg-slate-50/50 transition-colors">
-
-                                                    {/* Doctor Info Column */}
-                                                    <div className="p-6 flex flex-col items-center justify-center text-center space-y-2 relative">
-                                                        <div className="relative">
-                                                            <img src={dentist.image} alt={dentist.name} className="h-16 w-16 rounded-2xl object-cover border-2 border-white shadow-md group-hover:rotate-3 transition-transform duration-300" />
-                                                            <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white"></div>
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="font-bold text-slate-900 text-sm leading-tight">{dentist.name}</h3>
-                                                            <p className="text-[10px] text-primary font-bold mt-1 uppercase tracking-wide bg-primary/5 px-2 py-0.5 rounded-full inline-block">{dentist.specialization}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Availability Columns */}
-                                                    {dates.map((day, idx) => {
-                                                        const slots = doctorAvailability[dentist.id][day.fullDate] || [];
-                                                        return (
-                                                            <div key={idx} className="p-2 flex flex-col gap-2 items-center justify-start py-6">
-                                                                {slots.length > 0 ? (
-                                                                    slots.map((time, tIdx) => (
-                                                                        <button
-                                                                            key={tIdx}
-                                                                            onClick={() => handleBooking(dentist.id, day.fullDate, time)}
-                                                                            className={`w-full max-w-[100px] py-2 px-1 rounded-lg border text-xs font-bold transition-all shadow-sm active:scale-95 group/time ${bookingData?.dentistId === dentist.id && bookingData?.date === day.fullDate && bookingData?.time === time
-                                                                                ? 'bg-primary border-primary text-white shadow-md ring-2 ring-primary ring-offset-2'
-                                                                                : 'border-slate-200 bg-white text-slate-600 hover:border-primary hover:bg-primary hover:text-white'
-                                                                                }`}
-                                                                        >
-                                                                            {time}
-                                                                        </button>
-                                                                    ))
-                                                                ) : (
-                                                                    <span className="text-xs text-slate-300 font-medium mt-4">-</span>
-                                                                )}
-
-                                                            </div>
-                                                        );
-                                                    })}
+                                        <div className="hidden md:block">
+                                            
+                                            <div className="grid grid-cols-[1fr_repeat(4,1fr)] bg-slate-50 border-b border-slate-100 divide-x divide-slate-100">
+                                                <div className="p-4 flex items-center justify-center text-slate-400 font-medium italic">
+                                                    <span className="text-xs uppercase tracking-wider">Doctor</span>
                                                 </div>
-                                            ))}
+                                                {dates.map((day, idx) => (
+                                                    <div key={idx} className="p-4 text-center">
+                                                        <div className="text-xs font-bold text-slate-400 uppercase mb-1">{day.dayName}</div>
+                                                        <div className="text-xl font-bold text-slate-900">{day.dayNumber}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="divide-y divide-slate-100">
+                                                {dentists.map((dentist) => (
+                                                    <div key={dentist.id} className="grid grid-cols-[1fr_repeat(4,1fr)] min-h-[150px] divide-x divide-slate-100 group hover:bg-slate-50/50 transition-colors">
+                                                        
+                                                        <div className="p-6 flex flex-col items-center justify-center text-center space-y-2 relative">
+                                                            <div className="relative group-hover:rotate-3 transition-transform duration-300">
+                                                                <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-white shadow-md">
+                                                                    <img
+                                                                        src={dentist.image}
+                                                                        alt={dentist.name}
+                                                                        className={`h-full w-full object-cover transition-transform duration-300 ${dentist.id === '2' ? 'scale-[1.7] object-top translate-y-3.5' : ''}`}
+                                                                    />
+                                                                </div>
+                                                                <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white z-10"></div>
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="font-bold text-slate-900 text-sm leading-tight">{dentist.name}</h3>
+                                                                <p className="text-[10px] text-primary font-bold mt-1 uppercase tracking-wide bg-primary/5 px-2 py-0.5 rounded-full inline-block">{dentist.specialization}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {dates.map((day, idx) => {
+                                                            const slots = doctorAvailability[dentist.id][day.fullDate] || [];
+                                                            return (
+                                                                <div key={idx} className="p-2 flex flex-col gap-2 items-center justify-start py-6">
+                                                                    {slots.length > 0 ? (
+                                                                        slots.map((time, tIdx) => (
+                                                                            <button
+                                                                                key={tIdx}
+                                                                                onClick={() => handleBooking(dentist.id, day.fullDate, time)}
+                                                                                className={`w-full max-w-[100px] py-2 px-1 rounded-lg border text-xs font-bold transition-all shadow-sm active:scale-95 group/time ${bookingData?.dentistId === dentist.id && bookingData?.date === day.fullDate && bookingData?.time === time
+                                                                                    ? 'bg-primary border-primary text-white shadow-md ring-2 ring-primary ring-offset-2'
+                                                                                    : 'border-slate-200 bg-white text-slate-600 hover:border-primary hover:bg-primary hover:text-white'
+                                                                                    }`}
+                                                                            >
+                                                                                {time}
+                                                                            </button>
+                                                                        ))
+                                                                    ) : (
+                                                                        <span className="text-xs text-slate-300 font-medium mt-4">-</span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Map Container */}
-                                    <div className="hidden lg:block h-full min-h-[600px] bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden relative">
+                                    <div className="block lg:block h-[300px] lg:h-full lg:min-h-[600px] bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden relative">
                                         <iframe
                                             src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d995.4896822145192!2d98.74468189569045!3d3.596933230626246!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x303131d0d6826859%3A0xd4b27636dae03e17!2sGo%20Dental%20Clinic%20(Part%20Of%20Medan%20Dental%20Center)!5e0!3m2!1sen!2sid!4v1768415380457!5m2!1sen!2sid"
                                             className="absolute inset-0 w-full h-full border-0"
@@ -310,15 +380,14 @@ export default function BookingPage() {
                                         ></iframe>
                                     </div>
 
-                                    {/* Action Bar for Step 3 - Mobile/Desktop - REMOVED */}
                                 </div>
                             </div>
                         )}
                     </div>
                 ) : (
-                    // STEP 4: CONFIRMATION FORM
+                    
                     <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        {/* LEFT COLUMN: FORM */}
+                        
                         <div className="lg:col-span-2 space-y-8">
                             <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 p-8 md:p-10">
                                 <button onClick={handleBack} className="text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-2 mb-6">
@@ -344,7 +413,7 @@ export default function BookingPage() {
                                 </div>
 
                                 <div className="space-y-8">
-                                    {/* Patient Details Section */}
+                                    
                                     <div>
                                         <h3 className="text-xl font-bold text-slate-900 mb-2">Patient details</h3>
                                         <p className="text-slate-500 text-sm mb-6">Please provide the following information about the person receiving care.</p>
@@ -383,7 +452,6 @@ export default function BookingPage() {
                                         </div>
                                     </div>
 
-                                    {/* Parent Details Section (Conditional) */}
                                     {bookingFor === 'child' && (
                                         <div className="animate-in fade-in slide-in-from-top-4">
                                             <h3 className="text-xl font-bold text-slate-900 mb-6 pt-4 border-t border-slate-100">Parent/Guardian details</h3>
@@ -400,7 +468,6 @@ export default function BookingPage() {
                                         </div>
                                     )}
 
-                                    {/* Contact Details */}
                                     <div>
                                         <h3 className="text-xl font-bold text-slate-900 mb-6 pt-4 border-t border-slate-100">Contact details</h3>
                                         <div className="space-y-5">
@@ -419,7 +486,6 @@ export default function BookingPage() {
                                         </div>
                                     </div>
 
-                                    {/* Other Details */}
                                     <div>
                                         <h3 className="text-xl font-bold text-slate-900 mb-6 pt-4 border-t border-slate-100">Other details</h3>
                                         <div className="space-y-1">
@@ -442,7 +508,6 @@ export default function BookingPage() {
                             </div>
                         </div>
 
-                        {/* RIGHT COLUMN: SUMMARY CARD */}
                         <div className="lg:col-span-1">
                             <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 p-8 sticky top-24">
                                 <h3 className="text-xl font-bold text-slate-900 mb-6">Appointment details</h3>

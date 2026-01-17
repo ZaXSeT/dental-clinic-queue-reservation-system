@@ -4,10 +4,8 @@
 
 :root {
   --foreground-rgb: 15, 23, 42;
-  /* Dark Navy Text */
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 240, 249, 255;
-  /* Light Blue Tint */
 }
 
 body {
@@ -19,7 +17,42 @@ body {
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: smooth !important;
+  overflow-y: overlay;
+  
+  scrollbar-width: thin;
+  
+  scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+  
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.5);
+  
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  
+  background-clip: content-box;
+  transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(71, 85, 105, 0.8);
+  
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
 }
 
 @layer utilities {
