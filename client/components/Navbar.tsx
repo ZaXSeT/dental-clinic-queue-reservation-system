@@ -14,10 +14,17 @@ export default function Navbar() {
     return (
         <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-white/40 shadow-lg transition-all duration-300">
             <div className="flex justify-between items-center w-full px-6 md:px-12 py-5">
-                <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-primary">
-                    <div className="h-10 w-10 bg-primary" style={{ maskImage: 'url(/resources/clean.png)', WebkitMaskImage: 'url(/resources/clean.png)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
-                    <span>Dental</span>
-                </Link>
+                {pathname === '/' ? (
+                    <a href="#home" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-primary cursor-pointer">
+                        <div className="h-10 w-10 bg-primary" style={{ maskImage: 'url(/resources/clean.png)', WebkitMaskImage: 'url(/resources/clean.png)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
+                        <span>Dental</span>
+                    </a>
+                ) : (
+                    <Link href="/?scrollTo=home" scroll={false} className="flex items-center gap-2 text-2xl font-bold tracking-tight text-primary">
+                        <div className="h-10 w-10 bg-primary" style={{ maskImage: 'url(/resources/clean.png)', WebkitMaskImage: 'url(/resources/clean.png)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
+                        <span>Dental</span>
+                    </Link>
+                )}
                 <div className="flex items-center gap-8">
                     <div className="hidden md:flex gap-8 font-medium text-slate-600">
                         {pathname === '/' ? (
