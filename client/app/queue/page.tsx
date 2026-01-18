@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Clock, ArrowLeft } from "lucide-react";
+import { getQueueState } from "@/actions/queue";
 
 interface QueueItem {
     queueNumber: number;
@@ -14,113 +15,189 @@ interface CurrentQueue {
     queueNumber: number;
     patientName: string;
     status: string;
-    room: number;
+    room: number | string;
+    doctorName?: string;
 }
 
 export default function QueueBoardPage() {
-    const [current, setCurrent] = useState<CurrentQueue | null>(null);
+    const [rooms, setRooms] = useState<any[]>([
+        { id: "1", name: "Dr. Alexander Buygin", status: "Available" },
+        { id: "2", name: "Dr. Dan Adler", status: "Available" },
+        { id: "3", name: "Dr. F. Khani", status: "Available" },
+    ]);
     const [upcoming, setUpcoming] = useState<QueueItem[]>([]);
     const [time, setTime] = useState("");
 
     useEffect(() => {
-        
+
         const timer = setInterval(() => {
             setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         }, 1000);
 
-        
+
         const fetchData = async () => {
             try {
-                const res = await fetch("http://localhost:3001/queue/live");
-                const data = await res.json();
-                setCurrent(data.current);
-                setUpcoming(data.next);
+                const data = await getQueueState();
+
+                // Map active queues to rooms
+                const updatedRooms = [
+                    { id: "1", name: "Dr. Sarah Wilson" },
+                    { id: "2", name: "Dr. James Carter" },
+                    { id: "3", name: "Dr. Emily Chen" }
+                ].map(baseRoom => {
+                    const active = data.activeQueues.find((q: any) => q.roomId === baseRoom.id);
+                    if (active) {
+                        return {
+                            ...baseRoom,
+                            queueNumber: active.number,
+                            patientName: active.name || active.patient?.name || "Guest",
+                            status: "Busy",
+                            // If DB had doctor info, we could overwrite baseRoom.name here
+                            // name: active.doctor?.name || baseRoom.name 
+                        };
+                    }
+                    return { ...baseRoom, status: "Available" };
+                });
+
+                setRooms(updatedRooms);
+
+                setUpcoming(data.next.map((item: any) => ({
+                    queueNumber: item.number,
+                    patientName: item.name || item.patient?.name || "Guest",
+                    estWait: "Wait..."
+                })));
             } catch (e) {
                 console.error("Failed to fetch queue", e);
-                
-                setCurrent({ queueNumber: 102, patientName: "John Doe", status: "IN_TREATMENT", room: 1 });
-                setUpcoming([
-                    { queueNumber: 103, patientName: "Alice Smith", estWait: "15 mins" },
-                    { queueNumber: 104, patientName: "Bob Jones", estWait: "30 mins" },
-                    { queueNumber: 105, patientName: "Charlie Day", estWait: "45 mins" },
-                ]);
             }
         };
 
-        fetchData();
-        
+        fetchData(); // Initial fetch
+        const dataTimer = setInterval(fetchData, 3000); // Poll every 3s
 
-        return () => clearInterval(timer);
+
+        return () => {
+            clearInterval(timer);
+            clearInterval(dataTimer);
+        };
     }, []);
 
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        // Check for admin token in cookies
+        const checkAdmin = () => {
+            const cookies = document.cookie.split(';');
+            const adminToken = cookies.find(c => c.trim().startsWith('admin_token='));
+            setIsAdmin(!!adminToken);
+        };
+        checkAdmin();
+    }, []);
+
+    const handleBack = () => {
+        if (isAdmin) {
+            window.location.href = '/dashboard'; // Force full navigation to hit middleware correct handling
+        } else {
+            window.location.href = '/';
+        }
+    };
+
     return (
-        <main className="min-h-screen bg-white text-slate-800 overflow-hidden p-8 flex gap-8">
-            {}
-            <section className="flex-1 flex flex-col">
-                <header className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-6">
-                        <Link href="/" className="p-3 rounded-full bg-slate-100/80 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-all border border-slate-200 hover:shadow-md group" aria-label="Back to Home">
-                            <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+        <main className="min-h-screen bg-slate-50 text-slate-800 overflow-hidden flex flex-col">
+            <header className="bg-white/80 backdrop-blur-md px-10 py-6 flex justify-between items-center shadow-sm z-10">
+                <div className="flex items-center gap-6">
+                    {/* ... Back buttons ... */}
+                    {isAdmin && (
+                        <button
+                            onClick={handleBack}
+                            className="px-4 py-3 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl group flex items-center gap-2"
+                            aria-label="Back to Admin Dashboard"
+                        >
+                            <span className="font-bold text-sm">Admin Panel</span>
+                        </button>
+                    )}
+                    {!isAdmin && (
+                        <Link href="/" className="p-3 rounded-full bg-slate-100/80 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-all border border-slate-200 hover:shadow-md group" aria-label="Back">
+                            <ArrowLeft className="w-6 h-6" />
                         </Link>
-                        <div className="flex items-center gap-2 text-2xl font-bold tracking-tight text-primary">
-                            <div className="h-10 w-10 bg-primary" style={{ maskImage: 'url(/resources/clean.png)', WebkitMaskImage: 'url(/resources/clean.png)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
-                            <span>Dental</span>
-                        </div>
-                    </div>
-                    <div className="text-6xl font-mono font-bold text-slate-900">{time}</div>
-                </header>
-
-                <div className="flex-1 flex flex-col justify-center items-center bg-sky-50 rounded-[3rem] border-8 border-white shadow-2xl shadow-sky-100 p-12 text-center relative overflow-hidden">
-                    <div className="absolute top-0 w-full h-2 bg-primary"></div>
-                    <h2 className="text-4xl text-slate-400 uppercase tracking-[0.2em] mb-8 font-semibold">Now Serving</h2>
-
-                    <div className="text-[14rem] leading-none font-black text-primary mb-4 tracking-tighter drop-shadow-sm">
-                        A{current?.queueNumber}
-                    </div>
-
-                    <div className="text-6xl font-bold text-slate-900 mb-12">
-                        {current?.patientName}
-                    </div>
-
-                    <div className="flex items-center gap-4 bg-white px-10 py-6 rounded-full text-3xl border border-slate-200 shadow-lg">
-                        <span className="w-5 h-5 rounded-full bg-green-500 animate-pulse box-shadow-green"></span>
-                        <span className="font-medium text-slate-700">Room {current?.room}</span>
-                        <span className="w-px h-8 bg-slate-300 mx-2"></span>
-                        <span className="font-bold text-slate-900">Dr. Sarah Wilson</span>
+                    )}
+                    <div className="flex items-center gap-3 text-2xl font-bold tracking-tight text-primary">
+                        <div className="h-10 w-10 bg-primary shadow-lg shadow-primary/20" style={{ maskImage: 'url(/resources/clean.png)', WebkitMaskImage: 'url(/resources/clean.png)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
+                        <span className="text-slate-800">Dental<span className="text-primary">Clinic</span></span>
                     </div>
                 </div>
-            </section>
+                <div className="text-5xl font-mono font-bold text-slate-800 tracking-tight">{time}</div>
+            </header>
 
-            {}
-            <aside className="w-[450px] flex flex-col bg-slate-50 rounded-[2.5rem] border border-slate-200 p-8 shadow-xl">
-                <h3 className="text-3xl font-bold mb-10 flex items-center gap-4 text-slate-800">
-                    <Clock className="text-primary h-10 w-10" /> Up Next
-                </h3>
+            <div className="flex-1 flex gap-8 p-8 overflow-hidden">
+                {/* Rooms Grid */}
+                <section className="flex-1 grid grid-cols-3 gap-6">
+                    {rooms.map((room) => (
+                        <div key={room.id} className={`rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-500 ${room.status === 'Busy' ? 'bg-white shadow-xl shadow-primary/5 border-2 border-primary/10' : 'bg-slate-100/50 border border-slate-200 opacity-80'}`}>
+                            {room.status === 'Busy' && <div className="absolute top-0 w-full h-2 bg-primary"></div>}
 
-                <div className="space-y-6">
-                    {upcoming.map((item, idx) => (
-                        <div key={idx} className="bg-white p-8 rounded-3xl flex justify-between items-center border border-slate-100 shadow-sm relative overflow-hidden group">
-                            <div className="absolute left-0 top-0 bottom-0 w-2 bg-slate-200 group-first:bg-primary transition-colors"></div>
-                            <div>
-                                <div className="text-4xl font-black text-slate-800 mb-1">A{item.queueNumber}</div>
-                                <div className="text-xl text-slate-500 font-medium">{item.patientName}</div>
+                            <div className="mb-6">
+                                <span className={`px-4 py-1.5 rounded-full text-sm font-bold tracking-wider uppercase ${room.status === 'Busy' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-500'}`}>
+                                    {room.status === 'Busy' ? 'Now Serving' : 'Available'}
+                                </span>
                             </div>
-                            <div className="text-right bg-slate-50 px-4 py-2 rounded-lg">
-                                <span className="block text-sm text-slate-400 uppercase font-bold tracking-wider mb-1">Est. Wait</span>
-                                <span className="text-2xl font-mono font-bold text-primary">{item.estWait}</span>
+
+                            <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mb-6 shadow-inner">
+                                <span className="text-4xl font-bold text-slate-400">R{room.id}</span>
+                            </div>
+
+                            {room.status === 'Busy' ? (
+                                <>
+                                    <div className="text-[8rem] leading-none font-black text-primary mb-4 tracking-tighter drop-shadow-sm">
+                                        #{room.queueNumber}
+                                    </div>
+                                    <div className="text-3xl font-bold text-slate-900 mb-8 line-clamp-1">
+                                        {room.patientName}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex-1 flex flex-col justify-center mb-8">
+                                    <div className="text-5xl text-slate-300 font-bold mb-2">--</div>
+                                    <div className="text-xl text-slate-400">Waiting for patient</div>
+                                </div>
+                            )}
+
+                            <div className="mt-auto pt-6 border-t border-slate-100 w-full">
+                                <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Doctor</div>
+                                <div className="text-xl font-bold text-slate-800">{room.name}</div>
                             </div>
                         </div>
                     ))}
-                </div>
+                </section>
 
-                <div className="mt-auto pt-8 border-t border-slate-200 text-center">
-                    <div className="bg-white p-4 rounded-xl inline-block shadow-sm border border-slate-100">
-                        {}
-                        <div className="w-32 h-32 bg-slate-900 rounded-lg mx-auto mb-2"></div>
-                        <p className="text-slate-500 text-sm font-medium">Scan to Check-in</p>
+                {/* Sidebar */}
+                <aside className="w-[400px] flex flex-col bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-xl">
+                    <h3 className="text-2xl font-bold mb-8 flex items-center gap-3 text-slate-800">
+                        <div className="p-3 bg-blue-50 text-primary rounded-2xl">
+                            <Clock className="h-6 w-6" />
+                        </div>
+                        Queue List
+                    </h3>
+
+                    <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
+                        {upcoming.length === 0 ? (
+                            <div className="text-center text-slate-400 py-10">All caught up!</div>
+                        ) : (
+                            upcoming.map((item, idx) => (
+                                <div key={idx} className="bg-slate-50 p-6 rounded-3xl flex justify-between items-center border border-slate-100 group">
+                                    <div>
+                                        <div className="text-3xl font-black text-slate-800 mb-1">#{item.queueNumber}</div>
+                                        <div className="text-lg text-slate-500 font-medium">{item.patientName}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="block text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Status</span>
+                                        <span className="text-sm font-bold text-primary bg-blue-50 px-3 py-1 rounded-full">Waiting</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
-                </div>
-            </aside>
+                </aside>
+            </div>
         </main>
     );
 }

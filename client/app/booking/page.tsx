@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import { getAllDoctors } from '@/actions/doctor';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ChevronRight, Check } from 'lucide-react';
 
@@ -14,11 +15,29 @@ export default function BookingPage() {
     const [bookingFor, setBookingFor] = useState<'myself' | 'child' | 'other'>('myself');
     const [mobileDateIdx, setMobileDateIdx] = useState(0);
 
-    const dentists = [
-        { id: '1', name: 'Dr. Alexander Buygin', specialization: 'General Dentist', image: '/sarah_wilson.jpg' },
-        { id: '2', name: 'Dr. Dan Adler', specialization: 'General Dentist', image: '/dan_adler.png' },
-        { id: '3', name: 'Dr. F. Khani', specialization: 'General Dentist', image: '/emily_parker.jpg' }
-    ];
+    const [dentists, setDentists] = useState<any[]>([]);
+    const [doctorAvailability, setDoctorAvailability] = useState<Record<string, Record<string, string[]>>>({});
+
+    useEffect(() => {
+        const loadDoctors = async () => {
+            const { data } = await getAllDoctors();
+            if (data) {
+                setDentists(data);
+
+                // Parse availability
+                const availMap: Record<string, any> = {};
+                data.forEach((doc: any) => {
+                    try {
+                        availMap[doc.id] = doc.availability ? JSON.parse(doc.availability) : {};
+                    } catch (e) {
+                        availMap[doc.id] = {};
+                    }
+                });
+                setDoctorAvailability(availMap);
+            }
+        };
+        loadDoctors();
+    }, []);
 
     const getNextDays = (numDays: number) => {
         const days = [];
@@ -28,36 +47,15 @@ export default function BookingPage() {
             date.setDate(today.getDate() + i);
             days.push({
                 dateObj: date,
-                dayName: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), 
-                dayNumber: date.getDate(), 
-                fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` 
+                dayName: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), // MON, TUE...
+                dayNumber: date.getDate(),
+                fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
             });
         }
         return days;
     };
 
-    const dates = getNextDays(4);
-
-    const doctorAvailability: Record<string, Record<string, string[]>> = {
-        '1': { 
-            [dates[0].fullDate]: ['09:00 AM', '11:40 AM', '02:00 PM', '04:00 PM'],
-            [dates[1].fullDate]: ['09:00 AM', '10:00 AM', '03:00 PM'],
-            [dates[2].fullDate]: ['11:00 AM', '01:00 PM'],
-            [dates[3].fullDate]: ['09:00 AM', '12:00 PM', '04:00 PM'],
-        },
-        '2': { 
-            [dates[0].fullDate]: ['10:00 AM', '12:00 PM'],
-            [dates[1].fullDate]: ['09:00 AM', '11:00 AM', '02:00 PM', '05:00 PM'],
-            [dates[2].fullDate]: ['09:00 AM', '10:00 AM', '11:00 AM'],
-            [dates[3].fullDate]: [],
-        },
-        '3': { 
-            [dates[0].fullDate]: ['02:00 PM', '04:00 PM'],
-            [dates[1].fullDate]: [],
-            [dates[2].fullDate]: ['09:00 AM', '12:00 PM', '03:00 PM'],
-            [dates[3].fullDate]: ['10:00 AM', '11:00 AM', '01:00 PM'],
-        }
-    };
+    const dates = getNextDays(14); // Extended to 2 weeks for better testing
 
     const handlePatientTypeSelect = (type: PatientType) => {
         setPatientType(type);
@@ -71,7 +69,7 @@ export default function BookingPage() {
 
     const handleBooking = (dentistId: string, date: string, time: string) => {
         if (bookingData?.dentistId === dentistId && bookingData?.date === date && bookingData?.time === time) {
-            setBookingData(null); 
+            setBookingData(null);
         } else {
             setBookingData({ dentistId, date, time });
         }
@@ -113,7 +111,7 @@ export default function BookingPage() {
 
     return (
         <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-primary/20 flex flex-col">
-            
+
             <header className="grid grid-cols-3 items-center px-6 md:px-12 py-6 w-full relative z-20">
                 <Link href="/" className="justify-self-start p-2 -ml-2 rounded-full hover:bg-white hover:shadow-sm text-slate-500 transition-all group flex items-center gap-2">
                     <div className="bg-white p-2 rounded-full border border-slate-200 shadow-sm group-hover:border-primary/20 group-hover:text-primary transition-colors">
@@ -233,11 +231,11 @@ export default function BookingPage() {
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8">
-                                    
+
                                     <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
 
                                         <div className="md:hidden flex flex-col h-full bg-slate-50/50">
-                                            
+
                                             <div className="flex overflow-x-auto py-4 px-4 gap-3 snap-x no-scrollbar bg-white border-b border-slate-100 sticky top-0 z-10">
                                                 {dates.map((day, idx) => (
                                                     <button
@@ -257,7 +255,7 @@ export default function BookingPage() {
                                             <div className="flex flex-col gap-4 p-4">
                                                 {dentists.map((dentist) => {
                                                     const selectedDate = dates[mobileDateIdx];
-                                                    const slots = doctorAvailability[dentist.id][selectedDate.fullDate] || [];
+                                                    const slots = doctorAvailability[dentist.id]?.[selectedDate.dayName] || [];
 
                                                     return (
                                                         <div key={dentist.id} className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm">
@@ -307,7 +305,7 @@ export default function BookingPage() {
                                         </div>
 
                                         <div className="hidden md:block">
-                                            
+
                                             <div className="grid grid-cols-[1fr_repeat(4,1fr)] bg-slate-50 border-b border-slate-100 divide-x divide-slate-100">
                                                 <div className="p-4 flex items-center justify-center text-slate-400 font-medium italic">
                                                     <span className="text-xs uppercase tracking-wider">Doctor</span>
@@ -323,7 +321,7 @@ export default function BookingPage() {
                                             <div className="divide-y divide-slate-100">
                                                 {dentists.map((dentist) => (
                                                     <div key={dentist.id} className="grid grid-cols-[1fr_repeat(4,1fr)] min-h-[150px] divide-x divide-slate-100 group hover:bg-slate-50/50 transition-colors">
-                                                        
+
                                                         <div className="p-6 flex flex-col items-center justify-center text-center space-y-2 relative">
                                                             <div className="relative group-hover:rotate-3 transition-transform duration-300">
                                                                 <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-white shadow-md">
@@ -342,7 +340,7 @@ export default function BookingPage() {
                                                         </div>
 
                                                         {dates.map((day, idx) => {
-                                                            const slots = doctorAvailability[dentist.id][day.fullDate] || [];
+                                                            const slots = doctorAvailability[dentist.id]?.[day.dayName] || [];
                                                             return (
                                                                 <div key={idx} className="p-2 flex flex-col gap-2 items-center justify-start py-6">
                                                                     {slots.length > 0 ? (
@@ -385,9 +383,9 @@ export default function BookingPage() {
                         )}
                     </div>
                 ) : (
-                    
+
                     <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        
+
                         <div className="lg:col-span-2 space-y-8">
                             <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 p-8 md:p-10">
                                 <button onClick={handleBack} className="text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-2 mb-6">
@@ -413,7 +411,7 @@ export default function BookingPage() {
                                 </div>
 
                                 <div className="space-y-8">
-                                    
+
                                     <div>
                                         <h3 className="text-xl font-bold text-slate-900 mb-2">Patient details</h3>
                                         <p className="text-slate-500 text-sm mb-6">Please provide the following information about the person receiving care.</p>
@@ -441,7 +439,7 @@ export default function BookingPage() {
                                                 </div>
                                                 <div className="space-y-1">
                                                     <label className="text-sm font-bold text-slate-700">Patient date of birth</label>
-                                                    <input type="text" placeholder="DD/MM/YYYY" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
+                                                    <input type="date" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium cursor-pointer text-slate-600" />
                                                 </div>
                                             </div>
 

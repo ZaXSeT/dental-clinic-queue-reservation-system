@@ -55,7 +55,7 @@ export default function Footer() {
                 <p>© 2026 Dental Clinic. All rights reserved.</p>
                 <div className="flex gap-6 justify-center md:justify-start">
                     <Link href="/privacy-terms" className="hover:text-primary transition-colors">Privacy & Terms</Link>
-                    <Link href="/admin/login" className="hover:text-primary transition-colors">Admin</Link>
+
                 </div>
             </div>
         </footer>

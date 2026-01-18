@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id             String        @id @default(uuid())
+  name           String
+  phone          String?
+  email          String?
+  birthDate      DateTime?
+  address        String?
+  medicalHistory String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  queues         Queue[]
+  appointments   Appointment[]
+}
+
+model Queue {
+  id        String   @id @default(uuid())
+  number    Int
+  status    String   @default("waiting") // waiting, treating, completed, cancelled, skipped
+  patientId String?
+  patient   Patient? @relation(fields: [patientId], references: [id])
+  name      String?  // Guest name
+  phone     String?
+  date      DateTime @default(now()) @db.Date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Multi-doctor support
+  doctorId  String?
+  doctor    Doctor?  @relation(fields: [doctorId], references: [id])
+  roomId    String?  // "1", "2", "3"
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  date      DateTime
+  time      String
+  status    String   @default("scheduled")
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  doctor    String?
+  treatment String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Doctor {
+  id             String   @id @default(uuid())
+  name           String
+  specialization String
+  image          String?
+  availability   String?  // JSON or text representing schedule
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  queues         Queue[]
+}
