@@ -95,10 +95,9 @@ export default function QueueControlPage() {
         }
     };
 
-    // Initial load and periodic refresh
     useEffect(() => {
         refreshData();
-        const interval = setInterval(refreshData, 5000); // Poll every 5s
+        const interval = setInterval(refreshData, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -132,10 +131,6 @@ export default function QueueControlPage() {
     };
 
     const handleRecall = (id: string, name: string) => {
-        // Recall doesn't necessarily need a confirmation if it's just an alert, 
-        // but for consistency let's make it a quick confirm or just execute.
-        // User asked for "Call next patient" specifically but let's improve all.
-        // Actually, recall is usually safe to just do. But let's add it for safety.
         triggerConfirmation(
             "Recall Patient",
             `Call ${name} to the room again?`,
@@ -178,7 +173,6 @@ export default function QueueControlPage() {
     };
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Sanitize: Allow only numbers
         const val = e.target.value.replace(/\D/g, '');
         setWalkInPhone(val);
         if (phoneError) setPhoneError("");
@@ -188,7 +182,6 @@ export default function QueueControlPage() {
         e.preventDefault();
         if (!walkInName.trim()) return;
 
-        // Phone Validation (if provided)
         if (walkInPhone && (walkInPhone.length < 10 || walkInPhone.length > 14)) {
             setPhoneError("Phone number must be between 10-14 digits");
             return;
@@ -208,7 +201,6 @@ export default function QueueControlPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-12 relative">
-            {/* Header */}
             <div className="flex justify-between items-end">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Queue Controller</h1>
@@ -220,7 +212,6 @@ export default function QueueControlPage() {
                 </div>
             </div>
 
-            {/* Room Control Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {dynamicRooms.map((room) => {
                     const active = data.activeQueues.find((q: any) => q.roomId === room.id);
@@ -289,9 +280,7 @@ export default function QueueControlPage() {
                 })}
             </div>
 
-            {/* Split Grid for Queue List & Actions (Below) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Next List */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                     <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
                         Next in Line <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs border border-slate-200">{data.waitingCount} Waiting</span>
@@ -324,7 +313,6 @@ export default function QueueControlPage() {
                     </div>
                 </div>
 
-                {/* Actions */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                     <h3 className="font-bold text-slate-800 mb-6">Quick Actions</h3>
                     <div className="grid grid-cols-2 gap-4">
@@ -353,7 +341,6 @@ export default function QueueControlPage() {
                 </div>
             </div>
 
-            {/* Walk-In Modal */}
             {showWalkInModal && mounted && createPortal(
                 <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
                     <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 border border-slate-100">
@@ -430,8 +417,6 @@ export default function QueueControlPage() {
                 document.body
             )}
 
-            {/* Confirmation Modal */}
-            {/* Confirmation Modal */}
             {confirmation.isOpen && mounted && createPortal(
                 <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
                     <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in zoom-in-95 duration-200 border border-slate-100">
