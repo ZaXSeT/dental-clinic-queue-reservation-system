@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Clock, ArrowLeft } from "lucide-react";
 import { getQueueState } from "@/actions/queue";
+import { getAllDoctors } from "@/actions/doctor";
 
 interface QueueItem {
     queueNumber: number;
@@ -21,30 +22,40 @@ interface CurrentQueue {
 
 export default function QueueBoardPage() {
     const [rooms, setRooms] = useState<any[]>([
-        { id: "1", name: "Dr. Alexander Buygin", status: "Available" },
-        { id: "2", name: "Dr. Dan Adler", status: "Available" },
-        { id: "3", name: "Dr. F. Khani", status: "Available" },
+        { id: "1", name: "Loading...", status: "Available" },
+        { id: "2", name: "Loading...", status: "Available" },
+        { id: "3", name: "Loading...", status: "Available" },
     ]);
+    const [doctors, setDoctors] = useState<any[]>([]);
     const [upcoming, setUpcoming] = useState<QueueItem[]>([]);
     const [time, setTime] = useState("");
 
     useEffect(() => {
-
         const timer = setInterval(() => {
             setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         }, 1000);
 
+        const fetchDoctors = async () => {
+            const res = await getAllDoctors();
+            if (res.success && res.data) {
+                setDoctors(res.data);
+            }
+        };
+        fetchDoctors();
 
+    }, []);
+
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const data = await getQueueState();
 
-                // Map active queues to rooms
-                const updatedRooms = [
-                    { id: "1", name: "Dr. Sarah Wilson" },
-                    { id: "2", name: "Dr. James Carter" },
-                    { id: "3", name: "Dr. Emily Chen" }
-                ].map(baseRoom => {
+                const updatedRooms = [1, 2, 3].map((roomIdNum, index) => {
+                    const doc = doctors[index];
+                    const doctorName = doc ? doc.name : `Doctor ${roomIdNum}`;
+
+                    const baseRoom = { id: roomIdNum.toString(), name: doctorName };
+
                     const active = data.activeQueues.find((q: any) => q.roomId === baseRoom.id);
                     if (active) {
                         return {
@@ -52,8 +63,6 @@ export default function QueueBoardPage() {
                             queueNumber: active.number,
                             patientName: active.name || active.patient?.name || "Guest",
                             status: "Busy",
-                            // If DB had doctor info, we could overwrite baseRoom.name here
-                            // name: active.doctor?.name || baseRoom.name 
                         };
                     }
                     return { ...baseRoom, status: "Available" };
@@ -71,20 +80,14 @@ export default function QueueBoardPage() {
             }
         };
 
-        fetchData(); // Initial fetch
-        const dataTimer = setInterval(fetchData, 3000); // Poll every 3s
-
-
-        return () => {
-            clearInterval(timer);
-            clearInterval(dataTimer);
-        };
-    }, []);
+        fetchData();
+        const interval = setInterval(fetchData, 3000);
+        return () => clearInterval(interval);
+    }, [doctors]);
 
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        // Check for admin token in cookies
         const checkAdmin = () => {
             const cookies = document.cookie.split(';');
             const adminToken = cookies.find(c => c.trim().startsWith('admin_token='));
@@ -95,7 +98,7 @@ export default function QueueBoardPage() {
 
     const handleBack = () => {
         if (isAdmin) {
-            window.location.href = '/dashboard'; // Force full navigation to hit middleware correct handling
+            window.location.href = '/dashboard';
         } else {
             window.location.href = '/';
         }
@@ -105,7 +108,6 @@ export default function QueueBoardPage() {
         <main className="min-h-screen bg-slate-50 text-slate-800 overflow-hidden flex flex-col">
             <header className="bg-white/80 backdrop-blur-md px-10 py-6 flex justify-between items-center shadow-sm z-10">
                 <div className="flex items-center gap-6">
-                    {/* ... Back buttons ... */}
                     {isAdmin && (
                         <button
                             onClick={handleBack}
@@ -129,7 +131,6 @@ export default function QueueBoardPage() {
             </header>
 
             <div className="flex-1 flex gap-8 p-8 overflow-hidden">
-                {/* Rooms Grid */}
                 <section className="flex-1 grid grid-cols-3 gap-6">
                     {rooms.map((room) => (
                         <div key={room.id} className={`rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-500 ${room.status === 'Busy' ? 'bg-white shadow-xl shadow-primary/5 border-2 border-primary/10' : 'bg-slate-100/50 border border-slate-200 opacity-80'}`}>
@@ -169,7 +170,6 @@ export default function QueueBoardPage() {
                     ))}
                 </section>
 
-                {/* Sidebar */}
                 <aside className="w-[400px] flex flex-col bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-xl">
                     <h3 className="text-2xl font-bold mb-8 flex items-center gap-3 text-slate-800">
                         <div className="p-3 bg-blue-50 text-primary rounded-2xl">

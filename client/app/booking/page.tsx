@@ -1,62 +1,123 @@
 "use client";
 
-import { getAllDoctors } from '@/actions/doctor';
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Check } from 'lucide-react';
+import { useState, useEffect, useMemo } from "react";
+import { User, UserPlus, Check, ArrowLeft, ChevronRight, ChevronLeft, Calendar, MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { getAllDoctors } from "@/actions/doctor";
 
+// --- Types ---
 type PatientType = 'new' | 'returning' | null;
 
+interface Doctor {
+    id: string;
+    name: string;
+    specialization: string;
+    image: string;
+    availability: any;
+}
+
+interface DateInfo {
+    dayName: string;
+    dayNumber: number;
+    monthName: string;
+    fullDate: string;
+}
+
+interface BookingSelection {
+    dentistId: string;
+    date: string;
+    time: string;
+}
+
+type BookingForType = 'myself' | 'child' | 'other';
+
+// --- Constants ---
+const NEW_PATIENT_OPTIONS = [
+    "New Patient Experience",
+    "New Teen Experience (6 to 12 years old)",
+    "New Child Experience (Under 6 years old)",
+    "Consultation (Problem Focused)",
+];
+
+const RETURNING_PATIENT_OPTIONS = [
+    "Hygiene (Cleaning)",
+    "Whitening",
+    "Clear Aligner Consult",
+    "Consultation (Problem Focused)",
+];
+
 export default function BookingPage() {
-    const [step, setStep] = useState(1);
+    // --- State ---
+    const [step, setStep] = useState<number>(1);
     const [patientType, setPatientType] = useState<PatientType>(null);
     const [appointmentType, setAppointmentType] = useState<string | null>(null);
-    const [bookingData, setBookingData] = useState<{ dentistId: string; date: string; time: string } | null>(null);
-    const [bookingFor, setBookingFor] = useState<'myself' | 'child' | 'other'>('myself');
-    const [mobileDateIdx, setMobileDateIdx] = useState(0);
+    const [bookingFor, setBookingFor] = useState<string>('Myself');
 
-    const [dentists, setDentists] = useState<any[]>([]);
+    const [dentists, setDentists] = useState<Doctor[]>([]);
     const [doctorAvailability, setDoctorAvailability] = useState<Record<string, Record<string, string[]>>>({});
+    const [dates, setDates] = useState<DateInfo[]>([]);
 
+    const [dateOffset, setDateOffset] = useState<number>(0);
+    const [mobileDateIdx, setMobileDateIdx] = useState<number>(0);
+    const [bookingData, setBookingData] = useState<BookingSelection | null>(null);
+
+    // --- Effects ---
     useEffect(() => {
-        const loadDoctors = async () => {
-            const { data } = await getAllDoctors();
-            if (data) {
-                setDentists(data);
+        const fetchDoctors = async () => {
+            try {
+                const result = await getAllDoctors();
+                if (result.success && result.data) {
+                    const mappedDoctors: Doctor[] = result.data.map((doc: any) => ({
+                        id: doc.id,
+                        name: doc.name,
+                        specialization: doc.specialization,
+                        image: doc.image,
+                        availability: doc.availability ? JSON.parse(doc.availability as string) : {}
+                    }));
+                    setDentists(mappedDoctors);
 
-                // Parse availability
-                const availMap: Record<string, any> = {};
-                data.forEach((doc: any) => {
-                    try {
-                        availMap[doc.id] = doc.availability ? JSON.parse(doc.availability) : {};
-                    } catch (e) {
-                        availMap[doc.id] = {};
-                    }
-                });
-                setDoctorAvailability(availMap);
+                    const availabilityMap: Record<string, Record<string, string[]>> = {};
+                    mappedDoctors.forEach((doc) => {
+                        availabilityMap[doc.id] = doc.availability;
+                    });
+                    setDoctorAvailability(availabilityMap);
+                }
+            } catch (error) {
+                console.error("Failed to fetch doctors", error);
             }
         };
-        loadDoctors();
+        fetchDoctors();
     }, []);
 
-    const getNextDays = (numDays: number) => {
-        const days = [];
-        const today = new Date();
-        for (let i = 0; i < numDays; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
-            days.push({
-                dateObj: date,
-                dayName: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), // MON, TUE...
-                dayNumber: date.getDate(),
-                fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-            });
-        }
-        return days;
-    };
+    useEffect(() => {
+        const createDates = () => {
+            const arr: DateInfo[] = [];
+            const today = new Date();
+            for (let i = 0; i < 14; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                arr.push({
+                    dayName: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+                    dayNumber: date.getDate(),
+                    monthName: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+                    fullDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+                });
+            }
+            return arr;
+        };
+        setDates(createDates());
+    }, []);
 
-    const dates = getNextDays(14); // Extended to 2 weeks for better testing
+    // --- Computed ---
+    const visibleDates = dates.length > 0 ? dates.slice(dateOffset, dateOffset + 4) : [];
 
+    // Explicit useMemo here serves as a test that syntax is fine
+    const selectedDentist = useMemo(() => {
+        if (!bookingData) return null;
+        return dentists.find(d => d.id === bookingData.dentistId) || null;
+    }, [bookingData, dentists]);
+
+    // --- Handlers ---
     const handlePatientTypeSelect = (type: PatientType) => {
         setPatientType(type);
         setStep(2);
@@ -76,492 +137,478 @@ export default function BookingPage() {
     };
 
     const handleNextStep = () => {
-        if (step === 3 && bookingData) {
-            setStep(4);
-        }
+        if (step === 3 && bookingData) setStep(4);
     };
+
+    const handlePrevDates = () => {
+        setDateOffset(prev => Math.max(0, prev - 4));
+    };
+
+    const handleNextDates = () => {
+        setDateOffset(prev => Math.min(dates.length - 4, prev + 4));
+    };
+
+    const router = useRouter(); // Initialize router
 
     const handleBack = () => {
-        if (step === 4) {
-            setStep(3);
-        } else if (step === 3) {
-            setStep(2);
-            setAppointmentType(null);
-        } else if (step === 2) {
-            setStep(1);
-            setPatientType(null);
-        }
+        if (step === 4) setStep(3);
+        else if (step === 3) { setStep(2); setAppointmentType(null); }
+        else if (step === 2) { setStep(1); setPatientType(null); }
+        else if (step === 1) router.push('/');
     };
 
-    const selectedDentist = bookingData ? dentists.find(d => d.id === bookingData.dentistId) : null;
+    // --- Render Helpers ---
 
-    const newPatientOptions = [
-        "New Patient Experience",
-        "New Teen Experience (6 to 12 years old)",
-        "New Kids Experience (6 years and below)",
-        "Emergency Appointment (Broken Tooth/ Pain)",
-        "Wisdom Extraction Consultation"
-    ];
-
-    const returningPatientOptions = [
-        "Existing Patient Cleaning",
-        "Emergency Appointment (Broken Tooth/ Pain)",
-        "Wisdom Extraction Consultation"
-    ];
-
-    return (
-        <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-primary/20 flex flex-col">
-
-            <header className="grid grid-cols-3 items-center px-6 md:px-12 py-6 w-full relative z-20">
-                <Link href="/" className="justify-self-start p-2 -ml-2 rounded-full hover:bg-white hover:shadow-sm text-slate-500 transition-all group flex items-center gap-2">
-                    <div className="bg-white p-2 rounded-full border border-slate-200 shadow-sm group-hover:border-primary/20 group-hover:text-primary transition-colors">
+    const renderHeader = () => (
+        <nav className="w-full max-w-[95%] h-24 flex items-center justify-between relative mx-auto">
+            {/* Left: Back Button - Pushed to edge (ALWAYS Back to Home) */}
+            <div className="z-10 flex-shrink-0">
+                <button onClick={() => router.push('/')} className="flex items-center gap-3 text-slate-400 font-bold hover:text-slate-800 transition-colors group">
+                    <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center bg-white shadow-sm group-hover:border-slate-300 transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </div>
-                    <span className="font-bold text-slate-600 group-hover:text-slate-900 hidden md:inline">Back to Home</span>
-                </Link>
+                    <span className="hidden md:inline text-sm">Back to Home</span>
+                </button>
+            </div>
 
-                <div className="justify-self-center flex items-center gap-3 text-3xl font-bold tracking-tight text-primary">
-                    <div className="h-10 w-10 bg-primary" style={{ maskImage: 'url(/resources/clean.png)', WebkitMaskImage: 'url(/resources/clean.png)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
-                    <span>Dental</span>
+            {/* Center: Logo - Absolutely centered */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
+                <img
+                    src="/resources/clean.png"
+                    alt="Dental Logo"
+                    className="h-10 w-auto object-contain"
+                    style={{ filter: 'invert(49%) sepia(38%) saturate(3015%) hue-rotate(175deg) brightness(96%) contrast(101%)' }}
+                />
+                <span className="text-3xl font-bold tracking-tight text-[#009ae2]">Dental</span>
+            </div>
+
+            {/* Right: Dots - Pushed to edge */}
+            <div className="z-10 flex gap-3 flex-shrink-0">
+                <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${step >= 1 ? 'bg-[#009ae2] scale-110' : 'bg-slate-200'}`}></div>
+                <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${step >= 2 ? 'bg-[#009ae2] scale-110' : 'bg-slate-200'}`}></div>
+                <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${step >= 3 ? 'bg-[#009ae2] scale-110' : 'bg-slate-200'}`}></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+            </div>
+        </nav>
+    );
+
+    const renderStep1 = () => (
+        <div className="flex flex-col items-center justify-center min-h-[70vh]">
+            <div className="bg-white rounded-[3rem] p-12 w-full max-w-2xl shadow-xl shadow-slate-200/40 text-center">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-sky-50 text-[#009ae2] text-[10px] font-bold tracking-[0.2em] uppercase mb-6">
+                    BOOKING PHASE 1/3
+                </span>
+
+                <h1 className="text-4xl font-bold text-slate-900 mb-2">Who are you</h1>
+                <h1 className="text-4xl font-bold text-slate-900 mb-12">booking for?</h1>
+
+                <div className="space-y-4">
+                    <button
+                        onClick={() => handlePatientTypeSelect('new')}
+                        className="w-full bg-white border border-slate-100 rounded-[2rem] p-6 flex items-center justify-between hover:shadow-lg hover:border-blue-100 transition-all duration-300 group"
+                    >
+                        <div className="flex items-center gap-6">
+                            <div className="text-left">
+                                <div className="font-bold text-lg text-slate-900 group-hover:text-[#009ae2] transition-colors">New patient</div>
+                                <div className="text-slate-400 text-sm">First time visiting us</div>
+                            </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#009ae2] transition-all duration-300 group-hover:scale-110">
+                            <ChevronRight className="w-5 h-5" />
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={() => handlePatientTypeSelect('returning')}
+                        className="w-full bg-white border border-slate-100 rounded-[2rem] p-6 flex items-center justify-between hover:shadow-lg hover:border-blue-100 transition-all duration-300 group"
+                    >
+                        <div className="flex items-center gap-6">
+                            <div className="text-left">
+                                <div className="font-bold text-lg text-slate-900 group-hover:text-[#009ae2] transition-colors">Returning patient</div>
+                                <div className="text-slate-400 text-sm">Have been here before</div>
+                            </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#009ae2] transition-all duration-300 group-hover:scale-110">
+                            <ChevronRight className="w-5 h-5" />
+                        </div>
+                    </button>
                 </div>
+            </div>
+        </div>
+    );
 
-                <div className="justify-self-end flex items-center gap-2">
-                    <div className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${step >= 1 ? 'bg-primary' : 'bg-slate-200'}`}></div>
-                    <div className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${step >= 2 ? 'bg-primary' : 'bg-slate-200'}`}></div>
-                    <div className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${step >= 3 ? 'bg-primary' : 'bg-slate-200'}`}></div>
-                    <div className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${step >= 4 ? 'bg-primary' : 'bg-slate-200'}`}></div>
+    const renderStep2 = () => (
+        <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in slide-in-from-right-8 duration-500">
+            <div className="bg-white rounded-[3rem] p-12 w-full max-w-2xl shadow-xl shadow-slate-200/40 text-center relative">
+                <div className="absolute left-8 top-8">
+                    <button onClick={handleBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-sm font-bold transition-colors">
+                        <ArrowLeft className="w-4 h-4" /> Back
+                    </button>
                 </div>
-            </header>
+                <span className="inline-block px-4 py-1.5 rounded-full bg-sky-50 text-[#009ae2] text-[10px] font-bold tracking-[0.2em] uppercase mb-6">
+                    BOOKING PHASE 2/3
+                </span>
 
-            <main className="flex-1 max-w-full mx-auto w-full px-8 md:px-12 pb-20 flex flex-col items-center justify-start pt-8">
+                <h1 className="text-3xl font-bold text-slate-900 mb-2">What type of</h1>
+                <h1 className="text-3xl font-bold text-slate-900 mb-10">appointment?</h1>
 
-                {step < 4 ? (
-                    <div className={`w-full ${step === 3 ? 'max-w-full' : 'max-w-2xl'} bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden p-8 md:p-12 animate-in fade-in slide-in-from-bottom-8 duration-700`}>
-
-                        {step === 1 && (
-                            <div className="flex flex-col items-center space-y-10">
-                                <div className="text-center space-y-4">
-                                    <span className="text-primary font-bold text-xs uppercase tracking-[0.2em] bg-primary/5 px-4 py-2 rounded-full">Booking Phase 1/3</span>
-                                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight leading-tight">Who are you <br />booking for?</h1>
-                                </div>
-
-                                <div className="w-full space-y-4">
-                                    <button
-                                        onClick={() => handlePatientTypeSelect('new')}
-                                        className="w-full flex items-center justify-between p-6 rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group text-left relative overflow-hidden"
-                                    >
-                                        <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <div className="flex items-center gap-4 relative z-10">
-                                            <div className="h-12 w-12 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">✨</div>
-                                            <div>
-                                                <span className="block text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">New patient</span>
-                                                <span className="text-sm text-slate-400 font-medium">First time visiting us</span>
-                                            </div>
-                                        </div>
-                                        <div className="h-10 w-10 rounded-full bg-white border border-slate-100 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-colors shadow-sm relative z-10">
-                                            <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" />
-                                        </div>
-                                    </button>
-
-                                    <button
-                                        onClick={() => handlePatientTypeSelect('returning')}
-                                        className="w-full flex items-center justify-between p-6 rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group text-left relative overflow-hidden"
-                                    >
-                                        <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <div className="flex items-center gap-4 relative z-10">
-                                            <div className="h-12 w-12 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">👋</div>
-                                            <div>
-                                                <span className="block text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">Returning patient</span>
-                                                <span className="text-sm text-slate-400 font-medium">Have been here before</span>
-                                            </div>
-                                        </div>
-                                        <div className="h-10 w-10 rounded-full bg-white border border-slate-100 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-colors shadow-sm relative z-10">
-                                            <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" />
-                                        </div>
-                                    </button>
-                                </div>
+                <div className="space-y-4">
+                    {['New Patient Experience', 'New Teen Experience (6 to 12 years old)', 'New Child Experience (Under 6 years old)', 'Consultation (Problem Focused)'].map((type) => (
+                        <button
+                            key={type}
+                            onClick={() => handleAppointmentTypeSelect(type)}
+                            className="w-full bg-white border border-slate-100 rounded-[1.5rem] p-6 flex items-center justify-between hover:shadow-lg hover:border-blue-100 transition-all duration-300 group"
+                        >
+                            <span className="font-bold text-lg text-slate-700 group-hover:text-[#009ae2] transition-colors text-left">{type}</span>
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#009ae2] transition-all">
+                                <ChevronRight className="w-4 h-4" />
                             </div>
-                        )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 
-                        {step === 2 && (
-                            <div className="flex flex-col items-center space-y-10 animate-in slide-in-from-right-8 duration-500">
-                                <div className="text-center space-y-4 w-full relative">
-                                    <button onClick={handleBack} className="absolute left-0 top-1 text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-2">
-                                        <ArrowLeft className="w-4 h-4" /> Back
-                                    </button>
-                                    <span className="text-primary font-bold text-xs uppercase tracking-[0.2em] bg-primary/5 px-4 py-2 rounded-full">Booking Phase 2/3</span>
-                                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight leading-tight pt-2">What type of <br />appointment?</h1>
-                                </div>
+    const renderStep3 = () => (
+        <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {/* Phase Back Button - Above Card */}
 
-                                <div className="w-full space-y-3">
-                                    {(patientType === 'new' ? newPatientOptions : returningPatientOptions).map((option, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleAppointmentTypeSelect(option)}
-                                            className="w-full flex items-center justify-between p-5 rounded-2xl border border-slate-100 bg-white hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 group text-left"
-                                        >
-                                            <span className="text-base font-bold text-slate-700 group-hover:text-slate-900 transition-colors">{option}</span>
-                                            <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                                        </button>
-                                    ))}
-                                </div>
+
+            <div className="bg-white rounded-[3rem] p-8 w-full max-w-[95%] shadow-xl shadow-slate-200/40 border border-slate-50 relative">
+
+                {/* Header */}
+                <div className="flex flex-col items-center justify-center mb-8 relative">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2">
+                        <button onClick={handleBack} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-bold text-sm transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm">
+                                <ArrowLeft className="w-4 h-4" />
                             </div>
-                        )}
-
-                        {step === 3 && (
-                            <div className="flex flex-col space-y-8 animate-in slide-in-from-right-8 duration-500 w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
-
-                                <div className="text-center pb-2 md:pb-4 relative flex items-center justify-between gap-2 md:gap-4">
-                                    <button onClick={handleBack} className="text-xs md:text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-1 md:gap-2">
-                                        <ArrowLeft className="w-4 h-4" /> <span className="hidden xs:inline">Back</span>
-                                    </button>
-
-                                    <div className="flex flex-col items-center flex-1">
-                                        <span className="text-primary font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] bg-primary/5 px-3 py-1.5 md:px-4 md:py-2 rounded-full whitespace-nowrap">Final Phase 3/3</span>
-                                        <h1 className="text-lg md:text-3xl font-bold text-slate-900 tracking-tight mt-2 md:mt-4 leading-tight">Select Date & Time</h1>
-                                    </div>
-
-                                    <button
-                                        onClick={handleNextStep}
-                                        disabled={!bookingData}
-                                        className={`px-4 py-2 md:px-6 md:py-2 rounded-full font-bold text-white text-xs md:text-sm transition-all shadow-lg flex items-center gap-2 ${bookingData ? 'bg-primary hover:bg-sky-600 hover:shadow-primary/30' : 'bg-slate-300 cursor-not-allowed opacity-50'}`}
-                                    >
-                                        Next <Check className="w-4 h-4" />
-                                    </button>
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8">
-
-                                    <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
-
-                                        <div className="md:hidden flex flex-col h-full bg-slate-50/50">
-
-                                            <div className="flex overflow-x-auto py-4 px-4 gap-3 snap-x no-scrollbar bg-white border-b border-slate-100 sticky top-0 z-10">
-                                                {dates.map((day, idx) => (
-                                                    <button
-                                                        key={idx}
-                                                        onClick={() => setMobileDateIdx(idx)}
-                                                        className={`flex-shrink-0 snap-center flex flex-col items-center justify-center w-20 h-24 rounded-2xl border-2 transition-all duration-300 ${mobileDateIdx === idx
-                                                            ? 'bg-primary border-primary text-white shadow-lg shadow-primary/30 scale-105'
-                                                            : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
-                                                            }`}
-                                                    >
-                                                        <span className="text-[10px] font-bold uppercase tracking-widest">{day.dayName}</span>
-                                                        <span className="text-2xl font-black mt-1">{day.dayNumber}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-
-                                            <div className="flex flex-col gap-4 p-4">
-                                                {dentists.map((dentist) => {
-                                                    const selectedDate = dates[mobileDateIdx];
-                                                    const slots = doctorAvailability[dentist.id]?.[selectedDate.dayName] || [];
-
-                                                    return (
-                                                        <div key={dentist.id} className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm">
-                                                            <div className="flex items-center gap-4 mb-5 border-b border-slate-50 pb-4">
-                                                                <div className="relative">
-                                                                    <div className={`h-14 w-14 rounded-2xl overflow-hidden ${dentist.id === '2' ? 'shadow-sm' : ''}`}>
-                                                                        <img
-                                                                            src={dentist.image}
-                                                                            alt={dentist.name}
-                                                                            className={`h-full w-full object-cover ${dentist.id === '2' ? 'scale-[1.7] object-top translate-y-3.5' : ''}`}
-                                                                        />
-                                                                    </div>
-                                                                    <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white z-10"></div>
-                                                                </div>
-                                                                <div>
-                                                                    <h3 className="font-bold text-slate-900 leading-tight">{dentist.name}</h3>
-                                                                    <p className="text-xs text-primary font-bold uppercase tracking-wider mt-1">{dentist.specialization}</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div>
-                                                                {slots.length > 0 ? (
-                                                                    <div className="grid grid-cols-3 gap-2">
-                                                                        {slots.map((time, tIdx) => (
-                                                                            <button
-                                                                                key={tIdx}
-                                                                                onClick={() => handleBooking(dentist.id, selectedDate.fullDate, time)}
-                                                                                className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border-2 ${bookingData?.dentistId === dentist.id && bookingData?.date === selectedDate.fullDate && bookingData?.time === time
-                                                                                    ? 'bg-primary border-primary text-white shadow-md'
-                                                                                    : 'bg-slate-50 border-transparent text-slate-600 hover:bg-white hover:border-slate-200'
-                                                                                    }`}
-                                                                            >
-                                                                                {time}
-                                                                            </button>
-                                                                        ))}
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                                                        <span className="text-xs text-slate-400 font-medium">No slots available</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        <div className="hidden md:block">
-
-                                            <div className="grid grid-cols-[1fr_repeat(4,1fr)] bg-slate-50 border-b border-slate-100 divide-x divide-slate-100">
-                                                <div className="p-4 flex items-center justify-center text-slate-400 font-medium italic">
-                                                    <span className="text-xs uppercase tracking-wider">Doctor</span>
-                                                </div>
-                                                {dates.map((day, idx) => (
-                                                    <div key={idx} className="p-4 text-center">
-                                                        <div className="text-xs font-bold text-slate-400 uppercase mb-1">{day.dayName}</div>
-                                                        <div className="text-xl font-bold text-slate-900">{day.dayNumber}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div className="divide-y divide-slate-100">
-                                                {dentists.map((dentist) => (
-                                                    <div key={dentist.id} className="grid grid-cols-[1fr_repeat(4,1fr)] min-h-[150px] divide-x divide-slate-100 group hover:bg-slate-50/50 transition-colors">
-
-                                                        <div className="p-6 flex flex-col items-center justify-center text-center space-y-2 relative">
-                                                            <div className="relative group-hover:rotate-3 transition-transform duration-300">
-                                                                <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-white shadow-md">
-                                                                    <img
-                                                                        src={dentist.image}
-                                                                        alt={dentist.name}
-                                                                        className={`h-full w-full object-cover transition-transform duration-300 ${dentist.id === '2' ? 'scale-[1.7] object-top translate-y-3.5' : ''}`}
-                                                                    />
-                                                                </div>
-                                                                <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white z-10"></div>
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="font-bold text-slate-900 text-sm leading-tight">{dentist.name}</h3>
-                                                                <p className="text-[10px] text-primary font-bold mt-1 uppercase tracking-wide bg-primary/5 px-2 py-0.5 rounded-full inline-block">{dentist.specialization}</p>
-                                                            </div>
-                                                        </div>
-
-                                                        {dates.map((day, idx) => {
-                                                            const slots = doctorAvailability[dentist.id]?.[day.dayName] || [];
-                                                            return (
-                                                                <div key={idx} className="p-2 flex flex-col gap-2 items-center justify-start py-6">
-                                                                    {slots.length > 0 ? (
-                                                                        slots.map((time, tIdx) => (
-                                                                            <button
-                                                                                key={tIdx}
-                                                                                onClick={() => handleBooking(dentist.id, day.fullDate, time)}
-                                                                                className={`w-full max-w-[100px] py-2 px-1 rounded-lg border text-xs font-bold transition-all shadow-sm active:scale-95 group/time ${bookingData?.dentistId === dentist.id && bookingData?.date === day.fullDate && bookingData?.time === time
-                                                                                    ? 'bg-primary border-primary text-white shadow-md ring-2 ring-primary ring-offset-2'
-                                                                                    : 'border-slate-200 bg-white text-slate-600 hover:border-primary hover:bg-primary hover:text-white'
-                                                                                    }`}
-                                                                            >
-                                                                                {time}
-                                                                            </button>
-                                                                        ))
-                                                                    ) : (
-                                                                        <span className="text-xs text-slate-300 font-medium mt-4">-</span>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="block lg:block h-[300px] lg:h-full lg:min-h-[600px] bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden relative">
-                                        <iframe
-                                            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d995.4896822145192!2d98.74468189569045!3d3.596933230626246!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x303131d0d6826859%3A0xd4b27636dae03e17!2sGo%20Dental%20Clinic%20(Part%20Of%20Medan%20Dental%20Center)!5e0!3m2!1sen!2sid!4v1768415380457!5m2!1sen!2sid"
-                                            className="absolute inset-0 w-full h-full border-0"
-                                            allowFullScreen
-                                            loading="lazy"
-                                            referrerPolicy="no-referrer-when-downgrade"
-                                        ></iframe>
-                                    </div>
-
-                                </div>
-                            </div>
-                        )}
+                            <span className="hidden md:inline">Back</span>
+                        </button>
                     </div>
-                ) : (
+                    {/* Back button removed from here */}
 
-                    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <span className="px-4 py-1.5 rounded-full bg-sky-50 text-[#009ae2] text-[11px] font-bold tracking-[0.2em] uppercase mb-3">
+                        FINAL PHASE 3/3
+                    </span>
+                    <h1 className="text-3xl font-bold text-slate-900">Select Date & Time</h1>
 
-                        <div className="lg:col-span-2 space-y-8">
-                            <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 p-8 md:p-10">
-                                <button onClick={handleBack} className="text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-2 mb-6">
-                                    <ArrowLeft className="w-4 h-4" /> Back
+                    {/* Navigation Button */}
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                        <button
+                            disabled={!bookingData}
+                            onClick={() => setStep(4)}
+                            className={`flex items-center gap-2 font-bold px-6 py-2 rounded-full transition-all ${bookingData ? 'bg-[#009ae2] text-white shadow-md shadow-blue-200 hover:scale-105' : 'bg-slate-50 text-slate-300 cursor-not-allowed'}`}
+                        >
+                            <span>Next</span>
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-8 flex-1 min-h-0">
+                    {/* Schedule Section */}
+                    <div className="bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden h-full flex flex-col">
+
+                        {/* Desktop Grid Header with Navigation */}
+                        <div className="hidden md:grid grid-cols-[1.2fr_repeat(4,1fr)] border-b border-slate-100 bg-slate-50 flex-none relative">
+                            {/* Nav Buttons Overlay */}
+                            <div className="absolute inset-y-0 right-0 w-[80%] pointer-events-none flex justify-between items-center px-2">
+                                <button
+                                    onClick={handlePrevDates}
+                                    disabled={dateOffset === 0}
+                                    className={`pointer-events-auto p-2 rounded-full hover:bg-slate-200 transition-colors z-20 ${dateOffset === 0 ? 'opacity-0' : 'text-slate-500'}`}
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
                                 </button>
-                                <h2 className="text-2xl font-bold text-slate-900 mb-6">Who are you booking for?</h2>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                                    {[
-                                        { id: 'myself', label: 'Myself', icon: '👤' },
-                                        { id: 'child', label: 'Child or dependent', icon: '👶' },
-                                        { id: 'other', label: 'Someone else', icon: '👥' }
-                                    ].map((opt) => (
-                                        <button
-                                            key={opt.id}
-                                            onClick={() => setBookingFor(opt.id as any)}
-                                            className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 h-24 font-bold ${bookingFor === opt.id ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700'}`}
-                                        >
-                                            <span className="text-2xl">{opt.icon}</span>
-                                            <span className="text-sm">{opt.label}</span>
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className="space-y-8">
-
-                                    <div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2">Patient details</h3>
-                                        <p className="text-slate-500 text-sm mb-6">Please provide the following information about the person receiving care.</p>
-
-                                        <div className="space-y-5">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                                <div className="space-y-1">
-                                                    <label className="text-sm font-bold text-slate-700">Patient first name</label>
-                                                    <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-sm font-bold text-slate-700">Patient last name</label>
-                                                    <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                                <div className="space-y-1">
-                                                    <label className="text-sm font-bold text-slate-700">Patient legal sex</label>
-                                                    <select className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium bg-white">
-                                                        <option>Select...</option>
-                                                        <option>Male</option>
-                                                        <option>Female</option>
-                                                    </select>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-sm font-bold text-slate-700">Patient date of birth</label>
-                                                    <input type="date" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium cursor-pointer text-slate-600" />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <label className="text-sm font-bold text-slate-700">Patient zip/postal code</label>
-                                                <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {bookingFor === 'child' && (
-                                        <div className="animate-in fade-in slide-in-from-top-4">
-                                            <h3 className="text-xl font-bold text-slate-900 mb-6 pt-4 border-t border-slate-100">Parent/Guardian details</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                                                <div className="space-y-1">
-                                                    <label className="text-sm font-bold text-slate-700">Parent first name</label>
-                                                    <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-sm font-bold text-slate-700">Parent last name</label>
-                                                    <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-6 pt-4 border-t border-slate-100">Contact details</h3>
-                                        <div className="space-y-5">
-                                            <div className="space-y-1">
-                                                <label className="text-sm font-bold text-slate-700">Email</label>
-                                                <input type="email" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <label className="text-sm font-bold text-slate-700">Phone number</label>
-                                                <input type="tel" className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium" />
-                                            </div>
-                                            <label className="flex items-start gap-3 cursor-pointer group">
-                                                <input type="checkbox" className="mt-1 w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" />
-                                                <span className="text-sm text-slate-500 group-hover:text-slate-700">By leaving checked, I agree to receive automated messages regarding my appointment.</span>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-6 pt-4 border-t border-slate-100">Other details</h3>
-                                        <div className="space-y-1">
-                                            <div className="flex justify-between">
-                                                <label className="text-sm font-bold text-slate-700">Comments or special request</label>
-                                                <span className="text-xs text-slate-400">Optional</span>
-                                            </div>
-                                            <textarea rows={3} className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium resize-none"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-6">
-                                        <p className="text-xs text-slate-400 mb-6 leading-relaxed">By clicking "Book appointment," I agree to the <a href="#" className="underline hover:text-primary">Terms</a> and <a href="#" className="underline hover:text-primary">Privacy Policy</a>.</p>
-                                        <button className="w-full md:w-auto px-8 py-4 bg-primary hover:bg-sky-600 text-white font-bold rounded-xl shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all">
-                                            Book appointment
-                                        </button>
-                                    </div>
-
-                                </div>
+                                <button
+                                    onClick={handleNextDates}
+                                    disabled={dateOffset >= dates.length - 4}
+                                    className={`pointer-events-auto p-2 rounded-full hover:bg-slate-200 transition-colors z-20 ${dateOffset >= dates.length - 4 ? 'opacity-0' : 'text-slate-500'}`}
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
                             </div>
+
+                            <div className="p-6 text-center"><span className="text-xs font-bold text-slate-500 tracking-wider">DOCTOR</span></div>
+                            {visibleDates.map((day, idx) => (
+                                <div key={idx} className="p-4 text-center border-l border-slate-100 relative z-10 bg-transparent flex flex-col justify-center h-full">
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">{day.dayName}</div>
+                                    <div className="text-xl font-bold text-slate-800 leading-none mb-1">{day.dayNumber}</div>
+                                    <div className="text-[9px] font-bold text-[#009ae2] uppercase tracking-wide">{day.monthName}</div>
+                                </div>
+                            ))}
                         </div>
 
-                        <div className="lg:col-span-1">
-                            <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 p-8 sticky top-24">
-                                <h3 className="text-xl font-bold text-slate-900 mb-6">Appointment details</h3>
-
-                                <div className="space-y-6">
-                                    <div className="flex gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
-                                            <Check className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-slate-900 text-sm mb-1">{appointmentType}</p>
-                                            <p className="text-slate-500 text-sm leading-relaxed">
-                                                {bookingData && new Date(bookingData.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} at {bookingData?.time}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-slate-900 text-sm mb-1">AntriGigi Dental</p>
-                                            <p className="text-slate-500 text-sm leading-relaxed">
-                                                Jl. Bantaran Sungai, Hutan, Kec. Percut Sei Tuan, Kabupaten Deli Serdang
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {selectedDentist && (
-                                        <div className="flex gap-4 pt-6 border-t border-slate-100">
-                                            <img src={selectedDentist.image} className="w-10 h-10 rounded-full object-cover" alt={selectedDentist.name} />
-                                            <div>
-                                                <p className="font-bold text-slate-900 text-sm mb-0">{selectedDentist.name}</p>
-                                                <p className="text-slate-500 text-xs">{selectedDentist.specialization}</p>
+                        {/* Doctor Rows */}
+                        <div className="divide-y divide-slate-100 bg-white">
+                            {dentists.map((dentist) => (
+                                <div key={dentist.id} className="grid grid-cols-1 md:grid-cols-[1.2fr_repeat(4,1fr)] h-[300px] group hover:bg-slate-50/30 transition-colors">
+                                    <div className="p-6 flex flex-col items-center justify-start text-center pt-8">
+                                        <div className="relative mb-3">
+                                            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-sm border border-white bg-slate-100">
+                                                <img src={dentist.image} alt={dentist.name} className={`w-full h-full object-cover ${dentist.id === '2' ? 'scale-[1.6] object-top translate-y-2' : ''}`} />
                                             </div>
+                                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-400 border-2 border-white rounded-full"></div>
                                         </div>
-                                    )}
+                                        <h3 className="text-xs font-bold text-slate-900 leading-tight mb-1">{dentist.name}</h3>
+                                        <p className="text-[9px] font-bold text-blue-500 uppercase tracking-wide">{dentist.specialization}</p>
+                                    </div>
 
+                                    {/* Time Slots */}
+                                    <div className="col-span-4 hidden md:grid grid-cols-4">
+                                        {visibleDates.map((day, idx) => {
+                                            const slots = doctorAvailability[dentist.id]?.[day.dayName] || [];
+                                            return (
+                                                <div key={idx} className="p-2 border-l border-slate-50 flex flex-col gap-2 items-center justify-start py-4">
+                                                    {slots.length > 0 ? slots.map((time) => {
+                                                        const isSelected = bookingData?.dentistId === dentist.id && bookingData?.date === day.fullDate && bookingData?.time === time;
+                                                        return (
+                                                            <button
+                                                                key={time}
+                                                                onClick={() => handleBooking(dentist.id, day.fullDate, time)}
+                                                                className={`
+                                                                w-full py-3 rounded-xl border text-sm font-bold transition-all duration-200
+                                                                ${isSelected
+                                                                        ? 'bg-[#009ae2] text-white border-[#009ae2] shadow-md transform scale-105'
+                                                                        : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200 hover:shadow-sm'
+                                                                    }
+                                                            `}
+                                                            >
+                                                                {time}
+                                                            </button>
+                                                        );
+                                                    }) : <span className="text-slate-200 text-lg">•</span>}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Mobile Date/Time Fallback */}
+                                    <div className="md:hidden p-4 text-center border-t border-slate-50">
+                                        <span className="text-xs text-slate-400">Desktop view only</span>
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
-                )}
 
-                {
-                    step < 4 && (
-                        <div className="mt-12 text-center animate-in fade-in duration-1000 delay-300">
-                            <p className="text-sm text-slate-400 flex items-center justify-center gap-2 font-medium">
-                                <Check className="w-4 h-4 text-green-500" /> Instant booking secured with <span className="text-slate-600 font-bold">AntriGigi Secure</span>
+                    {/* Right: Map - Scaled to fill */}
+                    <div className="space-y-6 flex-shrink-0 h-full">
+                        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden relative h-full min-h-[500px]">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1990.9793064873745!2d98.74442617036429!3d3.596959756178393!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x303131d0d6826859%3A0xd4b27636dae03e17!2sGo%20Dental%20Clinic%20(Part%20Of%20Medan%20Dental%20Center)!5e0!3m2!1sen!2sid!4v1768770602878!5m2!1sen!2sid"
+                                className="absolute inset-0 w-full h-full border-0"
+                                allowFullScreen
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderStep4 = () => {
+        const selectedDoc = dentists.find(d => d.id === bookingData?.dentistId);
+
+        return (
+            <div className="w-full max-w-7xl mx-auto animate-in slide-in-from-right-8 duration-500 pb-20 pt-10">
+                <div className="flex flex-col lg:flex-row gap-8 items-start">
+
+                    {/* LEFT COLUMN: FORM */}
+                    <div className="flex-1 bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-slate-200/50 w-full">
+                        <button onClick={handleBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-sm font-bold mb-8 transition-colors">
+                            <ArrowLeft className="w-4 h-4" /> Back
+                        </button>
+
+                        <h2 className="text-2xl font-bold text-slate-900 mb-6">Who are you booking for?</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                            {['Myself', 'Child or dependent', 'Someone else'].map((opt) => (
+                                <button
+                                    key={opt}
+                                    onClick={() => setBookingFor(opt as BookingForType)}
+                                    className={`py-4 px-2 rounded-xl border-2 font-bold text-sm transition-all duration-200 flex flex-col items-center justify-center gap-2
+                                ${bookingFor === opt
+                                            ? 'border-[#009ae2] bg-blue-50/50 text-[#009ae2] shadow-sm'
+                                            : 'border-slate-100 text-slate-500 hover:border-slate-300 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <div className="text-2xl">
+                                        {opt === 'Myself' ? <User className="w-6 h-6" /> :
+                                            opt === 'Child or dependent' ? <UserPlus className="w-6 h-6" /> :
+                                                <UserPlus className="w-6 h-6" />}
+                                    </div>
+                                    {opt}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Patient Details */}
+                        <div className="mb-10">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Patient details</h2>
+                            <p className="text-slate-500 text-sm mb-6">Please provide the following information about the person receiving care.</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Your first name</label>
+                                    <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Your last name</label>
+                                    <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Your legal sex</label>
+                                    <select className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium bg-white text-slate-600">
+                                        <option>Select...</option>
+                                        <option>Male</option>
+                                        <option>Female</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Your date of birth</label>
+                                    <input
+                                        type="date"
+                                        max={new Date().toISOString().split('T')[0]}
+                                        className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium text-slate-600"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700">Your zip/postal code</label>
+                                <input type="text" className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium" />
+                            </div>
+                        </div>
+
+                        {/* Contact Details */}
+                        <div className="mb-10">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-6">Contact details</h2>
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Email</label>
+                                    <input type="email" className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Phone number</label>
+                                    <input type="tel" className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium" />
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <input type="checkbox" className="mt-1 w-4 h-4 rounded border-slate-300 text-[#009ae2] focus:ring-[#009ae2]" />
+                                    <span className="text-xs text-slate-500">By leaving checked, I agree with the <a href="#" className="text-[#009ae2] underline">Calling Consent</a>.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Other Details */}
+                        <div className="mb-10">
+                            <div className="flex justify-between items-center mb-2">
+                                <h2 className="text-2xl font-bold text-slate-900">Other details</h2>
+                                <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">Optional</span>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700">Comments or special request</label>
+                                <textarea rows={4} className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium resize-none"></textarea>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="pt-6 border-t border-slate-100">
+                            <button
+                                onClick={() => router.push('/success')}
+                                className="w-full md:w-auto px-10 py-4 bg-[#009ae2] hover:opacity-90 text-white font-bold rounded-full shadow-lg shadow-[#009ae2]/40 transition-all text-lg"
+                            >
+                                Book appointment
+                            </button>
+                            <p className="text-[10px] text-slate-400 mt-4 leading-relaxed max-w-2xl">
+                                By clicking "Book appointment," I agree to the <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a>. I consent for myself and others to receive automated messages.
                             </p>
                         </div>
-                    )
-                }
+                    </div>
 
+                    {/* RIGHT COLUMN: SUMMARY SIDEBAR */}
+                    <div className="w-full lg:w-[400px] flex-shrink-0">
+                        <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-xl shadow-slate-200/50 sticky top-6">
+                            <h3 className="text-xl font-bold text-slate-900 mb-6">Appointment details</h3>
+
+                            <div className="space-y-6">
+                                {/* Selected Service & Time */}
+                                <div className="flex gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-400">
+                                        <Calendar className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-slate-900 text-sm">{appointmentType || 'Consultation'}</div>
+                                        <div className="text-slate-500 text-sm mt-1">
+                                            {bookingData?.date ? new Date(bookingData.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : 'Date not selected'}
+                                            <br />
+                                            at {bookingData?.time || 'Time not selected'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Location */}
+                                <div className="flex gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-400">
+                                        <MapPin className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-slate-900 text-sm">Go Dental Clinic</div>
+                                        <div className="text-slate-500 text-sm mt-1 leading-relaxed">
+                                            Jl. Bantaran Sungai, Hutan, Kec. Percut Sei Tuan, Deli Serdang, Sumatera Utara
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Doctor */}
+                                {selectedDoc && (
+                                    <div className="flex gap-4 pt-6 border-t border-slate-50">
+                                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-slate-100">
+                                            <img src={selectedDoc.image} alt={selectedDoc.name} className="w-full h-full object-cover" />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-slate-900 text-sm">{selectedDoc.name}</div>
+                                            <div className="text-slate-500 text-xs uppercase tracking-wider font-bold mt-0.5">{selectedDoc.specialization}</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        );
+    };
+
+    // --- Main Render ---
+    let content = null;
+    if (step === 1) content = renderStep1();
+    else if (step === 2) content = renderStep2();
+    else if (step === 3) content = renderStep3();
+    else if (step === 4) content = renderStep4();
+
+    return (
+        <div className="min-h-screen bg-slate-50/[0.3] font-sans selection:bg-blue-100">
+            {renderHeader()}
+
+            <main className="w-full px-4 md:px-6 py-6 pb-20">
+                {content}
+
+                {step < 3 && (
+                    <div className="mt-12 text-center animate-in fade-in duration-1000 delay-300">
+                        <p className="text-xs text-slate-400 flex items-center justify-center gap-2 font-medium">
+                            <Check className="w-3 h-3 text-green-500" /> Instant booking secured with <span className="text-slate-600 font-bold">AntriGigi Secure</span>
+                        </p>
+                    </div>
+                )}
             </main>
-        </div >
+        </div>
     );
 }

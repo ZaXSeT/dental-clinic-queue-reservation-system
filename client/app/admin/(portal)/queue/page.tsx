@@ -1,15 +1,58 @@
 "use client";
 
-import { Mic, SkipForward, CheckCircle, RefreshCcw, UserPlus, Play, X, User, Phone } from "lucide-react";
+import { Mic, SkipForward, CheckCircle, RefreshCcw, UserPlus, Play, X, User, Phone, Stethoscope, AlertTriangle, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getQueueState, callNextPatient, completePatient, recallPatient, skipPatient, resetQueue, addWalkIn } from "@/actions/queue";
+import { getAllDoctors } from "@/actions/doctor";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 
 export default function QueueControlPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-    // Walk-In Modal State
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const [confirmation, setConfirmation] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'info' | 'danger' | 'success';
+        action: () => Promise<void>;
+    }>({
+        isOpen: false,
+        title: "",
+        message: "",
+        type: "info",
+        action: async () => { },
+    });
+
+    const triggerConfirmation = (title: string, message: string, type: 'info' | 'danger' | 'success', action: () => Promise<void>) => {
+        setConfirmation({
+            isOpen: true,
+            title,
+            message,
+            type,
+            action
+        });
+    };
+
+    const executeConfirmation = async () => {
+        setLoading(true);
+        try {
+            await confirmation.action();
+            setConfirmation(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+            console.error(error);
+            alert("Action failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const [showWalkInModal, setShowWalkInModal] = useState(false);
     const [walkInName, setWalkInName] = useState("");
     const [walkInPhone, setWalkInPhone] = useState("");
@@ -22,11 +65,26 @@ export default function QueueControlPage() {
         waitingCount: number;
     }>({ activeQueues: [], next: [], waitingCount: 0 });
 
-    const rooms = [
-        { id: "1", name: "Dr. Alexander Buygin", label: "Room 1" },
-        { id: "2", name: "Dr. Dan Adler", label: "Room 2" },
-        { id: "3", name: "Dr. F. Khani", label: "Room 3" },
-    ];
+    const [doctors, setDoctors] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            const res = await getAllDoctors();
+            if (res.success && res.data) {
+                setDoctors(res.data);
+            }
+        };
+        fetchDoctors();
+    }, []);
+
+    const dynamicRooms = [1, 2, 3].map((roomIdNum, index) => {
+        const doc = doctors[index];
+        return {
+            id: roomIdNum.toString(),
+            name: doc ? doc.name : `Doctor ${roomIdNum}`,
+            label: `Room ${roomIdNum}`,
+        };
+    });
 
     const refreshData = async () => {
         try {
@@ -44,47 +102,72 @@ export default function QueueControlPage() {
         return () => clearInterval(interval);
     }, []);
 
-    const handleCallNext = async (roomId: string) => {
-        setLoading(true);
+    const handleCallNext = (roomId: string) => {
         if (data.waitingCount === 0) {
             alert("No patients waiting in queue!");
-            setLoading(false);
             return;
         }
 
-        if (confirm(`Call next patient to ${roomId}?`)) {
-            await callNextPatient(roomId);
-            await refreshData();
-        }
-        setLoading(false);
+        triggerConfirmation(
+            "Call Next Patient?",
+            `Are you sure you want to call the next patient to Room ${roomId}?`,
+            "info",
+            async () => {
+                await callNextPatient(roomId);
+                await refreshData();
+            }
+        );
     };
 
-    const handleComplete = async (id: string, name: string) => {
-        if (confirm(`Finish treatment for ${name}?`)) {
-            setLoading(true);
-            await completePatient(id);
-            await refreshData();
-            setLoading(false);
-        }
+    const handleComplete = (id: string, name: string) => {
+        triggerConfirmation(
+            "Complete Treatment?",
+            `Are you sure you want to finish treatment for ${name}? This will mark them as completed.`,
+            "success",
+            async () => {
+                await completePatient(id);
+                await refreshData();
+            }
+        );
     };
 
-    const handleRecall = async (id: string, name: string) => {
-        alert(`Calling ${name} to room...`);
-        await recallPatient(id);
+    const handleRecall = (id: string, name: string) => {
+        // Recall doesn't necessarily need a confirmation if it's just an alert, 
+        // but for consistency let's make it a quick confirm or just execute.
+        // User asked for "Call next patient" specifically but let's improve all.
+        // Actually, recall is usually safe to just do. But let's add it for safety.
+        triggerConfirmation(
+            "Recall Patient",
+            `Call ${name} to the room again?`,
+            "info",
+            async () => {
+                await recallPatient(id);
+            }
+        );
     };
 
-    const handleSkip = async (id: string) => {
-        if (confirm("Skip this patient?")) {
-            await skipPatient(id);
-            await refreshData();
-        }
+    const handleSkip = (id: string) => {
+        triggerConfirmation(
+            "Skip Patient",
+            "Are you sure you want to skip this patient? They will be marked as skipped.",
+            "danger",
+            async () => {
+                await skipPatient(id);
+                await refreshData();
+            }
+        );
     };
 
-    const handleReset = async () => {
-        if (confirm("DANGER: This will delete ALL today's queue data. Continue?")) {
-            await resetQueue();
-            await refreshData();
-        }
+    const handleReset = () => {
+        triggerConfirmation(
+            "Reset All Queues?",
+            "DANGER: This will delete ALL today's queue data. This action cannot be undone. Are you absolutely sure?",
+            "danger",
+            async () => {
+                await resetQueue();
+                await refreshData();
+            }
+        );
     };
 
     const openWalkInModal = () => {
@@ -139,7 +222,7 @@ export default function QueueControlPage() {
 
             {/* Room Control Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {rooms.map((room) => {
+                {dynamicRooms.map((room) => {
                     const active = data.activeQueues.find((q: any) => q.roomId === room.id);
                     const isBusy = !!active;
 
@@ -169,7 +252,7 @@ export default function QueueControlPage() {
                                     </div>
                                 ) : (
                                     <div className="flex-1 flex flex-col justify-center py-8 opacity-50">
-                                        <div className="text-4xl mb-2">🧑‍⚕️</div>
+                                        <Stethoscope className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                         <div className="text-sm font-medium text-slate-500">Ready for patient</div>
                                     </div>
                                 )}
@@ -271,9 +354,9 @@ export default function QueueControlPage() {
             </div>
 
             {/* Walk-In Modal */}
-            {showWalkInModal && (
-                <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200">
+            {showWalkInModal && mounted && createPortal(
+                <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 border border-slate-100">
                         <div className="flex justify-between items-center mb-8">
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-900">Add Walk-In</h2>
@@ -343,7 +426,48 @@ export default function QueueControlPage() {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Confirmation Modal */}
+            {/* Confirmation Modal */}
+            {confirmation.isOpen && mounted && createPortal(
+                <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in zoom-in-95 duration-200 border border-slate-100">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${confirmation.type === 'danger' ? 'bg-red-50 text-red-500' :
+                            confirmation.type === 'success' ? 'bg-green-50 text-green-500' :
+                                'bg-blue-50 text-blue-500'
+                            }`}>
+                            {confirmation.type === 'danger' ? <AlertTriangle className="w-6 h-6" /> :
+                                confirmation.type === 'success' ? <CheckCircle className="w-6 h-6" /> :
+                                    <Info className="w-6 h-6" />}
+                        </div>
+
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">{confirmation.title}</h3>
+                        <p className="text-slate-500 mb-8 leading-relaxed">{confirmation.message}</p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setConfirmation(prev => ({ ...prev, isOpen: false }))}
+                                className="flex-1 py-3 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all active:scale-95"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={executeConfirmation}
+                                disabled={loading}
+                                className={`flex-1 py-3 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 ${confirmation.type === 'danger' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' :
+                                    confirmation.type === 'success' ? 'bg-green-500 hover:bg-green-600 shadow-green-500/20' :
+                                        'bg-primary hover:bg-sky-600 shadow-primary/20'
+                                    }`}
+                            >
+                                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Confirm"}
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     );

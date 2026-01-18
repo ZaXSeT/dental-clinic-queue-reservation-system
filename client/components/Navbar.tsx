@@ -30,12 +30,14 @@ export default function Navbar() {
                         {pathname === '/' ? (
                             <>
                                 <a href="#workflow" className="hover:text-primary transition-colors cursor-pointer">About</a>
+                                <a href="#treatments" className="hover:text-primary transition-colors cursor-pointer">Services</a>
                                 <a href="#dentists" className="hover:text-primary transition-colors cursor-pointer">Dentists</a>
                                 <a href="#contact" className="hover:text-primary transition-colors cursor-pointer">Contact</a>
                             </>
                         ) : (
                             <>
                                 <Link href="/?scrollTo=workflow" scroll={false} className="hover:text-primary transition-colors cursor-pointer">About</Link>
+                                <Link href="/?scrollTo=treatments" scroll={false} className="hover:text-primary transition-colors cursor-pointer">Services</Link>
                                 <Link href="/?scrollTo=dentists" scroll={false} className="hover:text-primary transition-colors cursor-pointer">Dentists</Link>
                                 <Link href="/?scrollTo=contact" scroll={false} className="hover:text-primary transition-colors cursor-pointer">Contact</Link>
                             </>

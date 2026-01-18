@@ -74,3 +74,13 @@ model Doctor {
   updatedAt      DateTime @updatedAt
   queues         Queue[]
 }
+
+model ClinicSettings {
+  id        String   @id @default(uuid())
+  name      String   @default("My Dental Clinic")
+  address   String   @default("123 Dental Street")
+  phone     String   @default("+62 812 3456 7890")
+  email     String?
+  website   String?
+  updatedAt DateTime @updatedAt
+}

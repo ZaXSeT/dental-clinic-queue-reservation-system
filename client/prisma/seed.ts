@@ -60,6 +60,25 @@ async function main() {
         }
     }
 
+    // Seed Doctors...
+    // ... (existing doctor code)
+
+    // Seed Admin
+    const admin = await prisma.admin.findFirst();
+    if (!admin) {
+        await prisma.admin.create({
+            data: {
+                username: 'admin',
+                password: 'password123', // In production, hash this!
+                name: 'Walter Black',
+                role: 'admin'
+            }
+        });
+        console.log('Created default admin: Walter Black');
+    } else {
+        console.log('Admin already exists.');
+    }
+
     console.log('Seeding finished.');
 }
 
