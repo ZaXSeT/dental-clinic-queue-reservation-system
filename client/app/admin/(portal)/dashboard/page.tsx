@@ -5,7 +5,7 @@ import { Users, Calendar, Clock, TrendingUp } from "lucide-react";
 export default function AdminDashboard() {
     return (
         <div className="space-y-8">
-            {/* Stats Grid */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                     { label: "Patients in Queue", val: "12", icon: Users, color: "bg-blue-500" },
@@ -25,7 +25,7 @@ export default function AdminDashboard() {
                 ))}
             </div>
 
-            {/* Recent Activity / Queue Table */}
+            {}
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-slate-200 flex justify-between items-center">
                     <h3 className="font-bold text-lg text-slate-800">Current Queue Status</h3>

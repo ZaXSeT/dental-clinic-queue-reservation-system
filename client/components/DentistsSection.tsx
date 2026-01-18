@@ -2,34 +2,16 @@
 
 import { ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-
-interface Dentist {
-    id: string;
-    name: string;
-    specialization: string;
-    rating: number;
-    experience: string;
-    image: string;
-    schedule: string[];
-}
+import { dentists } from "@/lib/data";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 export default function DentistsSection() {
-    const [dentists] = useState<Dentist[]>([
-        { id: '1', name: 'Dr. Alexander Buygin', specialization: 'General Dentist', rating: 4.9, experience: '15 Years', image: '/sarah_wilson.jpg', schedule: [] },
-        { id: '2', name: 'Dr. Dan Adler', specialization: 'General Dentist', rating: 4.8, experience: '12 Years', image: '/dan_adler.png', schedule: [] },
-        { id: '3', name: 'Dr. F. Khani', specialization: 'General Dentist', rating: 5.0, experience: '8 Years', image: '/emily_parker.jpg', schedule: [] },
-    ]);
-
     return (
         <section id="dentists" className="py-24 bg-slate-50 w-full px-6 scroll-mt-28">
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-end mb-16">
-                    <div>
-                        <h2 className="text-primary font-bold uppercase tracking-widest mb-2">Our Team</h2>
-                        <h3 className="text-4xl font-bold text-slate-900">Meet The Specialists</h3>
-                    </div>
-                    <Link href="/dentists" className="hidden md:flex items-center gap-2 font-bold text-slate-600 hover:text-primary transition-colors group">
+                    <SectionHeading subTitle="Our Team" title="Meet The Specialists" center={false} />
+                    <Link href="/dentists" className="hidden md:flex items-center gap-2 font-bold text-slate-600 hover:text-primary transition-colors group mb-6">
                         View All Dentists <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                 </div>

@@ -2,6 +2,8 @@
 
 import { ChevronLeft, ChevronRight, Star, User } from "lucide-react";
 import { useEffect, useState } from "react";
+import { reviews } from "@/lib/data";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 export default function ReviewsSection() {
     const [currentReview, setCurrentReview] = useState(0);
@@ -29,13 +31,10 @@ export default function ReviewsSection() {
     return (
         <section className="py-8 px-6 w-full bg-white relative overflow-hidden">
             <div className="max-w-6xl mx-auto relative z-10">
-                <div className="text-center mb-12">
-                    <h2 className="text-primary font-bold uppercase tracking-widest text-xs mb-2">Testimonials</h2>
-                    <h3 className="text-3xl font-bold text-slate-900">What Our Patients Say</h3>
-                </div>
+                <SectionHeading subTitle="Testimonials" title="What Our Patients Say" />
 
                 <div className="relative group px-4 md:px-12">
-                    {/* Arrow Nav - Previous */}
+                    {/* Navigation Buttons */}
                     <button
                         onClick={() => {
                             const maxIndex = 5 - (isMobile ? 1 : 3);
@@ -46,7 +45,6 @@ export default function ReviewsSection() {
                         <ChevronLeft className="w-5 h-5" />
                     </button>
 
-                    {/* Arrow Nav - Next */}
                     <button
                         onClick={() => {
                             const maxIndex = 5 - (isMobile ? 1 : 3);
@@ -62,43 +60,7 @@ export default function ReviewsSection() {
                             className="flex transition-transform duration-500 ease-out"
                             style={{ transform: `translateX(-${Math.min(currentReview, 5 - (isMobile ? 1 : 3)) * (isMobile ? 100 : 33.333)}%)` }}
                         >
-                            {[
-                                {
-                                    name: "Riri Riza",
-                                    role: "Film Director",
-                                    text: "Saya rutin check-up dengan Dr. Alexander Buygin. Beliau sangat teliti dan penjelasannya mudah dimengerti.",
-                                    image: "/sarah_wilson.jpg",
-                                    rating: 5
-                                },
-                                {
-                                    name: "Tessa Kaunang",
-                                    role: "Artist & Presenter",
-                                    text: "Veneer porcelain dengan Dr. Dan Adler hasilnya sangat natural dan rapi. Saya jadi lebih percaya diri saat tampil di TV.",
-                                    image: "/emily_parker.jpg",
-                                    rating: 5
-                                },
-                                {
-                                    name: "Saleha Halilintar",
-                                    role: "Influencer",
-                                    text: "Perawatan gigi dengan Dr. F. Khani sangat nyaman. Orangnya ramah banget, jadi ga takut sama sekali.",
-                                    image: "/michael_chen.png",
-                                    rating: 5
-                                },
-                                {
-                                    name: "Budi Santoso",
-                                    role: "Entrepreneur",
-                                    text: "Dr. Dan Adler sangat profesional. Klinik ini benar-benar mengutamakan kenyamanan pasien.",
-                                    image: "/sarah_wilson.jpg",
-                                    rating: 5
-                                },
-                                {
-                                    name: "Siti Aminah",
-                                    role: "Housewife",
-                                    text: "Anak saya biasanya nangis kalau ke dokter gigi, tapi dengan Dr. F. Khani dia malah senang dan mau balik lagi.",
-                                    image: "/emily_parker.jpg",
-                                    rating: 5
-                                }
-                            ].map((review, i) => (
+                            {reviews.map((review, i) => (
                                 <div key={i} className="min-w-full md:min-w-[33.333%] px-3">
                                     <div className="bg-white border border-slate-100 p-6 rounded-2xl h-full flex flex-col justify-between hover:border-slate-300 transition-colors">
                                         <div>
@@ -124,7 +86,7 @@ export default function ReviewsSection() {
                         </div>
                     </div>
 
-                    {/* Navigation Dots */}
+                    {/* Pagination */}
                     <div className="flex justify-center gap-1.5 mt-8">
                         {[...Array(isMobile ? 5 : 3)].map((_, idx) => (
                             <button

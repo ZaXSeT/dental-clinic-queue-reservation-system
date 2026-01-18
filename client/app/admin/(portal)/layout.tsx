@@ -14,19 +14,19 @@ export default function AdminPortalLayout({
     const router = useRouter();
 
     const handleLogout = () => {
-        // Clear cookies/tokens here
+        
         router.push("/admin/login");
     };
 
     const navItems = [
         { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
         { label: "Queue Control", href: "/admin/queue", icon: Tv },
-        // { label: "Dentists", href: "/admin/dentists", icon: Users },
+        
     ];
 
     return (
         <div className="flex h-screen bg-slate-100">
-            {/* Sidebar */}
+            {}
             <aside className="w-64 bg-slate-900 text-white flex flex-col">
                 <div className="p-6 border-b border-slate-800">
                     <div className="text-xl font-bold flex items-center gap-2">
@@ -63,7 +63,7 @@ export default function AdminPortalLayout({
                 </div>
             </aside>
 
-            {/* Main Content */}
+            {}
             <main className="flex-1 overflow-auto">
                 <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
                     <h2 className="text-xl font-bold text-slate-800">

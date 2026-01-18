@@ -1,20 +1,15 @@
-import { Calendar, Clock, User, CheckCircle2, Users, ShieldCheck, Trophy } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { workflowSteps, workflowStats, workflowFeatures } from "@/lib/data";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 export default function WorkflowSection() {
     return (
         <section id="workflow" className="py-12 px-6 w-full bg-white scroll-mt-28">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-16">
-                    <h2 className="text-primary font-bold uppercase tracking-widest mb-2">Our Workflow</h2>
-                    <h3 className="text-4xl font-bold text-slate-900">Redefining Your Experience</h3>
-                </div>
+                <SectionHeading subTitle="Our Workflow" title="Redefining Your Experience" />
 
                 <div className="grid grid-cols-3 md:grid-cols-3 gap-3 md:gap-8 mb-12 md:mb-20">
-                    {[
-                        { icon: Calendar, title: "Smart Booking", desc: "Real-time slot locking to prevent conflict." },
-                        { icon: Clock, title: "Live Queue", desc: "Track your position from anywhere." },
-                        { icon: User, title: "Top Specialists", desc: "Detailed profiles and ratings." },
-                    ].map((item, i) => (
+                    {workflowSteps.map((item, i) => (
                         <div key={i} className="bg-slate-50 p-3 md:p-10 rounded-xl md:rounded-[2rem] border border-slate-100 hover:border-primary/20 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/5 group flex flex-col items-center text-center">
                             <div className="bg-white w-10 h-10 md:w-20 md:h-20 rounded-lg md:rounded-2xl shadow-sm flex items-center justify-center mb-3 md:mb-8 border border-slate-100 group-hover:scale-110 transition-transform duration-500">
                                 <item.icon className="h-5 w-5 md:h-10 md:w-10 text-primary" />
@@ -35,7 +30,7 @@ export default function WorkflowSection() {
                             </p>
 
                             <div className="grid grid-cols-2 gap-y-4">
-                                {["State-of-the-Art Facility", "Certified Specialists", "Painless Treatments", "Digital X-Ray Labs"].map((txt, i) => (
+                                {workflowFeatures.map((txt, i) => (
                                     <div key={i} className="flex items-center gap-3">
                                         <CheckCircle2 className="text-primary h-5 w-5" />
                                         <span className="font-medium text-slate-700">{txt}</span>
@@ -45,12 +40,7 @@ export default function WorkflowSection() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-center">
-                            {[
-                                { icon: Users, label: "Patients", val: "10k+" },
-                                { icon: ShieldCheck, label: "Experience", val: "15y" },
-                                { icon: Trophy, label: "Awards", val: "24" },
-                                { icon: CheckCircle2, label: "Satisfaction", val: "99%" },
-                            ].map((stat, i) => (
+                            {workflowStats.map((stat, i) => (
                                 <div key={i} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all">
                                     <stat.icon className="h-8 w-8 text-primary mx-auto mb-3" />
                                     <div className="text-3xl font-bold mb-1 text-slate-900">{stat.val}</div>

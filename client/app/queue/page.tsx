@@ -23,12 +23,12 @@ export default function QueueBoardPage() {
     const [time, setTime] = useState("");
 
     useEffect(() => {
-        // Clock
+        
         const timer = setInterval(() => {
             setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         }, 1000);
 
-        // Fetch Initial Data
+        
         const fetchData = async () => {
             try {
                 const res = await fetch("http://localhost:3001/queue/live");
@@ -37,7 +37,7 @@ export default function QueueBoardPage() {
                 setUpcoming(data.next);
             } catch (e) {
                 console.error("Failed to fetch queue", e);
-                // Demo Fallback
+                
                 setCurrent({ queueNumber: 102, patientName: "John Doe", status: "IN_TREATMENT", room: 1 });
                 setUpcoming([
                     { queueNumber: 103, patientName: "Alice Smith", estWait: "15 mins" },
@@ -48,14 +48,14 @@ export default function QueueBoardPage() {
         };
 
         fetchData();
-        // Socket.IO listener would go here for real-time updates
+        
 
         return () => clearInterval(timer);
     }, []);
 
     return (
         <main className="min-h-screen bg-white text-slate-800 overflow-hidden p-8 flex gap-8">
-            {/* Left: Active Patient (Main Focus) */}
+            {}
             <section className="flex-1 flex flex-col">
                 <header className="flex justify-between items-center mb-8">
                     <div className="flex items-center gap-6">
@@ -91,7 +91,7 @@ export default function QueueBoardPage() {
                 </div>
             </section>
 
-            {/* Right: Upcoming List */}
+            {}
             <aside className="w-[450px] flex flex-col bg-slate-50 rounded-[2.5rem] border border-slate-200 p-8 shadow-xl">
                 <h3 className="text-3xl font-bold mb-10 flex items-center gap-4 text-slate-800">
                     <Clock className="text-primary h-10 w-10" /> Up Next
@@ -115,7 +115,7 @@ export default function QueueBoardPage() {
 
                 <div className="mt-auto pt-8 border-t border-slate-200 text-center">
                     <div className="bg-white p-4 rounded-xl inline-block shadow-sm border border-slate-100">
-                        {/* Placeholder QR */}
+                        {}
                         <div className="w-32 h-32 bg-slate-900 rounded-lg mx-auto mb-2"></div>
                         <p className="text-slate-500 text-sm font-medium">Scan to Check-in</p>
                     </div>

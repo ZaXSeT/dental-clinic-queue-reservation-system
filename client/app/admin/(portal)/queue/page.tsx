@@ -9,14 +9,14 @@ export default function QueueControlPage() {
     });
 
     const handleAction = (action: string) => {
-        // API call to backend would happen here
+        
         console.log("Action:", action);
         alert(`${action} triggered for ${activePatient.name}`);
     };
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
-            {/* Control Panel Header */}
+            {}
             <div className="flex justify-between items-end">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Queue Controller</h1>
@@ -28,7 +28,7 @@ export default function QueueControlPage() {
                 </div>
             </div>
 
-            {/* Main Active Card */}
+            {}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 p-6 flex justify-between items-center">
                     <span className="uppercase text-sm font-bold text-slate-500 tracking-wider">Now Serving</span>
@@ -64,9 +64,9 @@ export default function QueueControlPage() {
                 </div>
             </div>
 
-            {/* Next Actions */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Waiting List */}
+                {}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                     <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         Next in Line <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">4 Waiting</span>
@@ -93,7 +93,7 @@ export default function QueueControlPage() {
                     </div>
                 </div>
 
-                {/* Quick Actions */}
+                {}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                     <h3 className="font-bold text-slate-800 mb-4">Quick Actions</h3>
                     <div className="grid grid-cols-2 gap-4">
