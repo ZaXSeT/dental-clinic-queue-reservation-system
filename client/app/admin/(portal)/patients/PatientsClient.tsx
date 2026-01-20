@@ -15,7 +15,6 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
 
     return (
         <div className="space-y-6">
-            {/* Search Bar */}
             <div className="relative max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <Search className="h-5 w-5" />
@@ -29,7 +28,6 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                 />
             </div>
 
-            {/* List/Table */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">

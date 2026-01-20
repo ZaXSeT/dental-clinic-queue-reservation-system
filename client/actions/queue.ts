@@ -7,7 +7,6 @@ export async function getQueueState() {
     console.log("getQueueState called (BRUTE FORCE FETCH)");
 
     try {
-        // 1. Fetch EVERYTHING recently created (bypass DB filters)
         const allRecentQueues = await prisma.queue.findMany({
             take: 50,
             orderBy: { createdAt: 'desc' },
@@ -19,22 +18,16 @@ export async function getQueueState() {
 
         console.log(`Fetched ${allRecentQueues.length} raw records.`);
 
-        // 2. Filter manually in memory
-        // Active: treating or called
         const activeQueues = allRecentQueues
             .filter((q: any) => ['treating', 'called', 'TREATING', 'CALLED'].includes(q.status))
-            .sort((a: any, b: any) => (Number(a.roomId) || 99) - (Number(b.roomId) || 99)); // Sort by room ID
+            .sort((a: any, b: any) => (Number(a.roomId) || 99) - (Number(b.roomId) || 99));
 
-        // Waiting: waiting
         const waitingQueues = allRecentQueues
             .filter((q: any) => ['waiting', 'WAITING'].includes(q.status))
-            .sort((a: any, b: any) => a.number - b.number); // Sort by queue number
+            .sort((a: any, b: any) => a.number - b.number);
 
-        // Take top 7 for UI
         const nextHelper = waitingQueues.slice(0, 7);
 
-        // Get total count (this one we can ask DB safely, or just use length if it's small)
-        // Let's rely on DB count for total accuracy
         const waitingCountSource = await prisma.queue.count({
             where: { status: { in: ['waiting', 'WAITING'] } }
         });
@@ -42,7 +35,7 @@ export async function getQueueState() {
 
         console.log(`Memory Filtered: Active=${activeQueues.length}, WaitingList=${waitingQueues.length}`);
 
-        revalidatePath('/admin/queue'); // Force cache refresh
+        revalidatePath('/admin/queue');
 
         return { activeQueues, next: nextHelper, waitingCount, error: null };
     } catch (error: any) {
@@ -57,7 +50,6 @@ export async function getQueueState() {
 }
 
 export async function callNextPatient(roomId: string, doctorId?: string) {
-    // Get the next waiting patient
     const nextPatient = await prisma.queue.findFirst({
         where: {
             status: { in: ['waiting', 'WAITING'] }
@@ -68,24 +60,22 @@ export async function callNextPatient(roomId: string, doctorId?: string) {
     if (!nextPatient) return { success: false, message: "No patients waiting" };
 
     try {
-        // Complete any PREVIOUS patient in THIS specific room
         await prisma.queue.updateMany({
             where: {
-                date: { gte: new Date(new Date().setHours(0, 0, 0, 0)) }, // Keep date filter for completing previous patients
+                date: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
                 status: { in: ['treating', 'called', 'TREATING', 'CALLED'] },
                 roomId: roomId
             },
             data: { status: 'completed' }
         });
 
-        // Assign next patient to this Room & Doctor
         await prisma.queue.update({
             where: { id: nextPatient.id },
             data: {
                 status: 'treating',
                 updatedAt: new Date(),
                 roomId: roomId,
-                doctorId: doctorId || null // Optional if not provided
+                doctorId: doctorId || null
             }
         });
 
@@ -130,7 +120,7 @@ export async function skipPatient(id: string) {
     try {
         await prisma.queue.update({
             where: { id },
-            data: { status: 'skipped' } // Or move to end?
+            data: { status: 'skipped' }
         });
         revalidatePath('/admin/queue');
         return { success: true };
@@ -143,10 +133,6 @@ export async function resetQueue() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Dangerous action: Cancel all today's queues or delete?
-    // Let's just set all waiting to cancelled or delete them.
-    // For a "Reset" typically means clearing for testing. 
-    // Let's just delete today's queues for now.
     await prisma.queue.deleteMany({
         where: { date: { gte: today } }
     });
@@ -159,7 +145,6 @@ export async function addWalkIn(name: string, phone: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Get max number
     const lastQ = await prisma.queue.findFirst({
         where: { date: { gte: today } },
         orderBy: { number: 'desc' }
@@ -169,7 +154,7 @@ export async function addWalkIn(name: string, phone: string) {
     await prisma.queue.create({
         data: {
             number: nextNumber,
-            name: name, // Guest name
+            name: name,
             phone: phone,
             status: 'waiting',
             date: new Date(),

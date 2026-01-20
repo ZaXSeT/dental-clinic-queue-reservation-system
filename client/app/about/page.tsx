@@ -4,7 +4,6 @@ import { CheckCircle2, ShieldCheck, Users, Trophy } from "lucide-react";
 export default function AboutPage() {
     return (
         <main className="min-h-screen bg-white text-slate-800">
-            
             <section className="relative py-20 px-6 text-center bg-gradient-to-b from-sky-50 to-white">
                 <h1 className="text-4xl md:text-5xl font-bold mb-6 text-slate-900">Redefining Dental Care</h1>
                 <p className="text-xl text-slate-500 max-w-2xl mx-auto">

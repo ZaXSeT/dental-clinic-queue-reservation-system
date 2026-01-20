@@ -17,7 +17,6 @@ export async function getAllDoctors() {
 
 export async function updateDoctorAvailability(doctorId: string, availability: any) {
     try {
-        // Ensure availability is stored as stringified JSON
         const availabilityString = JSON.stringify(availability);
 
         await prisma.doctor.update({
@@ -26,7 +25,7 @@ export async function updateDoctorAvailability(doctorId: string, availability: a
         });
 
         revalidatePath('/admin/doctors');
-        revalidatePath('/booking'); // Update booking page as well
+        revalidatePath('/booking');
         return { success: true };
     } catch (error) {
         console.error("Error updating doctor schedule:", error);

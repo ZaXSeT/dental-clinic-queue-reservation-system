@@ -6,7 +6,6 @@ import { Clock, Save, Plus, X, Calendar, ChevronDown, Check } from 'lucide-react
 
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-// Time Picker Helpers
 const HOURS = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 const AMPM = ['AM', 'PM'];
@@ -16,11 +15,9 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
     const [schedule, setSchedule] = useState<Record<string, string[]>>({});
     const [isSaving, setIsSaving] = useState(false);
 
-    // Modal State for Adding Time
     const [addingSlotForDay, setAddingSlotForDay] = useState<string | null>(null);
     const [newTime, setNewTime] = useState({ hour: '09', minute: '00', period: 'AM' });
 
-    // Initial load of schedule when doctor is selected
     const handleSelectDoctor = (doc: any) => {
         setSelectedDoctor(doc);
         try {
@@ -38,7 +35,7 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
 
     const openAddTimeModal = (day: string) => {
         setAddingSlotForDay(day);
-        setNewTime({ hour: '09', minute: '00', period: 'AM' }); // Reset to default
+        setNewTime({ hour: '09', minute: '00', period: 'AM' });
     };
 
     const handleConfirmAddTime = () => {
@@ -48,13 +45,11 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
 
         setSchedule(prev => {
             const currentSlots = prev[addingSlotForDay] || [];
-            // Avoid duplicates
             if (currentSlots.includes(timeString)) return prev;
 
             return {
                 ...prev,
                 [addingSlotForDay]: [...currentSlots, timeString].sort((a, b) => {
-                    // Custom sort logic for AM/PM times
                     const parseTime = (t: string) => {
                         const [time, period] = t.split(' ');
                         let [h, m] = time.split(':').map(Number);
@@ -83,7 +78,6 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
         const res = await updateDoctorAvailability(selectedDoctor.id, schedule);
         setIsSaving(false);
         if (res.success) {
-            // alert("Schedule updated successfully!"); // Removed alert for cleaner UX
             selectedDoctor.availability = JSON.stringify(schedule);
             setSelectedDoctor(null);
         } else {
@@ -91,12 +85,9 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
         }
     };
 
-    // --- RENDER ---
-
     if (selectedDoctor) {
         return (
             <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden relative min-h-[600px] flex flex-col animate-in fade-in zoom-in-95 duration-300">
-                {/* Header */}
                 <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white sticky top-0 z-10">
                     <div className="flex items-center gap-4">
                         <button
@@ -127,7 +118,6 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
                     </button>
                 </div>
 
-                {/* Grid Content */}
                 <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 flex-1 bg-slate-50/30 overflow-y-auto">
                     {DAYS.map(day => (
                         <div key={day} className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden group">
@@ -168,7 +158,6 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
                     ))}
                 </div>
 
-                {/* Add Time Modal Overlay */}
                 {addingSlotForDay && (
                     <div className="absolute inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                         <div className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm border border-slate-100 animate-in zoom-in-95 duration-200">
@@ -240,7 +229,6 @@ export default function DoctorsClient({ doctors }: { doctors: any[] }) {
         );
     }
 
-    // List View
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {doctors.map(doc => (

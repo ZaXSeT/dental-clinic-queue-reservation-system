@@ -34,7 +34,6 @@ export default function ReviewsSection() {
                 <SectionHeading subTitle="Testimonials" title="What Our Patients Say" />
 
                 <div className="relative group px-4 md:px-12">
-                    {/* Navigation Buttons */}
                     <button
                         onClick={() => {
                             const maxIndex = 5 - (isMobile ? 1 : 3);
@@ -86,7 +85,6 @@ export default function ReviewsSection() {
                         </div>
                     </div>
 
-                    {/* Pagination */}
                     <div className="flex justify-center gap-1.5 mt-8">
                         {[...Array(isMobile ? 5 : 3)].map((_, idx) => (
                             <button

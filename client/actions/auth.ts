@@ -31,7 +31,6 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
             return { message: 'Invalid credentials' };
         }
 
-        // Create Session
         const token = await new SignJWT({ id: admin.id, username: admin.username, role: admin.role })
             .setProtectedHeader({ alg: 'HS256' })
             .setExpirationTime('24h')

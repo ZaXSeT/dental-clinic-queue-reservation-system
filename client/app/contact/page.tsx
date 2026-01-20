@@ -4,8 +4,6 @@ export default function ContactPage() {
     return (
         <main className="min-h-screen bg-white text-slate-800 p-6 md:p-12 flex items-center justify-center">
             <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-2xl">
-
-                {}
                 <div className="p-10 bg-slate-50 flex flex-col justify-center">
                     <h1 className="text-4xl font-bold mb-6 text-slate-900">Get in Touch</h1>
                     <p className="text-slate-500 mb-10">Have questions about our services or insurance? Our team is here to help you 24/7.</p>
@@ -43,9 +41,7 @@ export default function ContactPage() {
                         </div>
                     </div>
                 </div>
-                {}
                 <div className="relative h-full min-h-[400px] bg-white">
-                    {}
                     <form className="p-10 flex flex-col gap-6 h-full justify-center">
                         <h3 className="text-xl font-bold text-slate-900">Send us a message</h3>
                         <div className="grid grid-cols-2 gap-4">
@@ -57,7 +53,6 @@ export default function ContactPage() {
                         <button className="bg-slate-900 text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition-colors">Send Message</button>
                     </form>
                 </div>
-
             </div>
         </main>
     );

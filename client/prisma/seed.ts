@@ -9,7 +9,7 @@ async function main() {
         {
             name: 'Dr. Alexander Buygin',
             specialization: 'General Dentist',
-            image: '/sarah_wilson.jpg', // Using existing assets based on booking page code
+            image: '/sarah_wilson.jpg',
             availability: JSON.stringify({
                 "MON": ["09:00 AM", "11:40 AM", "02:00 PM", "04:00 PM"],
                 "TUE": ["09:00 AM", "10:00 AM", "03:00 PM"],
@@ -60,16 +60,12 @@ async function main() {
         }
     }
 
-    // Seed Doctors...
-    // ... (existing doctor code)
-
-    // Seed Admin
     const admin = await prisma.admin.findFirst();
     if (!admin) {
         await prisma.admin.create({
             data: {
                 username: 'admin',
-                password: 'password123', // In production, hash this!
+                password: 'password123',
                 name: 'Walter Black',
                 role: 'admin'
             }

@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-// --- Admin Profile ---
 export async function getAdminProfile() {
     try {
         const admin = await prisma.admin.findFirst();
@@ -36,10 +35,8 @@ export async function updateAdminProfile(id: string, data: { name?: string, user
     }
 }
 
-// --- Clinic Info ---
 export async function getClinicSettings() {
     try {
-        // Find first or create default
         let settings = await prisma.clinicSettings.findFirst();
 
         if (!settings) {
@@ -61,8 +58,6 @@ export async function getClinicSettings() {
 
 export async function updateClinicSettings(data: { name: string, address: string, phone: string, email?: string }) {
     try {
-        // Upsert approach: update the first one found, or create new if somehow empty (though get handles create)
-        // Since we don't know the ID easily without fetching, let's fetch first.
         const existing = await prisma.clinicSettings.findFirst();
 
         if (existing) {
@@ -74,7 +69,7 @@ export async function updateClinicSettings(data: { name: string, address: string
             await prisma.clinicSettings.create({ data });
         }
 
-        revalidatePath('/admin'); // Revalidate admin layout as it might use clinic name
+        revalidatePath('/admin');
         return { success: true };
     } catch (error) {
         console.error("Error updating clinic settings:", error);

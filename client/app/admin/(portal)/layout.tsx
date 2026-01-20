@@ -17,9 +17,7 @@ export default function AdminPortalLayout({
 
     const handleLogout = async () => {
         await logoutAction();
-        // Clear session flag
         sessionStorage.removeItem('admin_auth');
-        // Redirect back to login relative to current mode
         const loginPath = pathname.startsWith('/admin') ? '/admin/login' : '/login';
         router.push(loginPath);
     };
@@ -28,11 +26,8 @@ export default function AdminPortalLayout({
         if (!sessionStorage.getItem('admin_auth')) {
             handleLogout();
         }
-    }, [pathname]); // Check on mount and path changes for extra safety
+    }, [pathname]);
 
-    // Determine base path for navigation
-    // If we are on /admin/dashboard (path mode), links should include /admin
-    // If we are on /dashboard (subdomain mode), links should remain root-relative
     const isPathMode = pathname.startsWith('/admin');
     const basePath = isPathMode ? '/admin' : '';
 
@@ -47,7 +42,6 @@ export default function AdminPortalLayout({
 
     return (
         <div className="flex h-screen bg-slate-50/50 font-sans text-slate-900">
-            {/* Sidebar */}
             <aside className="w-72 bg-white border-r border-slate-200 flex flex-col shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] relative z-20">
                 <div className="p-6 border-b border-slate-100 bg-white">
                     <div className="flex items-center gap-3">
@@ -100,9 +94,7 @@ export default function AdminPortalLayout({
                 </div>
             </aside>
 
-            {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50/50 relative">
-                {/* Header */}
                 <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2">
@@ -135,7 +127,6 @@ export default function AdminPortalLayout({
                     </div>
                 </header>
 
-                {/* Page Content */}
                 <div className="flex-1 overflow-auto p-8 custom-scrollbar scroll-smooth">
                     <div className="max-w-7xl mx-auto h-full">
                         {children}

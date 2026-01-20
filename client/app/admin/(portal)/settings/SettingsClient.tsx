@@ -9,7 +9,6 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    // Form States
     const [profileForm, setProfileForm] = useState({
         name: admin?.name || '',
         username: admin?.username || ''
@@ -27,7 +26,6 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
         email: clinic?.email || ''
     });
 
-    // Handlers
     const handleProfileUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
@@ -99,7 +97,6 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
 
     return (
         <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Tabs */}
             <div className="w-full lg:w-64 flex-shrink-0 space-y-2">
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
@@ -118,7 +115,6 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
                 })}
             </div>
 
-            {/* Content Area */}
             <div className="flex-1">
                 <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm min-h-[400px]">
                     <h2 className="text-xl font-bold text-slate-800 mb-1 capitalize">{activeTab.replace('-', ' ')} Settings</h2>

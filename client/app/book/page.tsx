@@ -5,16 +5,15 @@ import { useSearchParams } from "next/navigation";
 import { Calendar as CalendarIcon, Clock, ChevronRight, Check } from "lucide-react";
 import Link from "next/link";
 import { clsx } from "clsx";
+import { io, Socket } from "socket.io-client";
 
+let socket: Socket;
 
 const TIME_SLOTS = [
     "09:00", "09:30", "10:00", "10:30",
     "11:00", "11:30", "13:00", "13:30",
     "14:00", "14:30", "15:00", "15:30"
 ];
-
-import { io, Socket } from "socket.io-client";
-let socket: Socket;
 
 export default function BookingPage() {
     const searchParams = useSearchParams();
@@ -24,18 +23,13 @@ export default function BookingPage() {
     const [selectedDentist, setSelectedDentist] = useState<string | null>(preSelectedDentist);
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [selectedTime, setSelectedTime] = useState<string>("");
-
-    
     const [lockedSlots, setLockedSlots] = useState<string[]>([]);
 
     useEffect(() => {
-        
         console.log("Connecting to WebSocket...");
-        
     }, []);
 
     const handleBooking = async () => {
-        
         alert(`Booked ${selectedDentist} on ${selectedDate} at ${selectedTime}`);
     };
 
@@ -57,7 +51,6 @@ export default function BookingPage() {
                 </header>
 
                 <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-xl shadow-slate-200/50">
-                    {}
                     {step === 1 && (
                         <div className="space-y-6">
                             <h2 className="text-xl font-semibold flex items-center gap-2 text-slate-900">
@@ -90,7 +83,6 @@ export default function BookingPage() {
                         </div>
                     )}
 
-                    {}
                     {step === 2 && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
                             <div>
@@ -144,7 +136,6 @@ export default function BookingPage() {
                         </div>
                     )}
 
-                    {}
                     {step === 3 && (
                         <div className="text-center py-10 animate-in zoom-in-95">
                             <h2 className="text-2xl font-bold mb-4 text-slate-900">Confirm Appointment</h2>

@@ -35,19 +35,18 @@ model Patient {
 model Queue {
   id        String   @id @default(uuid())
   number    Int
-  status    String   @default("waiting") // waiting, treating, completed, cancelled, skipped
+  status    String   @default("waiting")
   patientId String?
   patient   Patient? @relation(fields: [patientId], references: [id])
-  name      String?  // Guest name
+  name      String?
   phone     String?
   date      DateTime @default(now()) @db.Date
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  // Multi-doctor support
   doctorId  String?
   doctor    Doctor?  @relation(fields: [doctorId], references: [id])
-  roomId    String?  // "1", "2", "3"
+  roomId    String?
 }
 
 model Appointment {
@@ -69,7 +68,7 @@ model Doctor {
   name           String
   specialization String
   image          String?
-  availability   String?  // JSON or text representing schedule
+  availability   String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   queues         Queue[]

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Users, Calendar, Clock, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns"; // Standard date formatting if available, or native Intl
+import { format } from "date-fns";
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +44,7 @@ export default async function AdminDashboard() {
         { label: "Patients (Total)", val: patientCount.toString(), icon: Users, color: "bg-blue-500" },
         { label: "Today's Appointments", val: appointmentCount.toString(), icon: Calendar, color: "bg-purple-500" },
         { label: "In Queue (Waiting)", val: waitingCount.toString(), icon: Clock, color: "bg-orange-500" },
-        { label: "Revenue (Est.)", val: "$0", icon: TrendingUp, color: "bg-green-500" }, // specific logic needed for revenue
+        { label: "Revenue (Est.)", val: "$0", icon: TrendingUp, color: "bg-green-500" },
     ];
 
     if (!dbConnected) {
@@ -60,7 +60,6 @@ export default async function AdminDashboard() {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
                     <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 group cursor-default">
@@ -77,7 +76,6 @@ export default async function AdminDashboard() {
                 ))}
             </div>
 
-            {/* Current Queue Table */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm">
                     <div>

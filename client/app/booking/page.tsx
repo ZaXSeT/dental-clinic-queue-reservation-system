@@ -5,7 +5,6 @@ import { User, UserPlus, Check, ArrowLeft, ChevronRight, ChevronLeft, Calendar, 
 import { useRouter } from "next/navigation";
 import { getAllDoctors } from "@/actions/doctor";
 
-// --- Types ---
 type PatientType = 'new' | 'returning' | null;
 
 interface Doctor {
@@ -31,7 +30,6 @@ interface BookingSelection {
 
 type BookingForType = 'myself' | 'child' | 'other';
 
-// --- Constants ---
 const NEW_PATIENT_OPTIONS = [
     "New Patient Experience",
     "New Teen Experience (6 to 12 years old)",
@@ -47,7 +45,6 @@ const RETURNING_PATIENT_OPTIONS = [
 ];
 
 export default function BookingPage() {
-    // --- State ---
     const [step, setStep] = useState<number>(1);
     const [patientType, setPatientType] = useState<PatientType>(null);
     const [appointmentType, setAppointmentType] = useState<string | null>(null);
@@ -61,7 +58,6 @@ export default function BookingPage() {
     const [mobileDateIdx, setMobileDateIdx] = useState<number>(0);
     const [bookingData, setBookingData] = useState<BookingSelection | null>(null);
 
-    // --- Effects ---
     useEffect(() => {
         const fetchDoctors = async () => {
             try {
@@ -108,16 +104,13 @@ export default function BookingPage() {
         setDates(createDates());
     }, []);
 
-    // --- Computed ---
     const visibleDates = dates.length > 0 ? dates.slice(dateOffset, dateOffset + 4) : [];
 
-    // Explicit useMemo here serves as a test that syntax is fine
     const selectedDentist = useMemo(() => {
         if (!bookingData) return null;
         return dentists.find(d => d.id === bookingData.dentistId) || null;
     }, [bookingData, dentists]);
 
-    // --- Handlers ---
     const handlePatientTypeSelect = (type: PatientType) => {
         setPatientType(type);
         setStep(2);
@@ -148,7 +141,7 @@ export default function BookingPage() {
         setDateOffset(prev => Math.min(dates.length - 4, prev + 4));
     };
 
-    const router = useRouter(); // Initialize router
+    const router = useRouter();
 
     const handleBack = () => {
         if (step === 4) setStep(3);
@@ -157,11 +150,8 @@ export default function BookingPage() {
         else if (step === 1) router.push('/');
     };
 
-    // --- Render Helpers ---
-
     const renderHeader = () => (
         <nav className="w-full max-w-[95%] h-24 flex items-center justify-between relative mx-auto">
-            {/* Left: Back Button - Pushed to edge (ALWAYS Back to Home) */}
             <div className="z-10 flex-shrink-0">
                 <button onClick={() => router.push('/')} className="flex items-center gap-3 text-slate-400 font-bold hover:text-slate-800 transition-colors group">
                     <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center bg-white shadow-sm group-hover:border-slate-300 transition-colors">
@@ -171,7 +161,6 @@ export default function BookingPage() {
                 </button>
             </div>
 
-            {/* Center: Logo - Absolutely centered */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
                 <img
                     src="/resources/clean.png"
@@ -182,7 +171,6 @@ export default function BookingPage() {
                 <span className="text-3xl font-bold tracking-tight text-[#009ae2]">Dental</span>
             </div>
 
-            {/* Right: Dots - Pushed to edge */}
             <div className="z-10 flex gap-3 flex-shrink-0">
                 <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${step >= 1 ? 'bg-[#009ae2] scale-110' : 'bg-slate-200'}`}></div>
                 <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${step >= 2 ? 'bg-[#009ae2] scale-110' : 'bg-slate-200'}`}></div>
@@ -272,12 +260,7 @@ export default function BookingPage() {
 
     const renderStep3 = () => (
         <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-700">
-            {/* Phase Back Button - Above Card */}
-
-
             <div className="bg-white rounded-[3rem] p-8 w-full max-w-[95%] shadow-xl shadow-slate-200/40 border border-slate-50 relative">
-
-                {/* Header */}
                 <div className="flex flex-col items-center justify-center mb-8 relative">
                     <div className="absolute left-0 top-1/2 -translate-y-1/2">
                         <button onClick={handleBack} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-bold text-sm transition-colors">
@@ -287,14 +270,12 @@ export default function BookingPage() {
                             <span className="hidden md:inline">Back</span>
                         </button>
                     </div>
-                    {/* Back button removed from here */}
 
                     <span className="px-4 py-1.5 rounded-full bg-sky-50 text-[#009ae2] text-[11px] font-bold tracking-[0.2em] uppercase mb-3">
                         FINAL PHASE 3/3
                     </span>
                     <h1 className="text-3xl font-bold text-slate-900">Select Date & Time</h1>
 
-                    {/* Navigation Button */}
                     <div className="absolute right-0 top-1/2 -translate-y-1/2">
                         <button
                             disabled={!bookingData}
@@ -308,12 +289,8 @@ export default function BookingPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-8 flex-1 min-h-0">
-                    {/* Schedule Section */}
                     <div className="bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden h-full flex flex-col">
-
-                        {/* Desktop Grid Header with Navigation */}
                         <div className="hidden md:grid grid-cols-[1.2fr_repeat(4,1fr)] border-b border-slate-100 bg-slate-50 flex-none relative">
-                            {/* Nav Buttons Overlay */}
                             <div className="absolute inset-y-0 right-0 w-[80%] pointer-events-none flex justify-between items-center px-2">
                                 <button
                                     onClick={handlePrevDates}
@@ -341,7 +318,6 @@ export default function BookingPage() {
                             ))}
                         </div>
 
-                        {/* Doctor Rows */}
                         <div className="divide-y divide-slate-100 bg-white">
                             {dentists.map((dentist) => (
                                 <div key={dentist.id} className="grid grid-cols-1 md:grid-cols-[1.2fr_repeat(4,1fr)] h-[300px] group hover:bg-slate-50/30 transition-colors">
@@ -356,7 +332,6 @@ export default function BookingPage() {
                                         <p className="text-[9px] font-bold text-blue-500 uppercase tracking-wide">{dentist.specialization}</p>
                                     </div>
 
-                                    {/* Time Slots */}
                                     <div className="col-span-4 hidden md:grid grid-cols-4">
                                         {visibleDates.map((day, idx) => {
                                             const slots = doctorAvailability[dentist.id]?.[day.dayName] || [];
@@ -385,7 +360,6 @@ export default function BookingPage() {
                                         })}
                                     </div>
 
-                                    {/* Mobile Date/Time Fallback */}
                                     <div className="md:hidden p-4 text-center border-t border-slate-50">
                                         <span className="text-xs text-slate-400">Desktop view only</span>
                                     </div>
@@ -394,7 +368,6 @@ export default function BookingPage() {
                         </div>
                     </div>
 
-                    {/* Right: Map - Scaled to fill */}
                     <div className="space-y-6 flex-shrink-0 h-full">
                         <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden relative h-full min-h-[500px]">
                             <iframe
@@ -417,8 +390,6 @@ export default function BookingPage() {
         return (
             <div className="w-full max-w-7xl mx-auto animate-in slide-in-from-right-8 duration-500 pb-20 pt-10">
                 <div className="flex flex-col lg:flex-row gap-8 items-start">
-
-                    {/* LEFT COLUMN: FORM */}
                     <div className="flex-1 bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-slate-200/50 w-full">
                         <button onClick={handleBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-sm font-bold mb-8 transition-colors">
                             <ArrowLeft className="w-4 h-4" /> Back
@@ -446,7 +417,6 @@ export default function BookingPage() {
                             ))}
                         </div>
 
-                        {/* Patient Details */}
                         <div className="mb-10">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">Patient details</h2>
                             <p className="text-slate-500 text-sm mb-6">Please provide the following information about the person receiving care.</p>
@@ -487,7 +457,6 @@ export default function BookingPage() {
                             </div>
                         </div>
 
-                        {/* Contact Details */}
                         <div className="mb-10">
                             <h2 className="text-2xl font-bold text-slate-900 mb-6">Contact details</h2>
                             <div className="space-y-6">
@@ -506,7 +475,6 @@ export default function BookingPage() {
                             </div>
                         </div>
 
-                        {/* Other Details */}
                         <div className="mb-10">
                             <div className="flex justify-between items-center mb-2">
                                 <h2 className="text-2xl font-bold text-slate-900">Other details</h2>
@@ -518,7 +486,6 @@ export default function BookingPage() {
                             </div>
                         </div>
 
-                        {/* Footer */}
                         <div className="pt-6 border-t border-slate-100">
                             <button
                                 onClick={() => router.push('/success')}
@@ -532,13 +499,11 @@ export default function BookingPage() {
                         </div>
                     </div>
 
-                    {/* RIGHT COLUMN: SUMMARY SIDEBAR */}
                     <div className="w-full lg:w-[400px] flex-shrink-0">
                         <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-xl shadow-slate-200/50 sticky top-6">
                             <h3 className="text-xl font-bold text-slate-900 mb-6">Appointment details</h3>
 
                             <div className="space-y-6">
-                                {/* Selected Service & Time */}
                                 <div className="flex gap-4">
                                     <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-400">
                                         <Calendar className="w-5 h-5" />
@@ -553,7 +518,6 @@ export default function BookingPage() {
                                     </div>
                                 </div>
 
-                                {/* Location */}
                                 <div className="flex gap-4">
                                     <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-400">
                                         <MapPin className="w-5 h-5" />
@@ -566,7 +530,6 @@ export default function BookingPage() {
                                     </div>
                                 </div>
 
-                                {/* Doctor */}
                                 {selectedDoc && (
                                     <div className="flex gap-4 pt-6 border-t border-slate-50">
                                         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-slate-100">
@@ -587,7 +550,6 @@ export default function BookingPage() {
         );
     };
 
-    // --- Main Render ---
     let content = null;
     if (step === 1) content = renderStep1();
     else if (step === 2) content = renderStep2();

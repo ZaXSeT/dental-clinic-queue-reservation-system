@@ -7,9 +7,8 @@ import { format } from 'date-fns';
 
 export default function AppointmentsClient({ appointments }: { appointments: any[] }) {
     const [filter, setFilter] = useState('upcoming');
-    const [isLoading, setIsLoading] = useState<string | null>(null); // storing id of processing item
+    const [isLoading, setIsLoading] = useState<string | null>(null);
 
-    // Filter logic
     const filteredApps = appointments.filter(app => {
         if (filter === 'upcoming') return app.status === 'scheduled' || app.status === 'confirmed';
         if (filter === 'history') return app.status === 'completed' || app.status === 'cancelled';
@@ -36,7 +35,6 @@ export default function AppointmentsClient({ appointments }: { appointments: any
 
     return (
         <div className="space-y-6">
-            {/* Filter Tabs */}
             <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
                 <button
                     onClick={() => setFilter('upcoming')}
@@ -52,7 +50,6 @@ export default function AppointmentsClient({ appointments }: { appointments: any
                 </button>
             </div>
 
-            {/* List */}
             <div className="grid grid-cols-1 gap-4">
                 {filteredApps.length === 0 ? (
                     <div className="text-center py-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl">
@@ -63,8 +60,6 @@ export default function AppointmentsClient({ appointments }: { appointments: any
                 ) : (
                     filteredApps.map((app) => (
                         <div key={app.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
-
-                            {/* Info Left */}
                             <div className="flex items-start gap-4">
                                 <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 font-bold text-xl border border-blue-100">
                                     {format(new Date(app.date), 'dd')}
@@ -101,7 +96,6 @@ export default function AppointmentsClient({ appointments }: { appointments: any
                                 </div>
                             </div>
 
-                            {/* Actions Right */}
                             {filter === 'upcoming' && (
                                 <div className="flex items-center gap-2 w-full md:w-auto">
                                     <button
