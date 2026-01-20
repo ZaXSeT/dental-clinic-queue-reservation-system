@@ -40,7 +40,6 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
         cookies().set('admin_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24, // 1 day
             path: '/',
         });
 

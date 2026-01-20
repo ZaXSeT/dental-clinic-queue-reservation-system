@@ -17,6 +17,9 @@ export default function AdminLogin() {
 
     useEffect(() => {
         if (state.success) {
+            // Set tab-specific session flag to ensure login is required if this tab is closed and a new one opened
+            sessionStorage.setItem('admin_auth', 'true');
+
             // Intelligent redirect based on domain
             if (window.location.hostname.startsWith('admin')) {
                 router.push("/dashboard");

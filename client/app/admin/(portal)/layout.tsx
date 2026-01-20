@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Users, LogOut, Tv, Calendar, Settings, Stethoscope, ChevronRight } from "lucide-react";
 import { clsx } from "clsx";
@@ -16,8 +17,18 @@ export default function AdminPortalLayout({
 
     const handleLogout = async () => {
         await logoutAction();
-        router.push("/login");
+        // Clear session flag
+        sessionStorage.removeItem('admin_auth');
+        // Redirect back to login relative to current mode
+        const loginPath = pathname.startsWith('/admin') ? '/admin/login' : '/login';
+        router.push(loginPath);
     };
+
+    useEffect(() => {
+        if (!sessionStorage.getItem('admin_auth')) {
+            handleLogout();
+        }
+    }, [pathname]); // Check on mount and path changes for extra safety
 
     // Determine base path for navigation
     // If we are on /admin/dashboard (path mode), links should include /admin
