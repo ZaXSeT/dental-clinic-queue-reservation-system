@@ -38,6 +38,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                 <th className="p-6 text-center">Total Visits</th>
                                 <th className="p-6">Last Visit</th>
                                 <th className="p-6">Registered</th>
+                                <th className = "p-6"> Address </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -101,6 +102,12 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                             <div className="text-sm text-slate-400 flex items-center gap-2">
                                                 <Calendar className="w-4 h-4 text-slate-200" />
                                                 {format(new Date(patient.createdAt), 'dd MMM yyyy')}
+                                            </div>
+                                        </td>
+                                        <td className="p-6">
+                                            <div className="text-sm text-slate-400 flex items-center gap-2">
+                                                {/* <Calendar className="w-4 h-4 text-slate-200" /> */}
+                                                {patient.address}
                                             </div>
                                         </td>
                                     </tr>

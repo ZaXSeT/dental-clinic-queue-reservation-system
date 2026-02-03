@@ -7,13 +7,14 @@ import { getQueueState } from "@/actions/queue";
 import { getAllDoctors } from "@/actions/doctor";
 
 interface QueueItem {
-    queueNumber: number;
+    queueNumber: number | string;
     patientName: string;
     estWait: string;
+    status?: string;
 }
 
 interface CurrentQueue {
-    queueNumber: number;
+    queueNumber: number | string;
     patientName: string;
     status: string;
     room: number | string;
@@ -73,7 +74,8 @@ export default function QueueBoardPage() {
                 setUpcoming(data.next.map((item: any) => ({
                     queueNumber: item.number,
                     patientName: item.name || item.patient?.name || "Guest",
-                    estWait: "Wait..."
+                    estWait: "Wait...",
+                    status: item.status === 'scheduled' ? 'Scheduled' : 'Waiting'
                 })));
             } catch (e) {
                 console.error("Failed to fetch queue", e);
@@ -190,7 +192,9 @@ export default function QueueBoardPage() {
                                     </div>
                                     <div className="text-right">
                                         <span className="block text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Status</span>
-                                        <span className="text-sm font-bold text-primary bg-blue-50 px-3 py-1 rounded-full">Waiting</span>
+                                        <span className={`text-sm font-bold px-3 py-1 rounded-full ${item.status === 'Scheduled' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-primary'}`}>
+                                            {item.status || "Waiting"}
+                                        </span>
                                     </div>
                                 </div>
                             ))

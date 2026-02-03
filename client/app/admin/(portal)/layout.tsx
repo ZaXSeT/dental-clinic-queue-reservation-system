@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, LogOut, Tv, Calendar, Settings, Stethoscope, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, Tv, Calendar, Settings, Stethoscope, ChevronRight, Mail } from "lucide-react";
 import { clsx } from "clsx";
 import { logoutAction } from "@/actions/auth";
 
@@ -34,6 +34,7 @@ export default function AdminPortalLayout({
     const navItems = [
         { label: "Dashboard", href: `${basePath}/dashboard`, icon: LayoutDashboard },
         { label: "Queue Control", href: `${basePath}/queue`, icon: Tv },
+        { label: "Messages", href: `${basePath}/Messages`, icon: Mail},
         { label: "Appointments", href: `${basePath}/appointments`, icon: Calendar },
         { label: "Patients", href: `${basePath}/patients`, icon: Users },
         { label: "Doctors", href: `${basePath}/doctors`, icon: Stethoscope },
@@ -89,7 +90,7 @@ export default function AdminPortalLayout({
                         <span>Sign Out</span>
                     </button>
                     <div className="mt-4 px-2 text-xs text-slate-400 text-center font-medium">
-                        &copy; 2024 Antigravity System
+                        &copy; 2026 Dental Clinic
                     </div>
                 </div>
             </aside>

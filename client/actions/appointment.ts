@@ -1,9 +1,10 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 
 export async function getAppointments() {
+    noStore();
     try {
         const appointments = await prisma.appointment.findMany({
             orderBy: [

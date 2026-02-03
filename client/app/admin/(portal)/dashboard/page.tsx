@@ -17,9 +17,23 @@ export default async function AdminDashboard() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
         const results = await Promise.all([
             prisma.patient.count(),
-            prisma.appointment.count({ where: { date: { gte: today } } }),
+            // STRICTLY TODAY and ONLY SCHEDULED/CONFIRMED
+            prisma.appointment.count({
+                where: {
+                    date: {
+                        gte: today,
+                        lt: tomorrow
+                    },
+                    status: {
+                        in: ['scheduled', 'confirmed']
+                    }
+                }
+            }),
             prisma.queue.count({ where: { date: { gte: today }, status: 'waiting' } }),
             prisma.queue.findMany({
                 take: 5,
@@ -44,7 +58,7 @@ export default async function AdminDashboard() {
         { label: "Patients (Total)", val: patientCount.toString(), icon: Users, color: "bg-blue-500" },
         { label: "Today's Appointments", val: appointmentCount.toString(), icon: Calendar, color: "bg-purple-500" },
         { label: "In Queue (Waiting)", val: waitingCount.toString(), icon: Clock, color: "bg-orange-500" },
-        { label: "Revenue (Est.)", val: "$0", icon: TrendingUp, color: "bg-green-500" },
+        //{ label: "Revenue (Est.)", val: "$0", icon: TrendingUp, color: "bg-green-500" },
     ];
 
     if (!dbConnected) {
@@ -62,19 +76,29 @@ export default async function AdminDashboard() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 group cursor-default">
+                    <Link
+                        key={i}
+                        href={
+                            stat.label.includes("Patients") ? "/patients" :
+                                stat.label.includes("Appointments") ? "/appointments" :
+                                    stat.label.includes("Queue") ? "/queue" :
+                                        "/" // fallback
+                        }
+                        className="block bg-white p-6 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 group cursor-pointer"
+                    >
                         <div className="flex items-center gap-4">
                             <div className={`${stat.color} bg-opacity-10 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300`}>
-                                <stat.icon className={`h-6 w-6 ${stat.color.replace('bg-', 'text-')}`} />
+                                <stat.icon className={`h-6 w-6 ${stat.color.replace("bg-", "text-")}`} />
                             </div>
                             <div>
                                 <div className="text-3xl font-bold text-slate-800 tracking-tight">{stat.val}</div>
                                 <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-1">{stat.label}</div>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
+
 
             <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm">

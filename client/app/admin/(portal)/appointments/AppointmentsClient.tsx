@@ -2,15 +2,17 @@
 
 import { useState } from 'react';
 import { updateAppointmentStatus } from '@/actions/appointment';
-import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
+import { Calendar, Clock, User, CheckCircle, XCircle, FileText } from 'lucide-react';
 import { format } from 'date-fns';
+
 
 export default function AppointmentsClient({ appointments }: { appointments: any[] }) {
     const [filter, setFilter] = useState('upcoming');
     const [isLoading, setIsLoading] = useState<string | null>(null);
 
     const filteredApps = appointments.filter(app => {
-        if (filter === 'upcoming') return app.status === 'scheduled' || app.status === 'confirmed';
+        if (filter === 'all') return true;
+        if (filter === 'upcoming') return app.status === 'scheduled' || app.status === 'confirmed' || app.status === 'Scheduled';
         if (filter === 'history') return app.status === 'completed' || app.status === 'cancelled';
         return true;
     });
@@ -24,7 +26,8 @@ export default function AppointmentsClient({ appointments }: { appointments: any
     };
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        const s = status.toLowerCase();
+        switch (s) {
             case 'scheduled': return 'bg-blue-50 text-blue-700 border-blue-200';
             case 'confirmed': return 'bg-green-50 text-green-700 border-green-200';
             case 'completed': return 'bg-slate-100 text-slate-600 border-slate-200';
@@ -36,6 +39,12 @@ export default function AppointmentsClient({ appointments }: { appointments: any
     return (
         <div className="space-y-6">
             <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
+                <button
+                    onClick={() => setFilter('all')}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filter === 'all' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    All
+                </button>
                 <button
                     onClick={() => setFilter('upcoming')}
                     className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filter === 'upcoming' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
@@ -83,7 +92,7 @@ export default function AppointmentsClient({ appointments }: { appointments: any
                                         {app.doctor && (
                                             <div className="flex items-center gap-1.5">
                                                 <User className="w-4 h-4 text-slate-400" />
-                                                Dr. {app.doctor}
+                                                Dr. {app.doctor.name}
                                             </div>
                                         )}
                                     </div>
@@ -96,7 +105,7 @@ export default function AppointmentsClient({ appointments }: { appointments: any
                                 </div>
                             </div>
 
-                            {filter === 'upcoming' && (
+                            {(filter === 'upcoming' || filter === 'all') && (app.status === 'scheduled' || app.status === 'confirmed' || app.status === 'Scheduled') && (
                                 <div className="flex items-center gap-2 w-full md:w-auto">
                                     <button
                                         onClick={() => handleStatusUpdate(app.id, 'completed')}

@@ -60,7 +60,7 @@ export default function AboutPage() {
             <section className="py-20 text-center">
                 <h2 className="text-3xl font-bold mb-6">Ready for a checkup?</h2>
                 <Link
-                    href="/book"
+                    href="/booking"
                     className="inline-block px-8 py-3 bg-primary hover:bg-sky-600 text-white rounded-full font-bold transition-all shadow-lg hover:shadow-primary/50"
                 >
                     Book Appointment Now

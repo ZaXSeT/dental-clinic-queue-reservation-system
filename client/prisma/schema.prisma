@@ -22,14 +22,14 @@ model Patient {
   id             String        @id @default(uuid())
   name           String
   phone          String?
-  email          String?
+  email          String? @unique
   birthDate      DateTime?
   address        String?
   medicalHistory String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  queues         Queue[]
   appointments   Appointment[]
+  queues         Queue[]
 }
 
 model Queue {
@@ -37,42 +37,48 @@ model Queue {
   number    Int
   status    String   @default("waiting")
   patientId String?
-  patient   Patient? @relation(fields: [patientId], references: [id])
   name      String?
   phone     String?
   date      DateTime @default(now()) @db.Date
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
   doctorId  String?
-  doctor    Doctor?  @relation(fields: [doctorId], references: [id])
   roomId    String?
+  doctor    Doctor?  @relation(fields: [doctorId], references: [id])
+  patient   Patient? @relation(fields: [patientId], references: [id])
 }
 
 model Appointment {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   date      DateTime
   time      String
-  status    String   @default("scheduled")
+  status    String    @default("scheduled")
   patientId String
-  patient   Patient  @relation(fields: [patientId], references: [id])
-  doctor    String?
+  doctorID  String?
+
+  // Correct relation to Doctor
+  doctor    Doctor?   @relation(fields: [doctorID], references: [id], map: "Appointment_doctorId_fkey")
+  
   treatment String?
   notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  patient   Patient   @relation(fields: [patientId], references: [id], map: "Appointment_patientId_fkey")
 }
 
 model Doctor {
-  id             String   @id @default(uuid())
-  name           String
+  id           String        @id @default(uuid())
+  name         String
   specialization String
-  image          String?
-  availability   String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  queues         Queue[]
+  image        String?
+  availability String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  queues       Queue[]
+  appointments Appointment[] // opposite relation
 }
+
 
 model ClinicSettings {
   id        String   @id @default(uuid())
@@ -82,4 +88,14 @@ model ClinicSettings {
   email     String?
   website   String?
   updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  message   String
+  createdAt DateTime @default(now())
+  email     String
+  replied   Boolean  @default(false)   // tracks if the message was replied
+  repliedBy String?                   // stores the admin/user who replied
 }
