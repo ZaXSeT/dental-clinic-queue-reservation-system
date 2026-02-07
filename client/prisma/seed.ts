@@ -1,6 +1,20 @@
-import { PrismaClient } from '@prisma/client';
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
+let url = process.env.DATABASE_URL;
+if (url && !url.includes('pgbouncer=true')) {
+    url += url.includes('?') ? '&pgbouncer=true' : '?pgbouncer=true';
+}
+
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url,
+        },
+    },
+});
 
 async function main() {
     console.log('Seeding database...');
@@ -60,19 +74,66 @@ async function main() {
         }
     }
 
-    const admin = await prisma.admin.findFirst();
+    const walter = await prisma.admin.findUnique({ where: { username: 'WalterBlack' } });
+    const walterPassword = await bcrypt.hash('password123', 10);
+
+    if (!walter) {
+        // Double check if lowercase version exists to avoid duplicates
+        const existingLower = await prisma.admin.findUnique({ where: { username: 'walterblack' } });
+        if (existingLower) {
+            await prisma.admin.update({
+                where: { id: existingLower.id },
+                data: { username: 'WalterBlack', role: 'owner' }
+            });
+            console.log('Updated existing walterblack to WalterBlack (Owner)');
+        } else {
+            await prisma.admin.create({
+                data: {
+                    username: 'WalterBlack',
+                    password: walterPassword,
+                    name: 'Walter Black',
+                    role: 'owner'
+                }
+            });
+            console.log('Created Owner: WalterBlack (password: password123)');
+        }
+    } else {
+        await prisma.admin.update({
+            where: { id: walter.id },
+            data: { role: 'owner' }
+        });
+        console.log('Updated WalterBlack to Owner role.');
+    }
+
+    const admin = await prisma.admin.findUnique({ where: { username: 'admin' } });
+    const adminPassword = await bcrypt.hash('password123', 10);
+
     if (!admin) {
         await prisma.admin.create({
             data: {
                 username: 'admin',
-                password: 'password123',
-                name: 'Walter Black',
+                password: adminPassword,
+                name: 'Standard Admin',
                 role: 'admin'
             }
         });
-        console.log('Created default admin: Walter Black');
-    } else {
-        console.log('Admin already exists.');
+        console.log('Created default admin: admin (password: password123)');
+    }
+
+    const products = [
+        { name: 'Amoxicillin 500mg', price: 45000, description: 'Antibiotic for dental infections' },
+        { name: 'Paracetamol 500mg', price: 15000, description: 'Pain relief' },
+        { name: 'Dental Care Kit (Pro)', price: 125000, description: 'Toothbrush, floss, and specialized paste' },
+        { name: 'Mouthwash (Clinical)', price: 65000, description: 'Antiseptic mouthwash' },
+        { name: 'Teeth Whitening Gel', price: 350000, description: 'Home whitening kit supplement' }
+    ];
+
+    for (const p of products) {
+        const existing = await prisma.product.findFirst({ where: { name: p.name } });
+        if (!existing) {
+            await prisma.product.create({ data: p });
+            console.log(`Created product: ${p.name}`);
+        }
     }
 
     console.log('Seeding finished.');

@@ -2,10 +2,17 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import bcrypt from 'bcryptjs';
+import { verifySession } from './auth';
 
 export async function getAdminProfile() {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
-        const admin = await prisma.admin.findFirst();
+        const admin = await prisma.admin.findFirst({
+            where: { id: session.id }
+        });
         if (!admin) return { success: false, error: "No admin found" };
 
         return {
@@ -14,6 +21,7 @@ export async function getAdminProfile() {
                 id: admin.id,
                 name: admin.name,
                 username: admin.username,
+                role: admin.role
             }
         };
     } catch (error) {
@@ -22,10 +30,19 @@ export async function getAdminProfile() {
 }
 
 export async function updateAdminProfile(id: string, data: { name?: string, username?: string, password?: string }) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
+        const updateData: any = { ...data };
+
+        if (data.password) {
+            updateData.password = await bcrypt.hash(data.password, 10);
+        }
+
         await prisma.admin.update({
             where: { id },
-            data: data
+            data: updateData
         });
         revalidatePath('/admin');
         return { success: true };
@@ -36,6 +53,9 @@ export async function updateAdminProfile(id: string, data: { name?: string, user
 }
 
 export async function getClinicSettings() {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
         let settings = await prisma.clinicSettings.findFirst();
 
@@ -57,6 +77,9 @@ export async function getClinicSettings() {
 }
 
 export async function updateClinicSettings(data: { name: string, address: string, phone: string, email?: string }) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
         const existing = await prisma.clinicSettings.findFirst();
 

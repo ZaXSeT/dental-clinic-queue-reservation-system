@@ -23,8 +23,8 @@ export default function Step2({ patientType, onSelect, onBack }: Step2Props) {
         <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in slide-in-from-right-8 duration-500">
             <div className="bg-white rounded-[3rem] p-12 w-full max-w-2xl shadow-xl shadow-slate-200/40 text-center relative">
                 <div className="absolute left-8 top-8">
-                    <button onClick={onBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-sm font-bold transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> Back
+                    <button onClick={onBack} className="text-slate-400 hover:text-primary flex items-center gap-2 text-sm font-bold transition-all group">
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back
                     </button>
                 </div>
                 <span className="inline-block px-4 py-1.5 rounded-full bg-sky-50 text-[#009ae2] text-[10px] font-bold tracking-[0.2em] uppercase mb-6">

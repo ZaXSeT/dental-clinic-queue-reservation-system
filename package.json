@@ -9,6 +9,11 @@
         "install:all": "cd client && npm install && cd ../server && npm install"
     },
     "devDependencies": {
-        "concurrently": "^8.2.0"
+        "@prisma/client": "5.22",
+        "@types/node": "^25.2.1",
+        "concurrently": "^8.2.0",
+        "dotenv": "^17.2.4",
+        "prisma": "5.22",
+        "tsx": "^4.21.0"
     }
 }

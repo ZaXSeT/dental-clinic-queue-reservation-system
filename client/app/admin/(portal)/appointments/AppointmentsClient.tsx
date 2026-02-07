@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { updateAppointmentStatus } from '@/actions/appointment';
-import { Calendar, Clock, User, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { createInvoice } from '@/actions/billing';
+import { Calendar, Clock, User, CheckCircle, XCircle, FileText, Receipt, Save } from 'lucide-react';
 import { format } from 'date-fns';
 
 
 export default function AppointmentsClient({ appointments }: { appointments: any[] }) {
     const [filter, setFilter] = useState('upcoming');
     const [isLoading, setIsLoading] = useState<string | null>(null);
+    const [finishingApp, setFinishingApp] = useState<any>(null);
+    const [completionData, setCompletionData] = useState({ treatment: '', fee: 200000 });
 
     const filteredApps = appointments.filter(app => {
         if (filter === 'all') return true;
@@ -18,11 +21,42 @@ export default function AppointmentsClient({ appointments }: { appointments: any
     });
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
+        if (newStatus === 'completed') {
+            const app = appointments.find(a => a.id === id);
+            setFinishingApp(app);
+            setCompletionData({ treatment: app.treatment || '', fee: 200000 });
+            return;
+        }
+
         if (!confirm(`Mark this appointment as ${newStatus}?`)) return;
 
         setIsLoading(id);
         await updateAppointmentStatus(id, newStatus);
         setIsLoading(null);
+    };
+
+    const handleFinalizeCompletion = async () => {
+        if (!finishingApp) return;
+        setIsLoading(finishingApp.id);
+
+        try {
+            // 1. Update status to completed
+            await updateAppointmentStatus(finishingApp.id, 'completed');
+
+            // 2. Create invoice with clinical data
+            await createInvoice(
+                finishingApp.id,
+                completionData.treatment,
+                completionData.fee
+            );
+
+            setIsLoading(null);
+            setFinishingApp(null);
+            window.location.reload();
+        } catch (error) {
+            console.error("Error finalizing:", error);
+            setIsLoading(null);
+        }
     };
 
     const getStatusColor = (status: string) => {
@@ -127,6 +161,69 @@ export default function AppointmentsClient({ appointments }: { appointments: any
                     ))
                 )}
             </div>
+
+            {finishingApp && (
+                <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 w-full max-w-md border border-slate-100 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 bg-green-100 text-green-600 rounded-2xl">
+                                <Receipt className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Finalize Visit</h3>
+                                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Mark as Completed & Generate Invoice</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 mb-8">
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Patient</p>
+                                <p className="font-bold text-slate-800">{finishingApp.patient.name}</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Clinical Treatment Done</label>
+                                <textarea
+                                    value={completionData.treatment}
+                                    onChange={e => setCompletionData({ ...completionData, treatment: e.target.value })}
+                                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all h-24 resize-none text-sm"
+                                    placeholder="e.g. Scaling, Filling on 24, Extraction..."
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Base Service Fee (Rp)</label>
+                                <input
+                                    type="number"
+                                    value={completionData.fee}
+                                    onChange={e => setCompletionData({ ...completionData, fee: parseInt(e.target.value) })}
+                                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setFinishingApp(null)}
+                                className="flex-1 py-4 bg-white border border-slate-200 text-slate-500 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all active:scale-95"
+                            >
+                                Back
+                            </button>
+                            <button
+                                onClick={handleFinalizeCompletion}
+                                disabled={!!isLoading}
+                                className="flex-[2] py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {isLoading ? (
+                                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <><CheckCircle className="w-5 h-5" /> Finalize Appointment</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

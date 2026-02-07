@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { verifySession } from './auth';
 
 export async function getAllDoctors() {
     try {
@@ -16,6 +17,9 @@ export async function getAllDoctors() {
 }
 
 export async function updateDoctorAvailability(doctorId: string, availability: any) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
         const availabilityString = JSON.stringify(availability);
 

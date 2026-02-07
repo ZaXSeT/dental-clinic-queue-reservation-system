@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { updateAdminProfile, updateClinicSettings } from '@/actions/settings';
-import { User, Lock, Building, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { createAdminAccount } from '@/actions/owner';
+import { User, Lock, Building, Save, AlertCircle, CheckCircle, UserPlus, Shield, ChevronDown, ShieldCheck, UserCog } from 'lucide-react';
 
 export default function SettingsClient({ admin, clinic }: { admin: any, clinic: any }) {
     const [activeTab, setActiveTab] = useState('profile');
@@ -26,13 +27,20 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
         email: clinic?.email || ''
     });
 
+    const [userForm, setUserForm] = useState({
+        name: '',
+        username: '',
+        password: '',
+        role: 'admin'
+    });
+
+    const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+
     const handleProfileUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
         setIsLoading(true);
-
         const res = await updateAdminProfile(admin.id, profileForm);
-
         setIsLoading(false);
         if (res.success) {
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
@@ -44,7 +52,6 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
-
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
             setMessage({ type: 'error', text: 'Passwords do not match!' });
             return;
@@ -53,11 +60,9 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
             setMessage({ type: 'error', text: 'Password must be at least 6 characters.' });
             return;
         }
-
         setIsLoading(true);
         const res = await updateAdminProfile(admin.id, { password: passwordForm.newPassword });
         setIsLoading(false);
-
         if (res.success) {
             setMessage({ type: 'success', text: 'Password changed successfully!' });
             setPasswordForm({ newPassword: '', confirmPassword: '' });
@@ -70,9 +75,7 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
         e.preventDefault();
         setMessage(null);
         setIsLoading(true);
-
         const res = await updateClinicSettings(clinicForm);
-
         setIsLoading(false);
         if (res.success) {
             setMessage({ type: 'success', text: 'Clinic information updated!' });
@@ -81,10 +84,25 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
         }
     };
 
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setMessage(null);
+        setIsLoading(true);
+        const res = await createAdminAccount(userForm);
+        setIsLoading(false);
+        if (res.success) {
+            setMessage({ type: 'success', text: 'New account created successfully!' });
+            setUserForm({ name: '', username: '', password: '', role: 'admin' });
+        } else {
+            setMessage({ type: 'error', text: res.error || 'Failed to create account.' });
+        }
+    };
+
     const tabs = [
         { id: 'profile', label: 'My Profile', icon: User },
         { id: 'security', label: 'Security', icon: Lock },
         { id: 'clinic', label: 'Clinic Info', icon: Building },
+        ...(admin.role === 'owner' ? [{ id: 'users', label: 'User Management', icon: UserPlus }] : []),
     ];
 
     if (!admin) {
@@ -229,6 +247,113 @@ export default function SettingsClient({ admin, clinic }: { admin: any, clinic: 
                                 </button>
                             </div>
                         </form>
+                    )}
+
+                    {activeTab === 'users' && (
+                        <div className="space-y-8">
+                            <form onSubmit={handleCreateUser} className="max-w-md space-y-5">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={userForm.name}
+                                        onChange={e => setUserForm({ ...userForm, name: e.target.value })}
+                                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        placeholder="e.g. John Doe"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Username</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={userForm.username}
+                                        onChange={e => setUserForm({ ...userForm, username: e.target.value })}
+                                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        placeholder="johndoe"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Initial Password</label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={userForm.password}
+                                        onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-2 relative">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Access Role</label>
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700 flex items-center justify-between hover:border-primary/30 transition-all focus:ring-2 focus:ring-primary/10"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {userForm.role === 'owner' ? (
+                                                    <ShieldCheck className="w-4 h-4 text-primary" />
+                                                ) : (
+                                                    <UserCog className="w-4 h-4 text-slate-400" />
+                                                )}
+                                                <span className="capitalize">{userForm.role}</span>
+                                            </div>
+                                            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        {isRoleDropdownOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-10" onClick={() => setIsRoleDropdownOpen(false)}></div>
+                                                <div className="absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl shadow-slate-200/60 p-2 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                    {[
+                                                        { id: 'admin', label: 'Admin', desc: 'Manage appointments & patients', icon: UserCog },
+                                                        { id: 'owner', label: 'Owner', desc: 'Full access including billing', icon: ShieldCheck }
+                                                    ].map((role) => (
+                                                        <button
+                                                            key={role.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setUserForm({ ...userForm, role: role.id });
+                                                                setIsRoleDropdownOpen(false);
+                                                            }}
+                                                            className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all text-left group ${userForm.role === role.id ? 'bg-primary/5 border border-primary/10' : 'hover:bg-slate-50'}`}
+                                                        >
+                                                            <div className={`p-2 rounded-lg ${userForm.role === role.id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-white group-hover:text-primary transition-colors'}`}>
+                                                                <role.icon className="w-4 h-4" />
+                                                            </div>
+                                                            <div>
+                                                                <div className={`text-sm font-black ${userForm.role === role.id ? 'text-primary' : 'text-slate-700'}`}>{role.label}</div>
+                                                                <div className="text-[10px] text-slate-400 font-bold group-hover:text-slate-500">{role.desc}</div>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="pt-4">
+                                    <button disabled={isLoading} className="px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-[1.5rem] font-black shadow-xl shadow-slate-200 transition-all flex items-center gap-3 disabled:opacity-50 uppercase tracking-[0.15em] text-[10px] active:scale-95 border-b-4 border-slate-950">
+                                        <Shield className="w-4 h-4 text-primary" />
+                                        {isLoading ? 'Creating...' : 'Authorize Admin Account'}
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] flex gap-4 items-center">
+                                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-sm shrink-0">
+                                    <AlertCircle className="w-6 h-6 text-slate-400" />
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Security Protocol</h4>
+                                    <p className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium">
+                                        This action is logged. Assigning <b>Owner</b> roles grants full database and billing access.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { verifySession } from './auth';
 
 export async function createContactMessage(data: {
   name: string;
@@ -17,11 +18,14 @@ export async function createContactMessage(data: {
   }
   //return prisma.contactMessage.create({ data });
   console.log('Message would be send: ', data);
-  return {success: true};
+  return { success: true };
 }
 
 // mark as replied
 export async function markMessageAsReplied(messageId: string, admin: string) {
+  const session = await verifySession();
+  if (!session) throw new Error("Unauthorized");
+
   return prisma.contactMessage.update({
     where: { id: messageId },
     data: { replied: true, repliedBy: admin },
@@ -30,6 +34,9 @@ export async function markMessageAsReplied(messageId: string, admin: string) {
 
 
 export async function getAllContactMessages() {
+  const session = await verifySession();
+  if (!session) throw new Error("Unauthorized");
+
   return prisma.contactMessage.findMany({
     orderBy: { createdAt: 'desc' },
   });

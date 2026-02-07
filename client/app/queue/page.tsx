@@ -107,7 +107,7 @@ export default function QueueBoardPage() {
     };
 
     return (
-        <main className="min-h-screen bg-slate-50 text-slate-800 overflow-hidden flex flex-col">
+        <main className="h-screen max-h-screen bg-slate-50 text-slate-800 overflow-hidden flex flex-col">
             <header className="bg-white/80 backdrop-blur-md px-10 py-6 flex justify-between items-center shadow-sm z-10">
                 <div className="flex items-center gap-6">
                     {isAdmin && (
@@ -172,7 +172,7 @@ export default function QueueBoardPage() {
                     ))}
                 </section>
 
-                <aside className="w-[400px] flex flex-col bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-xl">
+                <aside className="w-[400px] h-full max-h-full flex flex-col bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-xl overflow-hidden">
                     <h3 className="text-2xl font-bold mb-8 flex items-center gap-3 text-slate-800">
                         <div className="p-3 bg-blue-50 text-primary rounded-2xl">
                             <Clock className="h-6 w-6" />
@@ -180,7 +180,7 @@ export default function QueueBoardPage() {
                         Queue List
                     </h3>
 
-                    <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
+                    <div className="space-y-4 overflow-y-auto pr-2 flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {upcoming.length === 0 ? (
                             <div className="text-center text-slate-400 py-10">All caught up!</div>
                         ) : (

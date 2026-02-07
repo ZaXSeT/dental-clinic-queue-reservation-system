@@ -22,7 +22,6 @@ export default async function AdminDashboard() {
 
         const results = await Promise.all([
             prisma.patient.count(),
-            // STRICTLY TODAY and ONLY SCHEDULED/CONFIRMED
             prisma.appointment.count({
                 where: {
                     date: {
@@ -58,7 +57,6 @@ export default async function AdminDashboard() {
         { label: "Patients (Total)", val: patientCount.toString(), icon: Users, color: "bg-blue-500" },
         { label: "Today's Appointments", val: appointmentCount.toString(), icon: Calendar, color: "bg-purple-500" },
         { label: "In Queue (Waiting)", val: waitingCount.toString(), icon: Clock, color: "bg-orange-500" },
-        //{ label: "Revenue (Est.)", val: "$0", icon: TrendingUp, color: "bg-green-500" },
     ];
 
     if (!dbConnected) {

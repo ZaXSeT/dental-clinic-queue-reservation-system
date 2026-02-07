@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, LogOut, Tv, Calendar, Settings, Stethoscope, ChevronRight, Mail } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, Tv, Calendar, Settings, Stethoscope, ChevronRight, Mail, CreditCard } from "lucide-react";
 import { clsx } from "clsx";
 import { logoutAction } from "@/actions/auth";
 
@@ -14,15 +14,22 @@ export default function AdminPortalLayout({
 }) {
     const pathname = usePathname();
     const router = useRouter();
+    const [user, setUser] = useState<{ name: string, role: string, username: string } | null>(null);
 
     const handleLogout = async () => {
         await logoutAction();
         sessionStorage.removeItem('admin_auth');
+        sessionStorage.removeItem('admin_user');
         const loginPath = pathname.startsWith('/admin') ? '/admin/login' : '/login';
         router.push(loginPath);
     };
 
     useEffect(() => {
+        const storedUser = sessionStorage.getItem('admin_user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+
         if (!sessionStorage.getItem('admin_auth')) {
             handleLogout();
         }
@@ -34,12 +41,13 @@ export default function AdminPortalLayout({
     const navItems = [
         { label: "Dashboard", href: `${basePath}/dashboard`, icon: LayoutDashboard },
         { label: "Queue Control", href: `${basePath}/queue`, icon: Tv },
-        { label: "Messages", href: `${basePath}/Messages`, icon: Mail},
+        { label: "Messages", href: `${basePath}/Messages`, icon: Mail },
         { label: "Appointments", href: `${basePath}/appointments`, icon: Calendar },
         { label: "Patients", href: `${basePath}/patients`, icon: Users },
         { label: "Doctors", href: `${basePath}/doctors`, icon: Stethoscope },
+        { label: "Billing", href: `${basePath}/billing`, icon: CreditCard, role: 'owner' },
         { label: "Settings", href: `${basePath}/settings`, icon: Settings },
-    ];
+    ].filter(item => !item.role || (user && user.role === item.role));
 
     return (
         <div className="flex h-screen bg-slate-50/50 font-sans text-slate-900">
@@ -112,17 +120,17 @@ export default function AdminPortalLayout({
                                 {navItems.find(i => i.href === pathname)?.label || "Dashboard"}
                             </h2>
                         </div>
-                        <span className="text-sm text-slate-500">Welcome back, Admin</span>
+                        <span className="text-sm text-slate-500">Welcome back, {user?.name || 'Admin'}</span>
                     </div>
 
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 transition-colors cursor-pointer border border-slate-200 shadow-sm">
-                            <div className="h-8 w-8 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                A
+                            <div className="h-8 w-8 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm text-center">
+                                {user?.name?.[0] || 'A'}
                             </div>
                             <div className="text-left mr-2">
-                                <div className="text-sm font-bold text-slate-900 leading-none">Walter Black</div>
-                                <div className="text-[10px] text-slate-500 font-medium">Administrator</div>
+                                <div className="text-sm font-bold text-slate-900 leading-none">{user?.name || 'Admin'}</div>
+                                <div className="text-[10px] text-slate-500 font-medium capitalize">{user?.role || 'Administrator'}</div>
                             </div>
                         </div>
                     </div>

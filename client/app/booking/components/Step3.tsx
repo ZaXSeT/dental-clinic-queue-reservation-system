@@ -35,9 +35,9 @@ export default function Step3({
             <div className="bg-white rounded-[3rem] p-8 w-full max-w-[95%] shadow-xl shadow-slate-200/40 border border-slate-50 relative">
                 <div className="flex flex-col items-center justify-center mb-8 relative">
                     <div className="absolute left-0 top-1/2 -translate-y-1/2">
-                        <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-bold text-sm transition-colors">
-                            <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm">
-                                <ArrowLeft className="w-4 h-4" />
+                        <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-primary font-bold text-sm transition-all group">
+                            <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm group-hover:border-primary/30 group-hover:bg-primary/5">
+                                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             </div>
                             <span className="hidden md:inline">Back</span>
                         </button>

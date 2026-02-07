@@ -14,7 +14,6 @@ export async function POST(req: NextRequest) {
       notes,
     } = await req.json();
 
-    // 1️⃣ Find doctor by name
     const doctor = await prisma.doctor.findFirst({
       where: { name: dentistName },
     });
@@ -26,7 +25,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2️⃣ Create or connect patient
     let patient = await prisma.patient.findFirst({
       where: { email: patientInfo.email },
     });
@@ -44,16 +42,43 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 3️⃣ Create appointment
     const appointment = await prisma.appointment.create({
       data: {
         date: new Date(date),
         time,
         treatment,
         patientId: patient.id,
-        doctorID: doctor.id, // Connect the doctor
+        doctor: {
+          connect: { id: doctor.id }
+        },
         notes,
-      },
+      } as any,
+    });
+
+    const queueDate = new Date(date);
+    queueDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(queueDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    const queueCount = await prisma.queue.count({
+      where: {
+        date: {
+          gte: queueDate,
+          lt: nextDay
+        }
+      }
+    });
+
+    await prisma.queue.create({
+      data: {
+        number: queueCount + 1,
+        status: 'waiting',
+        patientId: patient.id,
+        doctorId: doctor.id,
+        date: new Date(date),
+        name: patient.name,
+        phone: patient.phone,
+      } as any,
     });
 
     return NextResponse.json({ success: true, appointment });

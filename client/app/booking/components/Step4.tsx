@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowLeft, User, UserPlus, Calendar, MapPin } from "lucide-react";
 import { BookingSelection, Doctor, BookingForType, PatientType } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 interface Step4Props {
   bookingData: BookingSelection | null;
@@ -25,6 +26,7 @@ export default function Step4({
   onSetBookingFor,
   onComplete,
 }: Step4Props) {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [legalSex, setLegalSex] = useState<"Male" | "Female">("Male");
@@ -69,7 +71,11 @@ export default function Step4({
       const data = await res.json();
       console.log("Appointment created:", data);
 
-      onComplete(); // redirect to success page
+      if (data.success && data.invoiceId) {
+        router.push(`/success?invoiceId=${data.invoiceId}`);
+      } else {
+        onComplete(); // fallback
+      }
     } catch (error) {
       console.error("Failed to book appointment:", error);
       setLoading(false);
@@ -83,9 +89,9 @@ export default function Step4({
         <div className="flex-1 bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-slate-200/50 w-full">
           <button
             onClick={onBack}
-            className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-sm font-bold mb-8 transition-colors"
+            className="text-slate-400 hover:text-primary flex items-center gap-2 text-sm font-bold mb-8 transition-all group"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back
           </button>
 
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Who are you booking for?</h2>

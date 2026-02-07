@@ -6,7 +6,7 @@ import { Lock } from "lucide-react";
 import { useEffect } from "react";
 import { loginAction } from "@/actions/auth";
 
-const initialState: { message?: string; success?: boolean } = {
+const initialState: { message?: string; success?: boolean; data?: { name: string, role: string, username: string } } = {
     message: "",
     success: false,
 };
@@ -16,8 +16,9 @@ export default function AdminLogin() {
     const router = useRouter();
 
     useEffect(() => {
-        if (state.success) {
+        if (state.success && state.data) {
             sessionStorage.setItem('admin_auth', 'true');
+            sessionStorage.setItem('admin_user', JSON.stringify(state.data));
 
             if (window.location.hostname.startsWith('admin')) {
                 router.push("/dashboard");

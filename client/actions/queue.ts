@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
+import { verifySession } from "./auth";
 
 export async function getQueueState() {
     console.log("getQueueState called (BRUTE FORCE FETCH)");
@@ -89,6 +90,9 @@ export async function getQueueState() {
 }
 
 export async function callNextPatient(roomId: string, doctorId?: string) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     const nextPatient = await prisma.queue.findFirst({
         where: {
             status: { in: ['waiting', 'WAITING'] }
@@ -128,6 +132,9 @@ export async function callNextPatient(roomId: string, doctorId?: string) {
 }
 
 export async function recallPatient(id: string) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
         await prisma.queue.update({
             where: { id },
@@ -141,6 +148,9 @@ export async function recallPatient(id: string) {
 }
 
 export async function completePatient(id: string) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
         await prisma.queue.update({
             where: { id },
@@ -156,6 +166,9 @@ export async function completePatient(id: string) {
 }
 
 export async function skipPatient(id: string) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
         await prisma.queue.update({
             where: { id },
@@ -169,6 +182,9 @@ export async function skipPatient(id: string) {
 }
 
 export async function resetQueue() {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -181,6 +197,9 @@ export async function resetQueue() {
 }
 
 export async function addWalkIn(name: string, phone: string) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 

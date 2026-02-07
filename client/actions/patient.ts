@@ -1,8 +1,12 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { verifySession } from './auth';
 
 export async function getPatients() {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
     try {
         const patients = await prisma.patient.findMany({
             orderBy: {

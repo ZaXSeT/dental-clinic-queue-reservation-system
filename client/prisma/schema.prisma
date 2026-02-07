@@ -30,6 +30,7 @@ model Patient {
   updatedAt      DateTime      @updatedAt
   appointments   Appointment[]
   queues         Queue[]
+  invoices       Invoice[]
 }
 
 model Queue {
@@ -56,7 +57,6 @@ model Appointment {
   patientId String
   doctorID  String?
 
-  // Correct relation to Doctor
   doctor    Doctor?   @relation(fields: [doctorID], references: [id], map: "Appointment_doctorId_fkey")
   
   treatment String?
@@ -65,6 +65,7 @@ model Appointment {
   updatedAt DateTime  @updatedAt
   
   patient   Patient   @relation(fields: [patientId], references: [id], map: "Appointment_patientId_fkey")
+  invoice   Invoice?
 }
 
 model Doctor {
@@ -76,9 +77,50 @@ model Doctor {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   queues       Queue[]
-  appointments Appointment[] // opposite relation
+  appointments Appointment[]
 }
 
+model Invoice {
+  id            String        @id @default(uuid())
+  invoiceNumber String        @unique
+  appointmentId String?       @unique
+  patientId     String
+  totalAmount   Float         @default(0)
+  status        String        @default("unpaid")
+  billingCode   String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  appointment   Appointment?  @relation(fields: [appointmentId], references: [id])
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  items         InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  description String
+  quantity    Int      @default(1)
+  price       Float
+  type        String   @default("service")
+  productId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id          String        @id @default(uuid())
+  name        String
+  price       Float
+  description String?
+  stock       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  invoiceItems InvoiceItem[]
+}
 
 model ClinicSettings {
   id        String   @id @default(uuid())
@@ -87,6 +129,7 @@ model ClinicSettings {
   phone     String   @default("+62 812 3456 7890")
   email     String?
   website   String?
+  npwp      String?  @default("01.234.567.8-901.000")
   updatedAt DateTime @updatedAt
 }
 
@@ -96,6 +139,6 @@ model ContactMessage {
   message   String
   createdAt DateTime @default(now())
   email     String
-  replied   Boolean  @default(false)   // tracks if the message was replied
-  repliedBy String?                   // stores the admin/user who replied
+  replied   Boolean  @default(false)
+  repliedBy String?
 }
