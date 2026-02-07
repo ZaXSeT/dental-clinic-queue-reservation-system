@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Check } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getAllDoctors } from "@/actions/doctor";
 import { Doctor, DateInfo, BookingSelection, PatientType, BookingForType } from "@/lib/types";
-import { useSearchParams } from "next/navigation";
 
 import BookingHeader from "./components/BookingHeader";
 import Step1 from "./components/Step1";
@@ -28,14 +27,13 @@ export default function BookingPage() {
     const [dateOffset, setDateOffset] = useState<number>(0);
     const [bookingData, setBookingData] = useState<BookingSelection | null>(null);
     const [userID, setUserId] = useState<string | null>(null);
-    
+
     useEffect(() => {
         const stepParam = searchParams.get("step");
-        if(stepParam) setStep(Number(stepParam));
+        if (stepParam) setStep(Number(stepParam));
     }, [searchParams]);
-    
+
     useEffect(() => {
-        
         const fetchDoctors = async () => {
             try {
                 const result = await getAllDoctors();
@@ -63,7 +61,6 @@ export default function BookingPage() {
     }, []);
 
     useEffect(() => {
-        
         const createDates = () => {
             const arr: DateInfo[] = [];
             const today = new Date();
@@ -98,7 +95,6 @@ export default function BookingPage() {
         if (type === "returning") {
             router.push("/login?redirect=/booking");
             return;
-            
         }
         setPatientType(type);
         setStep(2);
@@ -106,34 +102,31 @@ export default function BookingPage() {
 
     const handleAppointmentTypeSelect = async (type: string) => {
         setAppointmentType(type);
-
         try {
             await fetch("/api/bookings", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                patientType,
-                appointmentType: type,
-                userID,
-            }),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    patientType,
+                    appointmentType: type,
+                    userID,
+                }),
             });
-
         } catch (error) {
             console.error("Failed to save booking", error);
         }
-
         setStep(3);
-        };
+    };
 
     const handleBookingSelect = (dentistId: string, date: string, time: string) => {
         if (
-        bookingData?.dentistId === dentistId &&
-        bookingData?.date === date &&
-        bookingData?.time === time
+            bookingData?.dentistId === dentistId &&
+            bookingData?.date === date &&
+            bookingData?.time === time
         ) {
-        setBookingData(null);
+            setBookingData(null);
         } else {
-        setBookingData({ dentistId, date, time });
+            setBookingData({ dentistId, date, time });
         }
     };
 
@@ -169,16 +162,15 @@ export default function BookingPage() {
 
                 {step === 4 && (
                     <Step4
-  bookingData={bookingData}
-  selectedDoc={selectedDoc}
-  appointmentType={appointmentType}
-  bookingFor={bookingFor}
-  patientType={patientType} 
-  onBack={handleBack}
-  onSetBookingFor={setBookingFor}
-  onComplete={() => router.push("/success")} // can keep it or use handleSubmit inside Step4
-/>
-
+                        bookingData={bookingData}
+                        selectedDoc={selectedDoc}
+                        appointmentType={appointmentType}
+                        bookingFor={bookingFor}
+                        patientType={patientType}
+                        onBack={handleBack}
+                        onSetBookingFor={setBookingFor}
+                        onComplete={() => router.push("/success")}
+                    />
                 )}
 
                 {step < 3 && (
