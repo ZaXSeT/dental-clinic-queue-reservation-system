@@ -12,13 +12,13 @@ export class RolesGuard implements CanActivate {
         ]);
 
         if (!requiredRoles) {
-            return true; // No roles required, public access
+            return true; 
         }
 
         const { user } = context.switchToHttp().getRequest();
 
-        // Logic: Check if user exists and has matching role
-        // For now, assume user is attached to request by a previous AuthGuard (JWT)
+        
+        
         if (!user) return false;
 
         return requiredRoles.some((role) => user.role?.includes(role));

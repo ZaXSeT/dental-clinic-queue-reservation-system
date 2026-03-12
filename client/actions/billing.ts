@@ -90,7 +90,7 @@ export async function addInvoiceItem(invoiceId: string, item: {
             }
         });
 
-        // Recalculate total
+        
         const items = await prisma.invoiceItem.findMany({ where: { invoiceId } });
         const total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
@@ -116,7 +116,7 @@ export async function deleteInvoiceItem(itemId: string, invoiceId: string) {
             where: { id: itemId }
         });
 
-        // Recalculate total
+        
         const items = await prisma.invoiceItem.findMany({ where: { invoiceId } });
         const total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 

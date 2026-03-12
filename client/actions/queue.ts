@@ -33,47 +33,12 @@ export async function getQueueState() {
             where: { status: { in: ['waiting', 'WAITING'] } }
         });
 
-        // FETCH APPOINTMENTS FOR TODAY
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const todayAppointments = await prisma.appointment.findMany({
-            where: {
-                date: {
-                    gte: startOfDay,
-                    lte: endOfDay
-                },
-                status: 'scheduled' // Only show scheduled ones
-            },
-            include: {
-                patient: true
-            },
-            orderBy: {
-                time: 'asc'
-            }
-        });
-
-        const appointmentQueues = todayAppointments.map((appt: any) => ({
-            id: appt.id,
-            number: appt.time, // Display time instead of queue number
-            status: 'scheduled',
-            patient: appt.patient,
-            name: appt.patient?.name || "Patient",
-            isAppointment: true
-        }));
-
-        // Combine Walk-ins and Appointments
-        // We prioritize Walk-ins (waitingQueues) followed by Appointments, or mixed?
-        // For now, let's put appointments after walk-ins or just merge them.
-        // Use slice to limit result
-        const combinedQueue = [...waitingQueues, ...appointmentQueues];
+        const combinedQueue = [...waitingQueues];
         const nextHelper = combinedQueue.slice(0, 10);
 
-        const totalWaiting = (waitingCountSource || waitingQueues.length) + appointmentQueues.length;
+        const totalWaiting = waitingCountSource || waitingQueues.length;
 
-        console.log(`Memory Filtered: Active=${activeQueues.length}, WaitingList=${waitingQueues.length}, Appointments=${appointmentQueues.length}`);
+        console.log(`Memory Filtered: Active=${activeQueues.length}, WaitingList=${waitingQueues.length}`);
 
         revalidatePath('/admin/queue');
 

@@ -9,7 +9,7 @@ export default function SuccessPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const invoiceId = searchParams.get('invoiceId');
-    const appointmentId = searchParams.get('appointmentId'); // Optional for simple confirmation
+    const appointmentId = searchParams.get('appointmentId');
 
     const [invoice, setInvoice] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -38,13 +38,13 @@ export default function SuccessPage() {
         </div>
     );
 
-    // If no invoiceId, assume it's a simple booking confirmation
+
     const isConfirmationOnly = !invoiceId;
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 print:bg-white print:p-0">
             <div className="max-w-2xl w-full print:max-w-none">
-                {/* Header Success */}
+                { }
                 <div className="text-center mb-10 print:hidden">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 text-green-600 rounded-[2rem] shadow-lg shadow-green-100 mb-6 font-bold">
                         <CheckCircle2 className="w-10 h-10" />
@@ -60,10 +60,10 @@ export default function SuccessPage() {
                     </p>
                 </div>
 
-                {/* Patient Summary Card */}
+                { }
                 <div className="bg-white rounded-[3rem] shadow-2xl shadow-slate-200 overflow-hidden border border-slate-100 flex flex-col items-stretch print:shadow-none print:border-none print:rounded-none">
                     <div className="p-8 border-b-2 border-dashed border-slate-100 bg-slate-50/50 relative print:bg-white">
-                        {/* Decorative side notches - Hidden on print */}
+                        { }
                         <div className="absolute top-full left-0 w-6 h-6 bg-slate-50 rounded-full -translate-x-1/2 -translate-y-1/2 border border-slate-100 print:hidden"></div>
                         <div className="absolute top-full right-0 w-6 h-6 bg-slate-50 rounded-full translate-x-1/2 -translate-y-1/2 border border-slate-100 print:hidden"></div>
 
@@ -107,7 +107,7 @@ export default function SuccessPage() {
 
                     <div className="p-10 space-y-8">
                         {isConfirmationOnly ? (
-                            /* Simple Instructions for Booking */
+
                             <div className="space-y-6">
                                 <div className="bg-blue-50/50 p-6 rounded-3xl border border-blue-100">
                                     <h4 className="text-sm font-black text-blue-900 mb-4 flex items-center gap-2">
@@ -130,13 +130,13 @@ export default function SuccessPage() {
                                 </div>
                                 <button
                                     onClick={() => router.push("/")}
-                                    className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-slate-300 transition-all flex items-center justify-center gap-3 active:scale-95"
+                                    className="w-full h-16 bg-[#009ae2] hover:bg-[#0088cc] text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-[#009ae2]/30 transition-all flex items-center justify-center gap-3 active:scale-95"
                                 >
                                     Finish & Home
                                 </button>
                             </div>
                         ) : (
-                            /* Billing Details for Post-Service */
+
                             <div className="space-y-6">
                                 <div className="space-y-4">
                                     {invoice?.items.map((item: any, idx: number) => (
@@ -176,14 +176,14 @@ export default function SuccessPage() {
                     </div>
                 </div>
 
-                {/* Secondary Actions - Hidden on print */}
+                { }
                 <div className="mt-8 flex justify-center gap-8 print:hidden">
                     <button className="text-xs font-black text-slate-400 hover:text-slate-600 uppercase tracking-[0.2em] transition-colors">
                         Contact Support
                     </button>
                 </div>
 
-                {/* Print only footer */}
+                { }
                 <div className="hidden print:block text-center mt-12 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     N.P.W.P Clinic: 01.234.567.8-901.000 • Document Issued by Go Dental Financial Dept.
                 </div>

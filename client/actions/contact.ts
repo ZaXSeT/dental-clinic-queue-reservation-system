@@ -10,18 +10,18 @@ export async function createContactMessage(data: {
 }) {
   try {
     const result = await prisma.contactMessage.create({ data });
-    console.log('✅ Message saved to DB:', result); // <-- ADD THIS
+    console.log('✅ Message saved to DB:', result); 
     return result;
   } catch (err) {
-    console.error('❌ Prisma error:', err); // <-- ADD THIS
+    console.error('❌ Prisma error:', err); 
     throw err;
   }
-  //return prisma.contactMessage.create({ data });
+  
   console.log('Message would be send: ', data);
   return { success: true };
 }
 
-// mark as replied
+
 export async function markMessageAsReplied(messageId: string, admin: string) {
   const session = await verifySession();
   if (!session) throw new Error("Unauthorized");

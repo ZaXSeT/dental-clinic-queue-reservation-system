@@ -36,7 +36,7 @@ export async function updateAppointmentStatus(id: string, status: string) {
             data: { status }
         });
 
-        // Sync Queue Status
+        
         const queueDate = new Date(appointment.date);
         queueDate.setHours(0, 0, 0, 0);
         const nextDay = new Date(queueDate);

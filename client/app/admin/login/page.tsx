@@ -19,12 +19,7 @@ export default function AdminLogin() {
         if (state.success && state.data) {
             sessionStorage.setItem('admin_auth', 'true');
             sessionStorage.setItem('admin_user', JSON.stringify(state.data));
-
-            if (window.location.hostname.startsWith('admin')) {
-                router.push("/dashboard");
-            } else {
-                router.push("/admin/dashboard");
-            }
+            router.push("/admin/portal/dashboard");
         }
     }, [state.success, router]);
 
@@ -67,7 +62,7 @@ export default function AdminLogin() {
                         </div>
                     )}
 
-                    <button type="submit" className="w-full bg-slate-900 text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition-colors">
+                    <button type="submit" className="w-full bg-[#009ae2] text-white font-bold py-3 rounded-lg hover:bg-[#0088cc] transition-colors">
                         Sign In
                     </button>
                 </form>

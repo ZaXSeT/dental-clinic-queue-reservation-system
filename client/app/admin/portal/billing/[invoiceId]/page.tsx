@@ -28,7 +28,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
         const res = await markInvoiceAsPaid(params.invoiceId);
         if (res.success) {
             router.refresh();
-            // Refetch data
+            
             const data = await getInvoiceDetails(params.invoiceId);
             setInvoice(data);
         }
@@ -54,7 +54,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
-            {/* Header Actions */}
+            {}
             <div className="flex items-center justify-between">
                 <Link href="/admin/billing" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-bold transition-all group">
                     <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -79,9 +79,9 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                 </div>
             </div>
 
-            {/* Invoice Document Design (Inspired by Siloam Kuitansi) */}
+            {}
             <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden print:shadow-none print:border-none">
-                {/* Header branding */}
+                {}
                 <div className="p-12 border-b border-slate-100 flex justify-between items-start">
                     <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
@@ -98,7 +98,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                     </div>
                 </div>
 
-                {/* Metadata Grid */}
+                {}
                 <div className="px-12 py-8 bg-slate-50/50 grid grid-cols-2 md:grid-cols-4 gap-8">
                     <div>
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Invoice No.</p>
@@ -118,7 +118,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                     </div>
                 </div>
 
-                {/* Line Items Table */}
+                {}
                 <div className="p-12">
                     <table className="w-full">
                         <thead>
@@ -165,7 +165,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                         </tbody>
                     </table>
 
-                    {/* Totals Section */}
+                    {}
                     <div className="mt-12 pt-8 border-t-2 border-slate-900/5 flex flex-col items-end space-y-3">
                         <div className="w-full md:w-64 flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-widest">
                             <span>Subtotal Amount</span>
@@ -191,7 +191,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                     </div>
                 </div>
 
-                {/* Footer Section */}
+                {}
                 <div className="px-12 py-10 bg-slate-50 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-8 text-[10px]">
                     <div>
                         <p className="font-black text-slate-400 uppercase tracking-widest mb-3">Notice / Perhatian</p>
@@ -216,7 +216,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                 </div>
             </div>
 
-            {/* NPWP alignment at very bottom */}
+            {}
             <div className="text-center">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">N.P.W.P Clinic: 01.234.567.8-901.000 • Issued by Go Dental Financial Dept.</p>
             </div>

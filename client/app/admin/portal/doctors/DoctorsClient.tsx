@@ -19,7 +19,7 @@ export default function DoctorsClient({ doctors, userRole }: { doctors: any[], u
     const [addingSlotForDay, setAddingSlotForDay] = useState<string | null>(null);
     const [newTime, setNewTime] = useState({ hour: '09', minute: '00', period: 'AM' });
 
-    // Add Doctor state
+    
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [doctorForm, setDoctorForm] = useState({
         name: '',
@@ -110,7 +110,7 @@ export default function DoctorsClient({ doctors, userRole }: { doctors: any[], u
                     "MON": [], "TUE": [], "WED": [], "THU": [], "FRI": [], "SAT": [], "SUN": []
                 })
             });
-            window.location.reload(); // Refresh to show new doctor
+            window.location.reload(); 
         } else {
             alert(res.error);
         }

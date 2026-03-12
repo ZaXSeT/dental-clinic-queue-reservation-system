@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DentistsService {
-    // Mock Data for Phase 2 Demo
+    
     private dentists = [
         {
             id: 'd1',

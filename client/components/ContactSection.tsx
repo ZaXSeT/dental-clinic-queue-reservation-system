@@ -1,9 +1,9 @@
-'use client'; // Add this at the top
+'use client'; 
 
 import { useState } from 'react';
 import { ArrowRight, Clock, MapPin, Phone } from "lucide-react";
 import { officeInfo } from "@/lib/data";
-import { createContactMessage } from '@/actions/contact'; // import your server action
+import { createContactMessage } from '@/actions/contact'; 
 
 export default function ContactSection() {
 
@@ -18,7 +18,7 @@ export default function ContactSection() {
 
     setLoading(true);
     try {
-      await createContactMessage({ name, email, message }); // submit to Prisma
+      await createContactMessage({ name, email, message }); 
       await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log('Message sent:', { name, email, message });
       setName('');
@@ -86,7 +86,7 @@ export default function ContactSection() {
           </form>
         </div>
 
-        {/* Contact info side stays unchanged */}
+        {}
         <div>
           <h2 className="text-3xl font-bold text-slate-900 mb-6">Contact Information</h2>
           <div className="space-y-6 mb-10">

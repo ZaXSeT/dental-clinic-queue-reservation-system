@@ -80,7 +80,7 @@ export default async function AdminDashboard() {
                             stat.label.includes("Patients") ? "/patients" :
                                 stat.label.includes("Appointments") ? "/appointments" :
                                     stat.label.includes("Queue") ? "/queue" :
-                                        "/" // fallback
+                                        "/" 
                         }
                         className="block bg-white p-6 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 group cursor-pointer"
                     >

@@ -7,7 +7,7 @@ export class AppointmentsController {
 
     @Post()
     create(@Body() createAppointmentDto: any) {
-        // In real app, DTO would validate fields
+        
         return this.appointmentsService.create(createAppointmentDto);
     }
 

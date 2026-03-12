@@ -106,7 +106,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                         </td>
                                         <td className="p-6">
                                             <div className="text-sm text-slate-400 flex items-center gap-2">
-                                                {/* <Calendar className="w-4 h-4 text-slate-200" /> */}
+                                                {}
                                                 {patient.address}
                                             </div>
                                         </td>

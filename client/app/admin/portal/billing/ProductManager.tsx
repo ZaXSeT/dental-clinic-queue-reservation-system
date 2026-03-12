@@ -117,7 +117,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                 <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
                     {/* List Section */}
                     <div className={`flex-1 flex flex-col border-r border-slate-100 ${(isAdding || isEditing) ? 'hidden md:flex' : 'flex'}`}>
-                        {/* Search & Add Bar */}
+                        {}
                         <div className="p-6 border-b border-slate-100 flex gap-4">
                             <div className="flex-1 relative">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -180,7 +180,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                         </div>
                     </div>
 
-                    {/* Form Section */}
+                    {}
                     {(isAdding || isEditing) && (
                         <div className="w-full md:w-[400px] bg-slate-50/50 p-8 flex flex-col overflow-y-auto animate-in slide-in-from-right-10 duration-300">
                             <div className="flex justify-between items-center mb-8">

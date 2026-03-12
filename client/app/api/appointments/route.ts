@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // make sure prisma client is exported
+import { prisma } from "@/lib/prisma"; 
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,20 +25,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let patient = await prisma.patient.findFirst({
-      where: { email: patientInfo.email },
-    });
+    let patient = null;
+
+    if (patientInfo.email && patientInfo.email.trim() !== "") {
+        patient = await prisma.patient.findFirst({
+            where: { email: patientInfo.email },
+        });
+    }
+
+    const typedName = `${patientInfo.firstName} ${patientInfo.lastName}`.trim();
 
     if (!patient) {
       patient = await prisma.patient.create({
         data: {
-          name: `${patientInfo.firstName} ${patientInfo.lastName}`,
-          email: patientInfo.email,
+          name: typedName,
+          email: patientInfo.email || null,
           phone: patientInfo.phone,
           birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,
           address: patientInfo.zipCode || null,
           medicalHistory: patientInfo.comments || null,
         },
+      });
+    } else if (typedName !== "" && typedName !== patient.name) {
+      patient = await prisma.patient.update({
+          where: { id: patient.id },
+          data: { name: typedName, phone: patientInfo.phone || patient.phone }
       });
     }
 
@@ -48,9 +59,7 @@ export async function POST(req: NextRequest) {
         time,
         treatment,
         patientId: patient.id,
-        doctor: {
-          connect: { id: doctor.id }
-        },
+        doctorID: doctor.id,
         notes,
       } as any,
     });
@@ -84,6 +93,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, appointment });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ success: false, error: "Failed to book appointment" }, { status: 500 });
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }

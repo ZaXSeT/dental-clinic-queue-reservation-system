@@ -78,7 +78,7 @@ async function main() {
     const walterPassword = await bcrypt.hash('password123', 10);
 
     if (!walter) {
-        // Double check if lowercase version exists to avoid duplicates
+        
         const existingLower = await prisma.admin.findUnique({ where: { username: 'walterblack' } });
         if (existingLower) {
             await prisma.admin.update({

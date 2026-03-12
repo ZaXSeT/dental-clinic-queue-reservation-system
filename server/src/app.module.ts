@@ -8,6 +8,6 @@ import { QueueModule } from './queue/queue.module';
 @Module({
     imports: [PrismaModule, DentistsModule, AppointmentsModule, QueueModule],
     controllers: [],
-    providers: [], // Gateway is now in AppointmentsModule
+    providers: [], 
 })
 export class AppModule { }

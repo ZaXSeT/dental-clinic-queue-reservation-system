@@ -5,9 +5,9 @@ import { PrismaService } from '../prisma/prisma.service';
 export class QueueService {
     constructor(private prisma: PrismaService) { }
 
-    // Get current active queue for the day
+    
     async getTodayQueue() {
-        // Mock Data for Phase 3/4 Demo
+        
         return {
             current: {
                 queueNumber: 102,
@@ -23,7 +23,7 @@ export class QueueService {
     }
 
     async callNext(dentistId: string) {
-        // Logic to move queue head
+        
         return { success: true, message: "Called next patient" };
     }
 }

@@ -43,7 +43,7 @@ export default function AppointmentsClient({ appointments }: { appointments: any
             // 1. Update status to completed
             await updateAppointmentStatus(finishingApp.id, 'completed');
 
-            // 2. Create invoice with clinical data
+            
             await createInvoice(
                 finishingApp.id,
                 completionData.treatment,

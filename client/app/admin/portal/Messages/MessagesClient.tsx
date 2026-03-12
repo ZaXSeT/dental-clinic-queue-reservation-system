@@ -34,7 +34,7 @@ export default function MessagesClient({ messages }: { messages: MessageDTO[] })
 
   return (
     <div className="space-y-6">
-      {/* Filter tabs */}
+      {}
       <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
         <button
           onClick={() => setFilter('unreplied')}
@@ -58,7 +58,7 @@ export default function MessagesClient({ messages }: { messages: MessageDTO[] })
         </button>
       </div>
 
-      {/* Messages list */}
+      {}
       <div className="grid grid-cols-1 gap-4">
         {filteredMessages.length === 0 ? (
           <div className="text-center py-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl">
@@ -73,7 +73,7 @@ export default function MessagesClient({ messages }: { messages: MessageDTO[] })
               className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-4"
             >
               <div className="flex items-start gap-4">
-                {/* Avatar */}
+                {}
                 <div className="h-14 w-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xl border border-indigo-100">
                   {msg.name.charAt(0).toUpperCase()}
                 </div>
@@ -99,7 +99,7 @@ export default function MessagesClient({ messages }: { messages: MessageDTO[] })
                     {msg.message}
                   </div>
 
-                  {/*Mark as replied */}
+                  {}
                   {!msg.replied && (
                     <button
                       onClick={() => markAsReplied(msg.id)}
@@ -110,7 +110,7 @@ export default function MessagesClient({ messages }: { messages: MessageDTO[] })
                     </button>
                   )}
 
-                  {/*Replied badge*/}
+                  {}
                   {msg.replied && (
                     <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-emerald-600">
                       <CheckCircle className="w-5 h-5" />

@@ -21,7 +21,7 @@ export default function NextInLine({ next, waitingCount, onSkip }: NextInLinePro
                     next.map((p, i) => (
                         <div key={i} className="flex justify-between items-center p-4 bg-slate-50/50 rounded-xl border border-slate-100 group hover:border-primary/30 hover:bg-white hover:shadow-md transition-all">
                             <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center font-bold text-slate-500 text-sm group-hover:text-primary group-hover:border-primary/20">
+                                <div className="h-10 w-auto px-3 min-w-[2.5rem] bg-white border border-slate-200 rounded-lg flex items-center justify-center font-bold text-slate-500 text-sm group-hover:text-primary group-hover:border-primary/20 whitespace-nowrap">
                                     #{p.number}
                                 </div>
                                 <div className="flex flex-col">
