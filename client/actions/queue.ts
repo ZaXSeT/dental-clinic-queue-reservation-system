@@ -1,14 +1,18 @@
 'use server';
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath, unstable_noStore as noStore } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { verifySession } from "./auth";
+import { Queue, Patient, Doctor } from "@prisma/client";
+
+type PopulatedQueue = Queue & {
+    patient: Patient | null;
+    doctor: Doctor | null;
+};
 
 export async function getQueueState() {
-    console.log("getQueueState called (BRUTE FORCE FETCH)");
-
     try {
-        const allRecentQueues = await prisma.queue.findMany({
+        const allRecentQueues: PopulatedQueue[] = await prisma.queue.findMany({
             take: 50,
             orderBy: { createdAt: 'desc' },
             include: {
@@ -17,39 +21,33 @@ export async function getQueueState() {
             }
         });
 
-        console.log(`Fetched ${allRecentQueues.length} raw records.`);
-
+        const activeStatuses = ['treating', 'called', 'TREATING', 'CALLED'];
         const activeQueues = allRecentQueues
-            .filter((q: any) => ['treating', 'called', 'TREATING', 'CALLED'].includes(q.status))
-            .sort((a: any, b: any) => (Number(a.roomId) || 99) - (Number(b.roomId) || 99));
+            .filter(q => activeStatuses.includes(q.status))
+            .sort((a, b) => (Number(a.roomId) || 99) - (Number(b.roomId) || 99));
 
+        const waitingStatuses = ['waiting', 'WAITING'];
         const waitingQueues = allRecentQueues
-            .filter((q: any) => ['waiting', 'WAITING'].includes(q.status))
-            .sort((a: any, b: any) => a.number - b.number);
-
-
+            .filter(q => waitingStatuses.includes(q.status))
+            .sort((a, b) => a.number - b.number);
 
         const waitingCountSource = await prisma.queue.count({
-            where: { status: { in: ['waiting', 'WAITING'] } }
+            where: { status: { in: waitingStatuses } }
         });
 
-        const combinedQueue = [...waitingQueues];
-        const nextHelper = combinedQueue.slice(0, 10);
-
+        const nextHelper = waitingQueues.slice(0, 10);
         const totalWaiting = waitingCountSource || waitingQueues.length;
-
-        console.log(`Memory Filtered: Active=${activeQueues.length}, WaitingList=${waitingQueues.length}`);
 
         revalidatePath('/admin/queue');
 
         return { activeQueues, next: nextHelper, waitingCount: totalWaiting, error: null };
-    } catch (error: any) {
+    } catch (error) {
         console.error("getQueueState CRITICAL ERROR:", error);
         return {
             activeQueues: [],
             next: [],
             waitingCount: 0,
-            error: "Server Error: " + (error.message || String(error))
+            error: "Server Error: " + (error instanceof Error ? error.message : String(error))
         };
     }
 }

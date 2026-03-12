@@ -1,14 +1,13 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { verifySession } from './auth';
 
 export async function getAppointments() {
     const session = await verifySession();
     if (!session) return { success: false, error: "Unauthorized" };
 
-    noStore();
     try {
         const appointments = await prisma.appointment.findMany({
             orderBy: [
@@ -77,17 +76,15 @@ export async function updateAppointmentStatus(id: string, status: string) {
                     number: queueCount + 1,
                     status: 'waiting',
                     patientId: appointment.patientId,
-                    doctorId: (appointment as any).doctorID || (appointment as any).doctorId,
+                    doctorId: appointment.doctorID,
                     date: new Date(appointment.date),
-                } as any
+                }
             });
         }
 
         revalidatePath('/admin/appointments');
         revalidatePath('/admin/dashboard');
-
-        revalidatePath('/admin/appointments');
-        revalidatePath('/admin/dashboard');
+        
         return { success: true };
     } catch (error) {
         console.error("Error updating appointment:", error);

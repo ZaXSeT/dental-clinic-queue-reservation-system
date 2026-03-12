@@ -59,9 +59,8 @@ export async function POST(req: NextRequest) {
         time,
         treatment,
         patientId: patient.id,
-        doctorID: doctor.id,
         notes,
-      } as any,
+      },
     });
 
     const queueDate = new Date(date);
@@ -87,7 +86,7 @@ export async function POST(req: NextRequest) {
         date: new Date(date),
         name: patient.name,
         phone: patient.phone,
-      } as any,
+      },
     });
 
     return NextResponse.json({ success: true, appointment });
