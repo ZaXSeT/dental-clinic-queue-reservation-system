@@ -74,15 +74,9 @@ export default async function AdminDashboard() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <Link
+                    <div
                         key={i}
-                        href={
-                            stat.label.includes("Patients") ? "/patients" :
-                                stat.label.includes("Appointments") ? "/appointments" :
-                                    stat.label.includes("Queue") ? "/queue" :
-                                        "/" 
-                        }
-                        className="block bg-white p-6 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 group cursor-pointer"
+                        className="block bg-white p-6 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 group"
                     >
                         <div className="flex items-center gap-4">
                             <div className={`${stat.color} bg-opacity-10 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300`}>
@@ -93,7 +87,7 @@ export default async function AdminDashboard() {
                                 <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-1">{stat.label}</div>
                             </div>
                         </div>
-                    </Link>
+                    </div>
                 ))}
             </div>
 

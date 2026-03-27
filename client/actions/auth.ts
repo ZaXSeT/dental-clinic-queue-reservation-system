@@ -1,16 +1,24 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key-change-this';
 const key = new TextEncoder().encode(SECRET_KEY);
 
-export async function loginAction(prevState: any, formData: FormData): Promise<{ message?: string; success?: boolean; data?: { name: string, role: string, username: string } }> {
-    const username = formData.get('username') as string;
-    const password = formData.get('password') as string;
+export async function loginAction(
+    prevState: any,
+    formData: FormData
+): Promise<{
+    message?: string;
+    success?: boolean;
+    data?: { name: string; role: string; username: string };
+}> {
+    const username = (formData.get('username') as string)?.trim();
+    const password = (formData.get('password') as string)?.trim();
+
+    console.log('INPUT:', { username, password });
 
     if (!username || !password) {
         return { message: 'Please enter both username and password' };
@@ -21,17 +29,22 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
             where: { username },
         });
 
+        console.log('DB ADMIN:', admin);
+
         if (!admin) {
             return { message: 'Invalid credentials' };
         }
 
-        const isValid = await bcrypt.compare(password, admin.password);
-
-        if (!isValid) {
+        // ✅ Plain text comparison (NO hash)
+        if (password !== admin.password) {
             return { message: 'Invalid credentials' };
         }
 
-        const token = await new SignJWT({ id: admin.id, username: admin.username, role: admin.role })
+        const token = await new SignJWT({
+            id: admin.id,
+            username: admin.username,
+            role: admin.role,
+        })
             .setProtectedHeader({ alg: 'HS256' })
             .setExpirationTime('24h')
             .sign(key);
@@ -40,7 +53,7 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             path: '/',
-            maxAge: 60 * 60 * 24 
+            maxAge: 60 * 60 * 24,
         });
 
         return {
@@ -48,8 +61,8 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
             data: {
                 name: admin.name,
                 role: admin.role,
-                username: admin.username
-            }
+                username: admin.username,
+            },
         };
     } catch (error) {
         console.error('Login error:', error);
@@ -65,7 +78,12 @@ export async function verifySession() {
         const { payload } = await jwtVerify(token, key, {
             algorithms: ['HS256'],
         });
-        return payload as { id: string, username: string, role: string };
+
+        return payload as {
+            id: string;
+            username: string;
+            role: string;
+        };
     } catch (error) {
         return null;
     }

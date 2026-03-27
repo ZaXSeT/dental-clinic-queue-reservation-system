@@ -1,87 +1,72 @@
 "use client";
 
+import { useFormState } from "react-dom";
+import { useRouter } from "next/navigation";
+import { Lock } from "lucide-react";
 import { useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { loginAction } from "@/actions/auth";
 
-import Navbar from "../components/Navbar";
-import HeroSection from "../components/HeroSection";
-import WorkflowSection from "../components/WorkflowSection";
-import TreatmentsSection from "../components/TreatmentsSection";
-import DentistsSection from "../components/DentistsSection";
-import ReviewsSection from "../components/ReviewsSection";
-import ContactSection from "../components/ContactSection";
-import Footer from "../components/Footer";
+const initialState: { message?: string; success?: boolean; data?: { name: string, role: string, username: string } } = {
+    message: "",
+    success: false,
+};
 
-export default function Home() {
-    const searchParams = useSearchParams();
+export default function AdminLogin() {
+    const [state, formAction] = useFormState(loginAction, initialState);
     const router = useRouter();
 
     useEffect(() => {
-        if (typeof window !== 'undefined' && window.history) {
-            window.history.scrollRestoration = 'manual';
+        if (state.success && state.data) {
+            sessionStorage.setItem('admin_auth', 'true');
+            sessionStorage.setItem('admin_user', JSON.stringify(state.data));
+            router.push("/admin/portal/dashboard");
         }
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        try {
-                            sessionStorage.setItem('lastSection', entry.target.id);
-                        } catch (e) {
-                        }
-                    }
-                });
-            },
-            { threshold: 0.5 }
-        );
-
-        const sections = ['home', 'workflow', 'treatments', 'dentists', 'contact'];
-        sections.forEach((id) => {
-            const element = document.getElementById(id);
-            if (element) observer.observe(element);
-        });
-
-        const paramSection = searchParams.get('scrollTo');
-        let targetSection = paramSection;
-
-        if (!targetSection) {
-            try {
-                targetSection = sessionStorage.getItem('lastSection');
-            } catch (e) {
-            }
-        }
-
-        if (targetSection) {
-            const attemptScroll = (retries = 0) => {
-                const element = document.getElementById(targetSection!);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'auto' });
-
-                    if (paramSection) {
-                        router.replace('/', { scroll: false });
-                    }
-                } else if (retries < 20) {
-                    setTimeout(() => attemptScroll(retries + 1), 100);
-                }
-            };
-            attemptScroll();
-        }
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [searchParams, router]);
+    }, [state.success, router]);
 
     return (
-        <main className="min-h-screen flex flex-col items-center justify-between text-slate-800 selection:bg-primary selection:text-white">
-            <Navbar />
-            <HeroSection />
-            <WorkflowSection />
-            <TreatmentsSection />
-            <DentistsSection />
-            <ReviewsSection />
-            <ContactSection />
-            <Footer />
+        <main className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
+                <div className="text-center mb-8">
+                    <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                        <Lock className="h-8 w-8" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-800">Admin Portal</h1>
+                    <p className="text-slate-500">Sign in to manage clinic operations</p>
+                </div>
+
+                <form action={formAction} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                        <input
+                            type="text"
+                            name="username"
+                            required
+                            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
+                            placeholder="username"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
+                            placeholder="••••••"
+                        />
+                    </div>
+
+                    {state.message && (
+                        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center">
+                            {state.message}
+                        </div>
+                    )}
+
+                    <button type="submit" className="w-full bg-[#009ae2] text-white font-bold py-3 rounded-lg hover:bg-[#0088cc] transition-colors">
+                        Sign In
+                    </button>
+                </form>
+            </div>
         </main>
     );
 }

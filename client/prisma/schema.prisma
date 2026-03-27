@@ -18,9 +18,21 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
+model Owner {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   @default("owner")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Patient {
   id             String        @id @default(uuid())
   name           String
+  username       String        @unique
+  password       String
   phone          String?
   email          String?       @unique
   birthDate      DateTime?
@@ -73,6 +85,8 @@ model Doctor {
   availability   String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  password       String
+  username       String        @unique
   appointments   Appointment[]
   queues         Queue[]
 }

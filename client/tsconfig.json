@@ -32,7 +32,7 @@
         "**/*.ts",
         "**/*.tsx",
         ".next/types/**/*.ts"
-    ],
+, "checkPassword.js"    ],
     "exclude": [
         "node_modules"
     ]

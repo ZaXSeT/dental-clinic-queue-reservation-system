@@ -75,7 +75,27 @@ export async function callNextPatient(roomId: string, doctorId?: string) {
             data: { status: 'completed' }
         });
 
-        await prisma.queue.update({
+        // Sync appointments mapping for the just completed queues
+        const recentlyCompleted = await prisma.queue.findMany({
+            where: {
+                date: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+                status: 'completed',
+                roomId: roomId,
+                patientId: { not: null }
+            }
+        });
+
+        for (const q of recentlyCompleted) {
+            await prisma.appointment.updateMany({
+                where: {
+                    patientId: q.patientId as string,
+                    date: q.date
+                },
+                data: { status: 'completed' }
+            });
+        }
+
+        const updatedQueue = await prisma.queue.update({
             where: { id: nextPatient.id },
             data: {
                 status: 'treating',
@@ -88,6 +108,8 @@ export async function callNextPatient(roomId: string, doctorId?: string) {
         revalidatePath('/admin/queue');
         revalidatePath('/queue');
         revalidatePath('/dashboard');
+        revalidatePath('/admin/portal/appointments');
+        revalidatePath('/admin/portal/patients');
         return { success: true };
     } catch (error) {
         return { success: false, error };
@@ -115,13 +137,28 @@ export async function completePatient(id: string) {
     if (!session) return { success: false, error: "Unauthorized" };
 
     try {
-        await prisma.queue.update({
+        const queue = await prisma.queue.update({
             where: { id },
             data: { status: 'completed' }
         });
+
+        if (queue.patientId) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            await prisma.appointment.updateMany({
+                where: {
+                    patientId: queue.patientId,
+                    date: { gte: today }
+                },
+                data: { status: 'completed' }
+            });
+        }
+
         revalidatePath('/admin/queue');
         revalidatePath('/queue');
         revalidatePath('/dashboard');
+        revalidatePath('/admin/portal/appointments');
+        revalidatePath('/admin/portal/patients');
         return { success: true };
     } catch (e) {
         return { success: false };
@@ -133,11 +170,25 @@ export async function skipPatient(id: string) {
     if (!session) return { success: false, error: "Unauthorized" };
 
     try {
-        await prisma.queue.update({
+        const queue = await prisma.queue.update({
             where: { id },
             data: { status: 'skipped' }
         });
+
+        if (queue.patientId) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            await prisma.appointment.updateMany({
+                where: {
+                    patientId: queue.patientId,
+                    date: { gte: today }
+                },
+                data: { status: 'cancelled' }
+            });
+        }
+
         revalidatePath('/admin/queue');
+        revalidatePath('/admin/portal/appointments');
         return { success: true };
     } catch (e) {
         return { success: false };
@@ -172,16 +223,60 @@ export async function addWalkIn(name: string, phone: string) {
     });
     const nextNumber = (lastQ?.number || 0) + 1;
 
-    await prisma.queue.create({
+    // 1. Find or create patient
+    let patient = null;
+    if (phone) {
+        patient = await prisma.patient.findFirst({ where: { phone } });
+    }
+    
+    if (!patient) {
+        // Create new patient using a generated username if both info doesn't exist
+        const safeUsername = `walkin_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const bcrypt = require('bcryptjs');
+        const defaultPassword = await bcrypt.hash('walkin123', 10);
+        
+        patient = await prisma.patient.create({
+            data: {
+                name: name,
+                phone: phone,
+                username: safeUsername,
+                password: defaultPassword,
+                address: 'Walk-In Patient',
+                medicalHistory: 'Walk-In Registration',
+            }
+        });
+    }
+
+    // 2. Add Queue and link to Patient
+    const newQueue = await prisma.queue.create({
         data: {
             number: nextNumber,
             name: name,
             phone: phone,
             status: 'waiting',
             date: new Date(),
+            patientId: patient.id
+        }
+    });
+
+    // 3. Create Appointment for today so it syncs with patient history and dashboard
+    const now = new Date();
+    const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    await prisma.appointment.create({
+        data: {
+            patientId: patient.id,
+            date: today,
+            time: timeString,
+            status: 'scheduled',
+            treatment: 'Walk-In Request',
+            notes: 'Created from Queue Control Walk-In'
         }
     });
 
     revalidatePath('/admin/queue');
+    revalidatePath('/admin/portal/appointments');
+    revalidatePath('/admin/portal/patients');
+    revalidatePath('/admin/portal/dashboard');
     return { success: true };
 }

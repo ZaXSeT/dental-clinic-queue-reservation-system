@@ -1,22 +1,29 @@
+
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-    title: "AtriReservasi - Dental Clinic",
-    description: "Advanced Dental Appointment & Queue System",
+  title: "Admin Portal",
+  description: "Clinic Admin Dashboard",
 };
 
 export default function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
-    return (
-        <html lang="en" className="scroll-smooth">
-            <body className={jakarta.className}>{children}</body>
-        </html>
-    );
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" className={inter.variable}>
+      <body className={`${inter.className} bg-slate-100 antialiased`}>
+        {children}
+      </body>
+    </html>
+  );
 }
