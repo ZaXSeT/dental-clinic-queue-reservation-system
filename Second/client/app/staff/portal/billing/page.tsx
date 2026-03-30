@@ -60,7 +60,6 @@ export default function BillingPage() {
                 </div>
             </div>
 
-            {}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-7 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between group hover:border-primary/20 transition-all">
                     <div className="flex justify-between items-start mb-4">
@@ -101,7 +100,6 @@ export default function BillingPage() {
                 </div>
             </div>
 
-            {}
             <div className="bg-white rounded-[3rem] shadow-sm border border-slate-200 overflow-hidden">
                 <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">

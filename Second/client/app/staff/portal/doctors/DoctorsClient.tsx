@@ -12,7 +12,6 @@ const MINUTES = ['00', '15', '30', '45'];
 const AMPM = ['AM', 'PM'];
 
 export default function DoctorsClient({ doctors, userRole }: { doctors: any[], userRole?: string }) {
-    // keep full list for conflict checking (unmodified)
     const allDoctors = doctors;
     const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
     const [schedule, setSchedule] = useState<Record<string, string[]>>({});
@@ -58,23 +57,19 @@ export default function DoctorsClient({ doctors, userRole }: { doctors: any[], u
 
         const timeString = `${newTime.hour}:${newTime.minute} ${newTime.period}`;
 
-        // Check duplicate within this doctor's own schedule
         if ((schedule[addingSlotForDay] || []).includes(timeString)) {
             setSlotError('This time slot is already in this doctor\'s schedule.');
             return;
         }
 
-        // Count how many OTHER doctors already have this day+time
         const conflictCount = allDoctors.filter(doc => {
-            if (doc.id === selectedDoctor?.id) return false; // skip current
+            if (doc.id === selectedDoctor?.id) return false;
             try {
                 const parsed = doc.availability ? JSON.parse(doc.availability) : {};
                 return (parsed[addingSlotForDay] || []).includes(timeString);
             } catch { return false; }
         }).length;
 
-        // Also count current doctor if they already have it (already blocked above)
-        // Max 3 rooms total
         if (conflictCount >= 3) {
             setSlotError(`All 3 rooms are already booked on ${addingSlotForDay} at ${timeString}. Max 3 doctors per slot.`);
             return;

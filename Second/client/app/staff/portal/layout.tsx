@@ -17,7 +17,7 @@ export default function StaffPortalLayout({
     const router = useRouter();
 
     const [user, setUser] = useState<{ name: string, role: string, username: string } | null>(null);
-    const [isLoaded, setIsLoaded] = useState(false); // ✅ FIX
+    const [isLoaded, setIsLoaded] = useState(false);
 
     const handleLogout = () => {
         startTransition(async () => {
@@ -35,10 +35,10 @@ export default function StaffPortalLayout({
             setUser(JSON.parse(storedUser));
         }
 
-        setIsLoaded(true); // ✅ FIX
+        setIsLoaded(true);
     }, [pathname]);
 
-    if (!isLoaded) return null; // ✅ FIX
+    if (!isLoaded) return null;
 
     const basePath = '/staff/portal';
 
@@ -47,80 +47,34 @@ export default function StaffPortalLayout({
             label: 'Dashboard',
             href: `${basePath}/dashboard`,
             icon: LayoutDashboard,
-            //roles: ['owner']
         },
-           { label: "Queue Control", 
-            href: `${basePath}/queue`, 
-            icon: Tv,// roles: ['admin']
+        {
+            label: "Queue Control",
+            href: `${basePath}/queue`,
+            icon: Tv,
         },
-
-         { 
-            label: "Patients", 
-            href: `${basePath}/patients`, 
+        {
+            label: "Patients",
+            href: `${basePath}/patients`,
             icon: Users,
             roles: ['owner', 'admin']
         },
-
-     
-        // { 
-        //     label: "Room Reservations", 
-        //     href: `${basePath}/rooms`, 
-        //     icon: School,
-        //     //roles: ['admin']
-        // },
-
-      
-
         {
             label: "Doctors",
             href: `${basePath}/doctors`,
             icon: Stethoscope,
-            //roles: ['owner', 'doctor']
         },
-          { 
-            label: "Messages", 
-            href: `${basePath}/Messages`, 
+        {
+            label: "Messages",
+            href: `${basePath}/Messages`,
             icon: Mail,
-            //roles: ['owner', 'admin']
         },
-
-        
-
-        // { 
-        //     label: "Patient Reservations",
-        //     href: `${basePath}/appointments`, 
-        //     icon: Calendar,
-        //     //roles: ['admin']
-        // },
-
-        
-
-       
-
-        
-
-        { 
-            label: "Billing", 
-            href: `${basePath}/billing`, 
+        {
+            label: "Billing",
+            href: `${basePath}/billing`,
             icon: CreditCard,
             roles: ['owner', 'admin']
         },
-
-        // { 
-        //     label: "Report", 
-        //     href: `${basePath}/billing`, 
-        //     icon: FileText,
-        //     roles: ['owner']
-        // },
-
-        // { 
-        //     label: "Log", 
-        //     href: `${basePath}/billing`, 
-        //     icon: ScrollText,
-        //     roles: ['owner']
-        // },
-
-        //{ label: "Settings", href: `${basePath}/settings`, icon: Settings },
     ].filter(item => {
         if (!item.roles) return true;
         return user && item.roles.includes(user.role);

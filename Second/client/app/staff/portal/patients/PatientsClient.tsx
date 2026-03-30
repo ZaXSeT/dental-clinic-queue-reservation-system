@@ -82,11 +82,10 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
         }
     };
 
-    // removed avatarColors array
+
 
     return (
         <div className="space-y-6">
-            {/* Header bar */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
                 <div className="relative w-full sm:max-w-sm">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -106,8 +105,6 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                     {showForm ? 'Cancel' : 'Add Patient'}
                 </button>
             </div>
-
-            {/* Add Patient Form */}
             {showForm && (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
@@ -175,15 +172,11 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                     </form>
                 </div>
             )}
-
-            {/* Stats summary */}
             <div className="flex items-center gap-2 text-sm text-slate-500">
                 <span className="font-semibold text-slate-800">{filteredPatients.length}</span>
                 <span>{filteredPatients.length === 1 ? 'patient' : 'patients'} found</span>
                 {searchTerm && <span className="text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">"{searchTerm}"</span>}
             </div>
-
-            {/* Table */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
@@ -215,12 +208,9 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                     const visits = patient._count?.appointments || 0;
                                     return (
                                         <tr key={patient.id} className="hover:bg-slate-50/70 transition-colors group">
-                                            {/* Patient */}
                                             <td className="px-6 py-4">
                                                 <span className="font-semibold text-slate-800 text-sm">{patient.name}</span>
                                             </td>
-
-                                            {/* Contact */}
                                             <td className="px-6 py-4">
                                                 <div className="space-y-1">
                                                     {patient.phone && (
@@ -240,8 +230,6 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                     )}
                                                 </div>
                                             </td>
-
-                                            {/* Visits */}
                                             <td className="px-6 py-4 text-center">
                                                 <span className={`inline-flex items-center justify-center min-w-[2rem] h-7 px-2.5 rounded-full text-xs font-bold ${
                                                     visits >= 5
@@ -253,8 +241,6 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                     {visits}
                                                 </span>
                                             </td>
-
-                                            {/* Last Visit */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-1.5 text-sm text-slate-600">
                                                     <Calendar className="w-3.5 h-3.5 text-slate-300" />
@@ -263,13 +249,9 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                         : <span className="text-slate-300 italic text-xs">Never</span>}
                                                 </div>
                                             </td>
-
-                                            {/* Registered */}
                                             <td className="px-6 py-4 text-sm text-slate-500">
                                                 {format(new Date(patient.createdAt), 'dd MMM yyyy')}
                                             </td>
-
-                                            {/* Address */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-start gap-1.5 text-sm text-slate-500 max-w-[160px]">
                                                     <MapPin className="w-3.5 h-3.5 text-slate-300 flex-shrink-0 mt-0.5" />
