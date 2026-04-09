@@ -97,13 +97,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button
-                    onClick={() => { setShowForm(!showForm); setErrors({}); }}
-                    className="flex items-center gap-2 px-5 h-11 bg-primary text-white rounded-xl text-sm font-semibold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
-                >
-                    {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    {showForm ? 'Cancel' : 'Add Patient'}
-                </button>
+
             </div>
             {showForm && (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

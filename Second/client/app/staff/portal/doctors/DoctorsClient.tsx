@@ -291,18 +291,9 @@ export default function DoctorsClient({ doctors, userRole }: { doctors: any[], u
     return (
         <div className="space-y-8">
            
-                <div className="flex justify-end">
-                    <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="bg-primary text-white px-6 py-3.5 rounded-2xl font-bold flex items-center gap-2 hover:bg-sky-600 transition-all shadow-lg shadow-primary/20 active:scale-95"
-                    >
-                        <UserPlus className="w-5 h-5" />
-                        Add New Doctor
-                    </button>
-                </div>
+            {/* Add New Doctor button hidden as requested */}
             
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
                 {doctors.map(doc => (
                     <div key={doc.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 hover:shadow-xl hover:shadow-slate-200/40 hover:border-primary/20 transition-all group cursor-pointer relative overflow-hidden" onClick={() => handleSelectDoctor(doc)}>
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500 ease-out"></div>

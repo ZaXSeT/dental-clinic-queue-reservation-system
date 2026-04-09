@@ -1,0 +1,134 @@
+<mxfile host="app.diagrams.net">
+
+  <!-- ============================================================ -->
+  <!--  DIAGRAM 1 : SEQUENCE – CREATE ACCOUNT (Patient)             -->
+  <!-- ============================================================ -->
+  <diagram id="seq-create-account" name="Sequence - Create Account">
+    <mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1050" pageHeight="860" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== PARTICIPANT HEADERS ===== -->
+        <mxCell id="p1" value="Pasien"        style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="20"  y="30" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="p2" value="Web App"       style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="200" y="30" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="p3" value="Server"        style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="380" y="30" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="p4" value="Database"      style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="560" y="30" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="p5" value="Email SMTP"    style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="740" y="30" width="110" height="40" as="geometry"/></mxCell>
+
+        <!-- ===== LIFELINES ===== -->
+        <mxCell id="l1" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75"  y="70" as="sourcePoint"/><mxPoint x="75"  y="820" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l2" style="endArrow=none;dashed=1;strokeColor=#d6b656;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="70" as="sourcePoint"/><mxPoint x="255" y="820" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l3" style="endArrow=none;dashed=1;strokeColor=#9673a6;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="70" as="sourcePoint"/><mxPoint x="435" y="820" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l4" style="endArrow=none;dashed=1;strokeColor=#b85450;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="615" y="70" as="sourcePoint"/><mxPoint x="615" y="820" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l5" style="endArrow=none;dashed=1;strokeColor=#82b366;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="795" y="70" as="sourcePoint"/><mxPoint x="795" y="820" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- ===== MESSAGES ===== -->
+        <!-- 1. Pasien buka form -->
+        <mxCell id="m1" value="1. Buka halaman /register" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75"  y="110" as="sourcePoint"/><mxPoint x="255" y="110" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 2. Tampilkan form -->
+        <mxCell id="m2" value="2. Tampilkan form registrasi" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="135" as="sourcePoint"/><mxPoint x="75"  y="135" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 3. Isi data -->
+        <mxCell id="m3" value="3. Isi nama, email, password → klik Daftar" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75"  y="165" as="sourcePoint"/><mxPoint x="255" y="165" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 4. Kirim ke server -->
+        <mxCell id="m4" value="4. registerPatient(nama, email, password)" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="195" as="sourcePoint"/><mxPoint x="435" y="195" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 5. Cek email di DB -->
+        <mxCell id="m5" value="5. Cek apakah email sudah terdaftar" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="225" as="sourcePoint"/><mxPoint x="615" y="225" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 6. DB balas -->
+        <mxCell id="m6" value="6. Email belum terdaftar" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="615" y="250" as="sourcePoint"/><mxPoint x="435" y="250" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 7. Simpan data -->
+        <mxCell id="m7" value="7. Simpan data pasien + token verifikasi" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="280" as="sourcePoint"/><mxPoint x="615" y="280" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 8. DB konfirmasi -->
+        <mxCell id="m8" value="8. Data tersimpan" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="615" y="305" as="sourcePoint"/><mxPoint x="435" y="305" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 9. Kirim OTP -->
+        <mxCell id="m9" value="9. Kirim kode OTP ke email pasien" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="335" as="sourcePoint"/><mxPoint x="795" y="335" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 10. Email terkirim -->
+        <mxCell id="m10" value="10. Email OTP diterima pasien" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="795" y="360" as="sourcePoint"/><mxPoint x="75"  y="360" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 11. Server balas ke web -->
+        <mxCell id="m11" value="11. Arahkan ke halaman verifikasi" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="390" as="sourcePoint"/><mxPoint x="255" y="390" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 12. Redirect user -->
+        <mxCell id="m12" value="12. Redirect ke /verify-email" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="415" as="sourcePoint"/><mxPoint x="75"  y="415" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- === Separator === -->
+        <mxCell id="sep" value="[ Pasien membuka email dan menyalin kode OTP ]" style="text;html=1;strokeColor=none;fillColor=#f5f5f5;align=center;fontStyle=2;fontSize=10;fontColor=#666666;" vertex="1" parent="1"><mxGeometry x="20" y="428" width="870" height="24" as="geometry"/></mxCell>
+
+        <!-- 13. Pasien input OTP -->
+        <mxCell id="m13" value="13. Masukkan kode OTP" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75"  y="465" as="sourcePoint"/><mxPoint x="255" y="465" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 14. Web kirim ke server -->
+        <mxCell id="m14" value="14. verifyEmail(token)" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="495" as="sourcePoint"/><mxPoint x="435" y="495" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 15. Update DB -->
+        <mxCell id="m15" value="15. Update emailVerified = true" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="525" as="sourcePoint"/><mxPoint x="615" y="525" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 16. DB balas -->
+        <mxCell id="m16" value="16. OK" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="615" y="550" as="sourcePoint"/><mxPoint x="435" y="550" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 17. Server balas -->
+        <mxCell id="m17" value="17. Akun berhasil dibuat" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="580" as="sourcePoint"/><mxPoint x="255" y="580" as="targetPoint"/></mxGeometry></mxCell>
+        <!-- 18. Redirect -->
+        <mxCell id="m18" value="18. Redirect ke halaman Login" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="605" as="sourcePoint"/><mxPoint x="75"  y="605" as="targetPoint"/></mxGeometry></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ============================================================ -->
+  <!--  DIAGRAM 2 : SEQUENCE – LOGIN (Patient)                      -->
+  <!-- ============================================================ -->
+  <diagram id="seq-login" name="Sequence - Login">
+    <mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="820" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== PARTICIPANT HEADERS ===== -->
+        <mxCell id="p1" value="Pasien"    style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="20"  y="30" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="p2" value="Web App"   style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="200" y="30" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="p3" value="Server"    style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="380" y="30" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="p4" value="Database"  style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="560" y="30" width="110" height="40" as="geometry"/></mxCell>
+
+        <!-- ===== LIFELINES ===== -->
+        <mxCell id="l1" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75"  y="70" as="sourcePoint"/><mxPoint x="75"  y="790" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l2" style="endArrow=none;dashed=1;strokeColor=#d6b656;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="70" as="sourcePoint"/><mxPoint x="255" y="790" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l3" style="endArrow=none;dashed=1;strokeColor=#9673a6;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="70" as="sourcePoint"/><mxPoint x="435" y="790" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l4" style="endArrow=none;dashed=1;strokeColor=#b85450;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="615" y="70" as="sourcePoint"/><mxPoint x="615" y="790" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- ===== MESSAGES (sebelum ALT) ===== -->
+        <mxCell id="m1" value="1. Buka halaman /login" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75"  y="110" as="sourcePoint"/><mxPoint x="255" y="110" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m2" value="2. Tampilkan form login" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="135" as="sourcePoint"/><mxPoint x="75"  y="135" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m3" value="3. Masukkan email dan password → klik Login" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75"  y="165" as="sourcePoint"/><mxPoint x="255" y="165" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m4" value="4. loginPatient(email, password)" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="195" as="sourcePoint"/><mxPoint x="435" y="195" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m5" value="5. Cari pasien berdasarkan email" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="225" as="sourcePoint"/><mxPoint x="615" y="225" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m6" value="6. Data pasien ditemukan" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="615" y="250" as="sourcePoint"/><mxPoint x="435" y="250" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- ===== ALT FRAME ===== -->
+        <mxCell id="alt-box"   value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=1.5;" vertex="1" parent="1"><mxGeometry x="50" y="268" width="640" height="480" as="geometry"/></mxCell>
+        <mxCell id="alt-tag"   value="alt" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#000000;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="50" y="268" width="42" height="24" as="geometry"/></mxCell>
+
+        <!-- Branch 1: Sukses -->
+        <mxCell id="b1-lbl" value="[ Password benar dan email sudah diverifikasi ]" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=2;fontSize=10;" vertex="1" parent="1"><mxGeometry x="100" y="272" width="350" height="18" as="geometry"/></mxCell>
+        <mxCell id="m7"  value="7. Verifikasi password (bcrypt compare)" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="500" y="308" as="sourcePoint"/><mxPoint x="435" y="330" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m7b" value="7. Password cocok" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="500" y="308" as="sourcePoint"/><mxPoint x="435" y="330" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m8"  value="8. Generate JWT Session Cookie" style="endArrow=block;endFill=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="500" y="310" as="sourcePoint"/><mxPoint x="435" y="310" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m9"  value="9. Set cookie + login berhasil" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="345" as="sourcePoint"/><mxPoint x="255" y="345" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m10" value="10. Redirect ke halaman Reservasi" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="370" as="sourcePoint"/><mxPoint x="75"  y="370" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- Divider else 1 -->
+        <mxCell id="div1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="50" y="393" as="sourcePoint"/><mxPoint x="690" y="393" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="b2-lbl" value="[ Password salah ]" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=2;fontSize=10;" vertex="1" parent="1"><mxGeometry x="100" y="396" width="200" height="18" as="geometry"/></mxCell>
+        <mxCell id="m11" value="11. Password tidak cocok" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="430" as="sourcePoint"/><mxPoint x="255" y="430" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m12" value="12. Tampilkan pesan &quot;Email atau password salah&quot;" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="455" as="sourcePoint"/><mxPoint x="75"  y="455" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- Divider else 2 -->
+        <mxCell id="div2" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="50" y="478" as="sourcePoint"/><mxPoint x="690" y="478" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="b3-lbl" value="[ Email belum diverifikasi ]" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=2;fontSize=10;" vertex="1" parent="1"><mxGeometry x="100" y="481" width="250" height="18" as="geometry"/></mxCell>
+        <mxCell id="m13" value="13. Email belum terverifikasi" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="515" as="sourcePoint"/><mxPoint x="255" y="515" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m14" value="14. Redirect ke /verify-email" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="540" as="sourcePoint"/><mxPoint x="75"  y="540" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- Divider else 3 -->
+        <mxCell id="div3" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="50" y="563" as="sourcePoint"/><mxPoint x="690" y="563" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="b4-lbl" value="[ Email tidak ditemukan ]" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=2;fontSize=10;" vertex="1" parent="1"><mxGeometry x="100" y="566" width="250" height="18" as="geometry"/></mxCell>
+        <mxCell id="m15" value="15. Email tidak ada di database" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="615" y="600" as="sourcePoint"/><mxPoint x="435" y="600" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m16" value="16. Tampilkan pesan &quot;Akun tidak ditemukan&quot;" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="435" y="625" as="sourcePoint"/><mxPoint x="255" y="625" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="m17" value="17. Tampilkan error dan link ke /register" style="endArrow=open;endFill=0;dashed=1;html=1;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="255" y="650" as="sourcePoint"/><mxPoint x="75"  y="650" as="targetPoint"/></mxGeometry></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>
