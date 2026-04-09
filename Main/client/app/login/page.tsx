@@ -19,7 +19,7 @@ export default function LoginPage() {
             .then(d => {
                 if (d.loggedIn) {
                     const params = new URLSearchParams(window.location.search);
-                    router.replace(params.get('callbackUrl') || '/booking');
+                    router.replace(params.get('callbackUrl') || '/');
                 }
             })
             .catch(() => {});
@@ -36,7 +36,8 @@ export default function LoginPage() {
         if (res?.requiresVerification) {
             router.push(`/verify-email?email=${encodeURIComponent(formData.get('email') as string)}`);
         } else if (res?.success) {
-            router.push('/booking');
+            const params = new URLSearchParams(window.location.search);
+            router.push(params.get('callbackUrl') || '/');
         } else {
             setError(res?.message || 'Login failed');
         }
