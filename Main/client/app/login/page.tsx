@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { loginPatient } from '@/actions/patientAuth';
 
@@ -9,9 +9,11 @@ import { ArrowLeft, Stethoscope, Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState(searchParams.get('reset') === 'success' ? 'Password berhasil direset! Silakan login.' : '');
 
     useEffect(() => {
         fetch('/api/patient/me')
@@ -113,6 +115,12 @@ export default function LoginPage() {
                             </div>
                         </div>
 
+                        {successMsg && (
+                            <div className="bg-green-50 text-green-700 p-4 rounded-2xl text-sm font-bold flex items-center justify-center border border-green-200">
+                                ✅ {successMsg}
+                            </div>
+                        )}
+
                         {error && (
                             <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold flex items-center justify-center border border-red-100">
                                 {error}
@@ -123,6 +131,12 @@ export default function LoginPage() {
                             <button type="submit" disabled={loading} className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-2xl text-base font-bold text-white bg-primary hover:bg-sky-500 focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                                 {loading ? 'Signing in...' : 'Sign in'}
                             </button>
+                        </div>
+
+                        <div className="text-center">
+                            <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:text-sky-500 transition-colors">
+                                Lupa password?
+                            </Link>
                         </div>
                     </form>
                 </div>

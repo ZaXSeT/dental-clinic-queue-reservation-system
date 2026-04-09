@@ -246,3 +246,42 @@ export async function verifyPatientSession() {
 export async function logoutPatientAction() {
     cookies().delete('patient_token');
 }
+
+// --- Forgot Password ---
+export async function forgotPassword(prevState: any, formData: FormData) {
+    const email = formData.get('email') as string;
+    if (!email) return { message: 'Email wajib diisi' };
+    try {
+        const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
+        if (!patient) return { success: true, email };
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        await prisma.patient.update({ where: { id: patient.id }, data: { verificationToken: otp } });
+        await sendVerificationEmail(email, patient.name, otp);
+        return { success: true, email };
+    } catch (err) {
+        console.error('Forgot password error:', err);
+        return { message: 'Terjadi kesalahan. Coba lagi.' };
+    }
+}
+
+// --- Reset Password ---
+export async function resetPassword(prevState: any, formData: FormData) {
+    const email = formData.get('email') as string;
+    const otp = formData.get('otp') as string;
+    const newPassword = formData.get('newPassword') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+    if (!email || !otp || !newPassword || !confirmPassword) return { message: 'Semua field wajib diisi' };
+    if (newPassword !== confirmPassword) return { message: 'Password baru dan konfirmasi tidak sama' };
+    if (newPassword.length < 8) return { message: 'Password minimal 8 karakter' };
+    try {
+        const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
+        if (!patient) return { message: 'Akun tidak ditemukan' };
+        if (patient.verificationToken !== otp) return { message: 'Kode OTP salah atau sudah kadaluarsa' };
+        const hashed = await bcrypt.hash(newPassword, 10);
+        await prisma.patient.update({ where: { id: patient.id }, data: { password: hashed, verificationToken: null } });
+        return { success: true };
+    } catch (err) {
+        console.error('Reset password error:', err);
+        return { message: 'Terjadi kesalahan. Coba lagi.' };
+    }
+}
