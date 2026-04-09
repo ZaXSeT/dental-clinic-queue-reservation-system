@@ -76,6 +76,13 @@ export default function Navbar() {
                                     <span className="hidden sm:block">Log Out</span>
                                 </button>
                             </>
+                        ) : sessionChecked ? (
+                            <Link
+                                href="/login"
+                                className="px-5 py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white font-bold transition-all text-sm"
+                            >
+                                Login
+                            </Link>
                         ) : null}
                         <Link
                             href="/booking"
