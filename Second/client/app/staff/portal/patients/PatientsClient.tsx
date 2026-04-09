@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, User, Phone, Mail, Calendar, MapPin, Hash, Stethoscope, Clock, MessageSquare } from 'lucide-react';
+import { Search, User, Phone, Mail, Calendar, Hash, Stethoscope, Clock, MessageSquare, Users } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function PatientsClient({ patients }: { patients: any[] }) {
@@ -64,7 +64,9 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                             ) : (
                                 filteredPatients.map((patient) => {
                                     const visits = patient.appointments?.length || 0;
-                                    const isNewPatient = visits <= 1;
+                                    const isNew = !patient.patientType || patient.patientType === 'new';
+                                    const bookingFor = patient.bookingFor || 'Myself';
+                                    const isSelf = bookingFor.toLowerCase() === 'myself';
                                     return (
                                         <tr key={patient.id} className="hover:bg-slate-50/50 transition-colors group">
                                             <td className="px-6 py-4">
@@ -77,6 +79,21 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                         <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                                                             <Hash className="w-2.5 h-2.5" /> {patient.id.slice(0, 8)}
                                                         </span>
+                                                        {/* bookingFor badge */}
+                                                        <div className="mt-1.5 flex items-center gap-1">
+                                                            {isSelf ? (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-sky-50 text-sky-500 border border-sky-100">
+                                                                    <User className="w-2.5 h-2.5" /> Myself
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100">
+                                                                    <Users className="w-2.5 h-2.5" /> {bookingFor}
+                                                                </span>
+                                                            )}
+                                                            {patient.guardianName && (
+                                                                <span className="text-[9px] text-slate-400 italic truncate max-w-[100px]">via {patient.guardianName}</span>
+                                                            )}
+                                                        </div>
                                                         {(patient.medicalHistory || patient.appointments?.[0]?.notes) && (
                                                             <div className="flex items-start gap-1.5 mt-2 text-xs text-slate-500 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100/50 w-full max-w-[280px]">
                                                                 <MessageSquare className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -165,7 +182,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4">
-                                                {isNewPatient ? (
+                                                {isNew ? (
                                                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-violet-50 text-violet-600 border border-violet-100 shadow-sm shadow-violet-100/50">
                                                         <div className="h-1.5 w-1.5 rounded-full bg-violet-500 animate-pulse" />
                                                         New Patient
