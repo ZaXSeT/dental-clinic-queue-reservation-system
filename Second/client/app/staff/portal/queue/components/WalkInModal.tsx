@@ -1,6 +1,7 @@
 "use client";
 
-import { Phone, User, UserPlus, X } from "lucide-react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { Phone, User, UserPlus, X, ChevronDown, Check, Stethoscope, Clock } from "lucide-react";
 import { createPortal } from "react-dom";
 
 interface WalkInModalProps {
@@ -12,48 +13,59 @@ interface WalkInModalProps {
 }
 
 export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, doctors }: WalkInModalProps) {
-    const [name, setName] = (require("react")).useState("");
-    const [phone, setPhone] = (require("react")).useState("");
-    const [doctorId, setDoctorId] = (require("react")).useState("");
-    const [timeField, setTimeField] = (require("react")).useState("");
-    const [phoneError, setPhoneError] = (require("react")).useState("");
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [doctorId, setDoctorId] = useState("");
+    const [timeField, setTimeField] = useState("");
+    const [phoneError, setPhoneError] = useState("");
+    const [doctorDropdownOpen, setDoctorDropdownOpen] = useState(false);
+    const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
+    const doctorDropdownRef = useRef<HTMLDivElement>(null);
+    const timeDropdownRef = useRef<HTMLDivElement>(null);
 
-    const selectedDoctor = (require("react")).useMemo(() => {
-        return doctors.find(d => d.id === doctorId);
-    }, [doctorId, doctors]);
+    const selectedDoctor = useMemo(() => doctors.find(d => d.id === doctorId), [doctorId, doctors]);
 
-    const availableSlots = (require("react")).useMemo(() => {
+    const availableSlots = useMemo(() => {
         if (!selectedDoctor) return [];
         const today = new Date();
         const dayStr = today.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-        
+
         let parsedAvailability: Record<string, string[]> = {};
         try {
-            parsedAvailability = typeof selectedDoctor.availability === 'string' ? JSON.parse(selectedDoctor.availability) : selectedDoctor.availability || {};
-        } catch(e) {}
-        
+            parsedAvailability = typeof selectedDoctor.availability === 'string'
+                ? JSON.parse(selectedDoctor.availability)
+                : selectedDoctor.availability || {};
+        } catch (e) { }
+
         const allDaySlots: string[] = parsedAvailability[dayStr] || [];
-        
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         const currentTimeStr = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
 
         return allDaySlots.filter(t => {
-            if (t < currentTimeStr) return false; // Passed time
-            
+            if (t < currentTimeStr) return false;
             const isBooked = selectedDoctor.appointments?.some((app: any) => {
                 const slDate = new Date(app.date);
                 const slDateStr = `${slDate.getFullYear()}-${String(slDate.getMonth() + 1).padStart(2, '0')}-${String(slDate.getDate()).padStart(2, '0')}`;
                 return slDateStr === todayStr && app.time === t;
             });
-            
             return !isBooked;
         });
     }, [selectedDoctor]);
 
-    (require("react")).useEffect(() => {
-        setTimeField("");
-    }, [doctorId]);
+    useEffect(() => { setTimeField(""); }, [doctorId]);
 
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (doctorDropdownRef.current && !doctorDropdownRef.current.contains(e.target as Node)) {
+                setDoctorDropdownOpen(false);
+            }
+            if (timeDropdownRef.current && !timeDropdownRef.current.contains(e.target as Node)) {
+                setTimeDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     if (!isOpen) return null;
 
@@ -66,14 +78,20 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
-
         if (phone && (phone.length < 10 || phone.length > 14)) {
             setPhoneError("Phone number must be between 10-14 digits");
             return;
         }
-
         await onSubmit(name, phone, doctorId || undefined, timeField || undefined);
     };
+
+    const doctorInitials = (name: string) => name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+
+    const avatarColors = [
+        'from-sky-400 to-blue-600',
+        'from-violet-400 to-purple-600',
+        'from-emerald-400 to-teal-600',
+    ];
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -88,7 +106,7 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Full Name</label>
                         <div className="relative">
@@ -108,7 +126,9 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Phone Number <span className="text-slate-300 font-normal normal-case">(Optional, Digits Only)</span></label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">
+                            Phone Number <span className="text-slate-300 font-normal normal-case">(Optional, Digits Only)</span>
+                        </label>
                         <div className="relative">
                             <div className={`absolute left-4 top-1/2 -translate-y-1/2 ${phoneError ? 'text-red-400' : 'text-slate-400'}`}>
                                 <Phone className="w-5 h-5" />
@@ -125,34 +145,117 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                         {phoneError && <p className="text-xs font-bold text-red-500 pl-1">{phoneError}</p>}
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Select Doctor <span className="text-slate-300 font-normal normal-case">(Optional)</span></label>
-                        <select
-                            value={doctorId}
-                            onChange={(e) => setDoctorId(e.target.value)}
-                            className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                        >
-                            <option value="">Any Available Doctor</option>
-                            {doctors.map(doc => (
-                                <option key={doc.id} value={doc.id}>{doc.name} - {doc.specialization}</option>
-                            ))}
-                        </select>
+                    <div className="space-y-2" ref={doctorDropdownRef}>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">
+                            Select Doctor <span className="text-slate-300 font-normal normal-case">(Optional)</span>
+                        </label>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setDoctorDropdownOpen(p => !p)}
+                                className="w-full flex items-center gap-3 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-left hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            >
+                                {selectedDoctor ? (
+                                    <>
+                                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColors[doctors.indexOf(selectedDoctor) % avatarColors.length]} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                                            {doctorInitials(selectedDoctor.name)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-bold text-slate-800 text-sm truncate">{selectedDoctor.name}</div>
+                                            <div className="text-xs text-slate-400">{selectedDoctor.specialization}</div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                                            <Stethoscope className="w-4 h-4 text-slate-400" />
+                                        </div>
+                                        <span className="font-bold text-slate-400 text-sm">Any Available Doctor</span>
+                                    </>
+                                )}
+                                <ChevronDown className={`w-4 h-4 text-slate-400 ml-auto shrink-0 transition-transform duration-200 ${doctorDropdownOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {doctorDropdownOpen && (
+                                <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                                    <div
+                                        onClick={() => { setDoctorId(""); setDoctorDropdownOpen(false); }}
+                                        className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors ${!doctorId ? 'bg-primary/5' : ''}`}
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                                            <Stethoscope className="w-4 h-4 text-slate-400" />
+                                        </div>
+                                        <span className="font-bold text-slate-600 text-sm flex-1">Any Available Doctor</span>
+                                        {!doctorId && <Check className="w-4 h-4 text-primary shrink-0" />}
+                                    </div>
+                                    <div className="border-t border-slate-100" />
+                                    {doctors.map((doc, idx) => (
+                                        <div
+                                            key={doc.id}
+                                            onClick={() => { setDoctorId(doc.id); setDoctorDropdownOpen(false); }}
+                                            className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors ${doctorId === doc.id ? 'bg-primary/5' : ''}`}
+                                        >
+                                            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColors[idx % avatarColors.length]} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                                                {doctorInitials(doc.name)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-bold text-slate-800 text-sm truncate">{doc.name}</div>
+                                                <div className="text-xs text-slate-400">{doc.specialization}</div>
+                                            </div>
+                                            {doctorId === doc.id && <Check className="w-4 h-4 text-primary shrink-0" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {doctorId && (
-                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Select Time <span className="text-slate-300 font-normal normal-case">(Optional)</span></label>
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2" ref={timeDropdownRef}>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">
+                                Select Time <span className="text-slate-300 font-normal normal-case">(Optional)</span>
+                            </label>
                             {availableSlots.length > 0 ? (
-                                <select
-                                    value={timeField}
-                                    onChange={(e) => setTimeField(e.target.value)}
-                                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                >
-                                    <option value="">No specific time</option>
-                                    {availableSlots.map(t => (
-                                        <option key={t} value={t}>{t}</option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => setTimeDropdownOpen(p => !p)}
+                                        className="w-full flex items-center gap-3 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-left hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                                            <Clock className="w-4 h-4 text-slate-400" />
+                                        </div>
+                                        <span className={`font-bold text-sm flex-1 ${timeField ? 'text-slate-800' : 'text-slate-400'}`}>
+                                            {timeField || "No specific time"}
+                                        </span>
+                                        <ChevronDown className={`w-4 h-4 text-slate-400 ml-auto shrink-0 transition-transform duration-200 ${timeDropdownOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {timeDropdownOpen && (
+                                        <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
+                                            <div
+                                                onClick={() => { setTimeField(""); setTimeDropdownOpen(false); }}
+                                                className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors ${!timeField ? 'bg-primary/5' : ''}`}
+                                            >
+                                                <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+                                                <span className="font-bold text-slate-600 text-sm flex-1">No specific time</span>
+                                                {!timeField && <Check className="w-4 h-4 text-primary shrink-0" />}
+                                            </div>
+                                            <div className="border-t border-slate-100" />
+                                            {availableSlots.map(t => (
+                                                <div
+                                                    key={t}
+                                                    onClick={() => { setTimeField(t); setTimeDropdownOpen(false); }}
+                                                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors ${timeField === t ? 'bg-primary/5' : ''}`}
+                                                >
+                                                    <div className={`w-2 h-2 rounded-full shrink-0 ${timeField === t ? 'bg-primary' : 'bg-slate-300'}`} />
+                                                    <span className="font-bold text-slate-800 text-sm flex-1">{t}</span>
+                                                    {timeField === t && <Check className="w-4 h-4 text-primary shrink-0" />}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="w-full px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 text-sm font-medium">
                                     No available timeslots today for this doctor.
