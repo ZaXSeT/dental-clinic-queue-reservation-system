@@ -26,16 +26,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Always use the typed name from the booking form.
-    // We NEVER reuse or update the account's profile patient record.
-    // The account profile (login) is separate from appointment patient records.
     const typedName = `${patientInfo.firstName} ${patientInfo.lastName}`.trim();
 
     const patient = await prisma.patient.create({
         data: {
             name: typedName,
-            // Store email from form - safe because booking records are always
-            // separate from auth account profiles (different patient records)
             email: patientInfo.email || null,
             phone: patientInfo.phone || null,
             birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,

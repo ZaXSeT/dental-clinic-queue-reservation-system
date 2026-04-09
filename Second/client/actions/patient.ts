@@ -43,7 +43,7 @@ export async function deletePatient(id: string) {
 
     try {
         await prisma.queue.deleteMany({ where: { patientId: id } });
-        // Make sure to delete related invoices that point to appointments we are about to delete
+
         const appts = await prisma.appointment.findMany({ where: { patientId: id }, select: { id: true } });
         const apptIds = appts.map(a => a.id);
         if (apptIds.length > 0) {
@@ -72,3 +72,4 @@ export async function updatePatientName(id: string, name: string) {
         return { success: false, error: "Failed to update patient" };
     }
 }
+

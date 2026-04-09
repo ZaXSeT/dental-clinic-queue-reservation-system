@@ -13,7 +13,7 @@ export default function QuickActions({ onAddWalkIn, onReset, userRole }: QuickAc
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
             <h3 className="font-bold text-slate-800 mb-6">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-4">
-                {/* Only admin can see Add Walk-in */}
+                
                 {userRole === "admin" && (
                     <button
                         onClick={onAddWalkIn}
@@ -27,7 +27,7 @@ export default function QuickActions({ onAddWalkIn, onReset, userRole }: QuickAc
                     </button>
                 )}
 
-                {/* Only owner can see Reset Today */}
+                
                 {userRole === "owner" && (
                     <button
                         onClick={onReset}

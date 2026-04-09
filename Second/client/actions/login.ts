@@ -19,7 +19,6 @@ export async function loginAction(prevState: any, formData: FormData) {
       return { success: false, message: 'Invalid credentials' };
     }
 
-    // Plain text comparison (NOT secure)
     if (password !== user.password) {
       return { success: false, message: 'Invalid credentials' };
     }

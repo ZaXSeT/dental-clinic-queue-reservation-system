@@ -28,7 +28,7 @@ export default function StaffPortalLayout({
     };
 
     useEffect(() => {
-        // STRICT TAB-CLOSE LOGOUT: Jika tidak ada flag di memory tab ini, anggap mereka belum login
+
         if (!sessionStorage.getItem('staff_auth')) {
             startTransition(async () => {
                 await logoutAction();
@@ -41,10 +41,10 @@ export default function StaffPortalLayout({
             const serverUser = await getSessionUser();
             if (serverUser) {
                 setUser(serverUser);
-                // Sinkronisasikan ke sessionStorage kalau-kalau perlu
+
                 sessionStorage.setItem('staff_user', JSON.stringify(serverUser));
             } else {
-                // Sengaja push ke login jika sesi server mati
+
                 router.push('/staff/login');
             }
             setIsLoaded(true);

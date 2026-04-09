@@ -24,7 +24,6 @@ export default function ProductManager({ products: initialProducts, onClose }: P
     const [isAdding, setIsAdding] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Form state
     const [formData, setFormData] = useState({
         name: '',
         price: '',
@@ -59,8 +58,8 @@ export default function ProductManager({ products: initialProducts, onClose }: P
         setIsLoading(false);
 
         if (res.success) {
-            // Optimistic update or reload would be better, but for now simple refresh logic
-            // In a real app we'd update the local state or invalidate queries
+
+
             window.location.reload();
         } else {
             alert("Failed to save product.");
@@ -97,7 +96,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
     return (
         <div className="fixed inset-0 z-[120] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col border border-slate-100 animate-in zoom-in-95 duration-300">
-                {/* Header */}
+                
                 <div className="p-8 border-b border-slate-100 flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
@@ -113,9 +112,9 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                     </button>
                 </div>
 
-                {/* Content */}
+                
                 <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-                    {/* List Section */}
+                    
                     <div className={`flex-1 flex flex-col border-r border-slate-100 ${(isAdding || isEditing) ? 'hidden md:flex' : 'flex'}`}>
                         {}
                         <div className="p-6 border-b border-slate-100 flex gap-4">
@@ -137,7 +136,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                             </button>
                         </div>
 
-                        {/* Products List */}
+                        
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
                             {filteredProducts.length === 0 ? (
                                 <div className="text-center py-20 text-slate-400">
@@ -258,3 +257,4 @@ export default function ProductManager({ products: initialProducts, onClose }: P
         </div>
     );
 }
+

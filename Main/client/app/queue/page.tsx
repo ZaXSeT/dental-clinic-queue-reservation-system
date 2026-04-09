@@ -51,11 +51,8 @@ export default function QueueBoardPage() {
             try {
                 const data = await getQueueState();
 
-                const updatedRooms = [1, 2, 3].map((roomIdNum, index) => {
-                    const doc = doctors[index];
-                    const doctorName = doc ? doc.name : `Doctor ${roomIdNum}`;
-
-                    const baseRoom = { id: roomIdNum.toString(), name: doctorName };
+                const updatedRooms = [1, 2, 3].map((roomIdNum) => {
+                    const baseRoom = { id: roomIdNum.toString() };
 
                     const active = data.activeQueues.find((q: any) => q.roomId === baseRoom.id);
                     if (active) {
@@ -134,7 +131,11 @@ export default function QueueBoardPage() {
 
             <div className="flex-1 flex gap-8 p-8 overflow-hidden">
                 <section className="flex-1 grid grid-cols-3 gap-6">
-                    {rooms.map((room) => (
+                    {rooms.map((room, index) => {
+                        const doc = doctors[index];
+                        const doctorName = doc ? doc.name : `Doctor ${room.id}`;
+
+                        return (
                         <div key={room.id} className={`rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-500 ${room.status === 'Busy' ? 'bg-white shadow-xl shadow-primary/5 border-2 border-primary/10' : 'bg-slate-100/50 border border-slate-200 opacity-80'}`}>
                             {room.status === 'Busy' && <div className="absolute top-0 w-full h-2 bg-primary"></div>}
 
@@ -166,10 +167,10 @@ export default function QueueBoardPage() {
 
                             <div className="mt-auto pt-6 border-t border-slate-100 w-full">
                                 <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Doctor</div>
-                                <div className="text-xl font-bold text-slate-800">{room.name}</div>
+                                <div className="text-xl font-bold text-slate-800">{doctorName}</div>
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </section>
 
                 <aside className="w-[400px] h-full max-h-full flex flex-col bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-xl overflow-hidden">

@@ -6,7 +6,7 @@ const ROOMS = [1, 2, 3];
 
 const generateTimeSlots = () => {
   const slots: string[] = [];
-  // From 07:00 to 22:00
+
   for (let h = 7; h <= 22; h++) {
     slots.push(`${String(h).padStart(2, '0')}:00`);
     slots.push(`${String(h).padStart(2, '0')}:30`);
@@ -16,8 +16,7 @@ const generateTimeSlots = () => {
 
 export default function RoomGrid() {
   const timeSlots = useMemo(() => generateTimeSlots(), []);
-  
-  // State for schedule form
+
   const [showForm, setShowForm] = useState(false);
   const [selectedCell, setSelectedCell] = useState<{ room: number; time: string } | null>(null);
   const [schedules, setSchedules] = useState<{ [key: string]: string }>({}); // key: `${room}-${time}`, value: schedule name
@@ -41,7 +40,7 @@ export default function RoomGrid() {
 
   return (
     <div className="flex w-full">
-      {/* Time column */}
+      
       <div className="flex-shrink-0 w-16">
         <div className="h-12" />
         {timeSlots.map(time => (
@@ -55,10 +54,10 @@ export default function RoomGrid() {
         ))}
       </div>
 
-      {/* Rooms scrollable */}
+      
       <div className="flex-1 overflow-x-auto">
         <div className="min-w-[540px]">
-          {/* Room headers */}
+          
           <div className="grid grid-cols-3 gap-2 mb-2">
             {ROOMS.map(room => (
               <div
@@ -70,7 +69,7 @@ export default function RoomGrid() {
             ))}
           </div>
 
-          {/* Room slots */}
+          
           <div className="grid grid-cols-3 gap-2">
             {ROOMS.map(room => (
               <div key={room} className="flex flex-col">
@@ -97,7 +96,7 @@ export default function RoomGrid() {
         </div>
       </div>
 
-      {/* Schedule Form Modal */}
+      
       {showForm && selectedCell && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded shadow-md w-64">

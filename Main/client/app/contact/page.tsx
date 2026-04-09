@@ -57,10 +57,8 @@ export default function ContactPage() {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
-    // Update form state
     setForm((prev) => ({ ...prev, [name]: value }));
 
-    // Validate the field live
     const errorMsg = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
   };
@@ -77,14 +75,13 @@ export default function ContactPage() {
 
     if (Object.keys(newErrors).length === 0) {
       console.log("Form submitted:", form);
-      // reset form or send data
     }
   };
 
   return (
     <main className="min-h-screen bg-white text-slate-800 p-6 md:p-12 flex items-center justify-center">
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-2xl">
-        {/* LEFT SIDE */}
+        
         <div className="p-10 bg-slate-50 flex flex-col justify-center">
           <h1 className="text-4xl font-bold mb-6 text-slate-900">Get in Touch</h1>
           <p className="text-slate-500 mb-10">
@@ -125,13 +122,13 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* RIGHT SIDE FORM */}
+        
         <div className="relative h-full min-h-[400px] bg-white">
           <form autoComplete="off" onSubmit={handleSubmit} noValidate className="p-10 flex flex-col gap-6 h-full justify-center">
             <h3 className="text-xl font-bold text-slate-900">Send us a message</h3>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* First Name */}
+              
               <div>
                 <input
                   type="text"
@@ -150,7 +147,7 @@ export default function ContactPage() {
                 )}
               </div>
 
-              {/* Last Name */}
+              
               <div>
                 <input
                   type="text"
@@ -169,7 +166,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Email */}
+            
             <div>
               <input
                 type="text"
@@ -189,7 +186,7 @@ export default function ContactPage() {
               )}
             </div>
 
-            {/* Password */}
+            
             <div>
               <input
                 type="password"
@@ -204,7 +201,7 @@ export default function ContactPage() {
               {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
 
-            {/* Message */}
+            
             <div>
               <textarea
                 name="message"

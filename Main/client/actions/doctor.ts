@@ -1,10 +1,11 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { verifySession } from './auth';
 
 export async function getAllDoctors() {
+    noStore();
     try {
         const doctors = await prisma.doctor.findMany({
             orderBy: { name: 'asc' },

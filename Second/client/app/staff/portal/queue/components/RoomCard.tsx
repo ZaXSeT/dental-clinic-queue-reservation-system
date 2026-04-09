@@ -68,12 +68,7 @@ export default function RoomCard({
                             >
                                 <CheckCircle className="h-4 w-4" /> Finish
                             </button>
-                            {/* <button
-                                onClick={() => onRecall(active.id, active.name)}
-                                className="w-full py-3 bg-amber-50 hover:bg-amber-100 text-amber-600 font-bold rounded-xl border border-amber-200 transition-all flex items-center justify-center gap-2"
-                            >
-                                <Mic className="h-4 w-4" /> Recall
-                            </button> */}
+                            
                         </>
                     ) : (
                         <button

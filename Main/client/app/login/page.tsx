@@ -13,7 +13,6 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Redirect if already logged in
     useEffect(() => {
         fetch('/api/patient/me')
             .then(r => r.json())

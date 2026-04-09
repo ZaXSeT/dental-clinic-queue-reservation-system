@@ -159,7 +159,6 @@ export async function removePatientFromQueue(id: string) {
         const queueEntry = await prisma.queue.findUnique({ where: { id } });
         if (!queueEntry) return { success: false, error: "Not found" };
 
-        // Cancel the corresponding appointment if it exists today
         if (queueEntry.patientId) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -177,7 +176,6 @@ export async function removePatientFromQueue(id: string) {
             });
         }
 
-        // Delete the queue entirely
         await prisma.queue.delete({ where: { id } });
         
         revalidatePath('/staff/queue');
@@ -197,12 +195,10 @@ export async function resetQueue() {
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
-    // Delete all today's queues
     await prisma.queue.deleteMany({
         where: { date: { gte: today } }
     });
 
-    // Cancel all today's appointments so slots are freed for new bookings
     await prisma.appointment.deleteMany({
         where: {
             date: { gte: today, lt: tomorrow },
@@ -222,7 +218,6 @@ export async function addWalkIn(name: string, phone: string, doctorId?: string, 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // If time is selected, check if doctor has that slot free today
     if (doctorId && time) {
         const slotTaken = await prisma.appointment.findFirst({
             where: {
@@ -247,7 +242,6 @@ export async function addWalkIn(name: string, phone: string, doctorId?: string, 
     });
     const nextNumber = (lastQ?.number || 0) + 1;
 
-    // Create queue entry
     const q = await prisma.queue.create({
         data: {
             number: nextNumber,
@@ -259,10 +253,9 @@ export async function addWalkIn(name: string, phone: string, doctorId?: string, 
         }
     });
 
-    // Create an Appointment to block the specific schedule
     if (doctorId && time) {
-        // Need to create or find a dummy patient for walk-in appointment or just save it
-        // The walkin might not have a Patient object, so we'll create a quick guest
+
+
         let p = await prisma.patient.findFirst({ where: { name } });
         if (!p) {
             p = await prisma.patient.create({ data: { name, phone } });
@@ -283,3 +276,4 @@ export async function addWalkIn(name: string, phone: string, doctorId?: string, 
     revalidatePath('/staff/queue');
     return { success: true };
 }
+

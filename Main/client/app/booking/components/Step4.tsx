@@ -44,7 +44,6 @@ export default function Step4({
     const handleSubmit = async () => {
         if (!bookingData || !selectedDoc) return;
 
-        // Validation Regexes
         const nameRegex = /^[a-zA-Z\s\-']{2,50}$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^[0-9]{8,15}$/;
@@ -152,7 +151,7 @@ export default function Step4({
     return (
         <div className="w-full max-w-7xl mx-auto animate-in slide-in-from-right-8 duration-500 pb-20 pt-10">
             <div className="flex flex-col lg:flex-row gap-8 items-start">
-                {/* Form */}
+                
                 <div className="flex-1 bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-slate-200/50 w-full">
                     <button
                         onClick={onBack}
@@ -181,7 +180,7 @@ export default function Step4({
                         ))}
                     </div>
 
-                    {/* Patient Details */}
+                    
                     <div className="mb-10">
                         <h2 className="text-2xl font-bold text-slate-900 mb-2">Patient details</h2>
                         <p className="text-slate-500 text-sm mb-6">
@@ -250,7 +249,7 @@ export default function Step4({
                         </div>
                     </div>
 
-                    {/* Parent Details Conditional */}
+                    
                     {bookingFor === "Child or dependent" && (
                         <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
                             <h2 className="text-2xl font-bold text-slate-900 mb-6">Parent/Guardian details</h2>
@@ -304,7 +303,7 @@ export default function Step4({
                         </div>
                     )}
 
-                    {/* Contact Details */}
+                    
                     <div className="mb-10">
                         <h2 className="text-2xl font-bold text-slate-900 mb-6">Contact details</h2>
                         <div className="space-y-6">
@@ -333,7 +332,7 @@ export default function Step4({
                         </div>
                     </div>
 
-                    {/* Comments */}
+                    
                     <div className="mb-10">
                         <h2 className="text-2xl font-bold text-slate-900 mb-2">Other details</h2>
                         <div className="space-y-2">
@@ -366,7 +365,7 @@ export default function Step4({
                     </div>
                 </div>
 
-                {/* Summary Sidebar */}
+                
                 <div className="w-full lg:w-[400px] flex-shrink-0">
                     <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-xl shadow-slate-200/50 sticky top-6">
                         <h3 className="text-xl font-bold text-slate-900 mb-6">Appointment details</h3>

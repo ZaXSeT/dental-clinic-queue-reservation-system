@@ -71,7 +71,7 @@ export default function NewInvoicePage() {
 
     return (
         <div className="max-w-2xl mx-auto space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
+            
             <div className="flex items-center gap-4">
                 <Link
                     href="/staff/portal/billing"
@@ -93,14 +93,14 @@ export default function NewInvoicePage() {
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Patient Selection */}
+                    
                     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
                             <User className="w-4 h-4 text-primary" />
                             <span className="text-sm font-bold text-slate-700">Select Patient</span>
                         </div>
                         <div className="p-5 space-y-3">
-                            {/* Search */}
+                            
                             <div className="relative">
                                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                                 <input
@@ -112,7 +112,7 @@ export default function NewInvoicePage() {
                                 />
                             </div>
 
-                            {/* Selected badge */}
+                            
                             {selectedPatient && (
                                 <div className="flex items-center justify-between px-4 py-3 bg-primary/5 border border-primary/20 rounded-xl">
                                     <div className="flex items-center gap-3">
@@ -130,7 +130,7 @@ export default function NewInvoicePage() {
                                 </div>
                             )}
 
-                            {/* Patient list */}
+                            
                             {!selectedPatient && (
                                 <div className="max-h-48 overflow-y-auto space-y-1">
                                     {filteredPatients.length === 0 ? (
@@ -156,7 +156,7 @@ export default function NewInvoicePage() {
                         </div>
                     </div>
 
-                    {/* Treatment */}
+                    
                     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
                             <Stethoscope className="w-4 h-4 text-primary" />
@@ -183,7 +183,7 @@ export default function NewInvoicePage() {
                         </div>
                     </div>
 
-                    {/* Fee */}
+                    
                     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
                             <DollarSign className="w-4 h-4 text-primary" />
@@ -204,14 +204,14 @@ export default function NewInvoicePage() {
                         </div>
                     </div>
 
-                    {/* Error */}
+                    
                     {error && (
                         <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm font-semibold rounded-xl">
                             ⚠️ {error}
                         </div>
                     )}
 
-                    {/* Submit */}
+                    
                     <button
                         type="submit"
                         disabled={loading}

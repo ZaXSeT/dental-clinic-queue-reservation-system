@@ -125,7 +125,6 @@ export async function registerPatient(prevState: any, formData: FormData) {
         });
 
         if (existing) {
-            // If already registered but not yet verified, resend a new code
             if (!existing.emailVerified) {
                 const newToken = Math.floor(100000 + Math.random() * 900000).toString();
                 await prisma.patient.update({
@@ -142,7 +141,6 @@ export async function registerPatient(prevState: any, formData: FormData) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // Generate a 6 digit random number
         const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
         const patient = await prisma.patient.create({
@@ -186,7 +184,6 @@ export async function verifyRegistrationToken(email: string, token: string) {
             data: { emailVerified: true, verificationToken: null }
         });
 
-        // Now we log them in
         const jwtToken = await new SignJWT({ id: patient.id, email: patient.email, name: patient.name, role: 'patient' })
             .setProtectedHeader({ alg: 'HS256' })
             .setExpirationTime('24h')

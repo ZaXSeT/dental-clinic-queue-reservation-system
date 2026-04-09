@@ -15,13 +15,11 @@ export default function StaffLogin() {
     const [state, formAction] = useFormState(loginAction, initialState);
     const router = useRouter();
 
-    // Clear old sessionStorage when page loads
     useEffect(() => {
         sessionStorage.removeItem('staff_user');
         sessionStorage.removeItem('staff_auth');
     }, []);
 
-    // Save user info and redirect after login
     useEffect(() => {
         if (state.success && state.data) {
             sessionStorage.setItem('staff_auth', 'true');

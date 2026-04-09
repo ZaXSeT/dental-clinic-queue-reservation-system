@@ -115,7 +115,6 @@ export default function Step3({
                                                         const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
                                                         const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-                                                        // Convert slot time (e.g. "01:00 PM") to minutes since midnight
                                                         const slotToMinutes = (t: string) => {
                                                             const match = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
                                                             if (!match) return 0;

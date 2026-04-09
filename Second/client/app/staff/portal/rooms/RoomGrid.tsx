@@ -118,7 +118,7 @@ export default function RoomGrid({ patients, doctors, rooms }: Props) {
 
   return (
     <div className="flex w-full flex-col">
-      {/* Add Booking Button */}
+      
       <button
         onClick={() => setShowForm(!showForm)}
         className="mb-4 flex items-center gap-2 px-5 h-[48px] bg-primary text-white rounded-xl"
@@ -127,7 +127,7 @@ export default function RoomGrid({ patients, doctors, rooms }: Props) {
         Add Booking
       </button>
 
-      {/* Booking Form */}
+      
       {showForm && (
         <div className="mb-6 bg-white p-6 rounded-2xl border shadow-sm">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,9 +188,9 @@ export default function RoomGrid({ patients, doctors, rooms }: Props) {
         </div>
       )}
 
-      {/* Schedule Grid */}
+      
       <div className="flex w-full">
-        {/* Time column */}
+        
         <div className="flex-shrink-0 w-16">
           <div className="h-12" />
           {timeSlots.map(time => (
@@ -204,10 +204,10 @@ export default function RoomGrid({ patients, doctors, rooms }: Props) {
           ))}
         </div>
 
-        {/* Rooms scrollable */}
+        
         <div className="flex-1 overflow-x-auto">
           <div className="min-w-[540px]">
-            {/* Room headers */}
+            
             <div className="grid grid-cols-3 gap-2 mb-2">
               {displayedRooms.map(room => (
                 <div
@@ -219,7 +219,7 @@ export default function RoomGrid({ patients, doctors, rooms }: Props) {
               ))}
             </div>
 
-            {/* Room slots */}
+            
             <div className="grid grid-cols-3 gap-2">
               {displayedRooms.map(room => (
                 <div key={room.id} className="flex flex-col">

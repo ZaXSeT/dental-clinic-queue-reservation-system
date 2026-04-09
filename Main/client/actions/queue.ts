@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { verifySession } from "./auth";
 import { Queue, Patient, Doctor } from "@prisma/client";
 
@@ -11,6 +11,7 @@ type PopulatedQueue = Queue & {
 };
 
 export async function getQueueState() {
+    noStore();
     try {
         const allRecentQueues: PopulatedQueue[] = await prisma.queue.findMany({
             take: 50,

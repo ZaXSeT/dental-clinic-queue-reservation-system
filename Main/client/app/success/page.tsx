@@ -35,7 +35,7 @@ export default function SuccessPage() {
                     mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                 }`}
             >
-                {/* Success Icon */}
+                
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-[2rem] shadow-lg shadow-green-100 mb-6">
                         <CheckCircle2 className="w-12 h-12 text-green-600" />
@@ -50,9 +50,9 @@ export default function SuccessPage() {
                     </p>
                 </div>
 
-                {/* Booking Card */}
+                
                 <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-100 border border-slate-100 overflow-hidden mb-6">
-                    {/* Header strip */}
+                    
                     <div className="bg-[#009ae2] px-8 py-4 flex items-center justify-between">
                         <span className="text-white text-xs font-black uppercase tracking-widest">
                             Booking Confirmation
@@ -61,7 +61,7 @@ export default function SuccessPage() {
                     </div>
 
                     <div className="p-8 space-y-5">
-                        {/* Treatment */}
+                        
                         <div className="flex items-center gap-4 pb-5 border-b border-slate-50">
                             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                                 <Sparkles className="w-5 h-5 text-[#009ae2]" />
@@ -74,7 +74,7 @@ export default function SuccessPage() {
                             </div>
                         </div>
 
-                        {/* Date & Time */}
+                        
                         {(formattedDate || time) && (
                             <div className="flex items-center gap-4 pb-5 border-b border-slate-50">
                                 <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -96,7 +96,7 @@ export default function SuccessPage() {
                             </div>
                         )}
 
-                        {/* Doctor */}
+                        
                         <div className="flex items-center gap-4 pb-5 border-b border-slate-50">
                             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                                 <Phone className="w-5 h-5 text-[#009ae2]" />
@@ -109,7 +109,7 @@ export default function SuccessPage() {
                             </div>
                         </div>
 
-                        {/* Location */}
+                        
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                                 <MapPin className="w-5 h-5 text-[#009ae2]" />
@@ -127,7 +127,7 @@ export default function SuccessPage() {
                     </div>
                 </div>
 
-                {/* Next Steps */}
+                
                 <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-6 mb-6">
                     <h4 className="text-sm font-black text-blue-900 mb-4 flex items-center gap-2">
                         <Sparkles className="w-4 h-4" /> What to do next
@@ -148,7 +148,7 @@ export default function SuccessPage() {
                     </ul>
                 </div>
 
-                {/* CTA */}
+                
                 <button
                     onClick={() => router.push("/")}
                     className="w-full h-14 bg-[#009ae2] hover:bg-[#0088cc] active:scale-95 text-white rounded-2xl font-black text-sm uppercase tracking-[0.15em] shadow-xl shadow-[#009ae2]/30 transition-all flex items-center justify-center gap-3"

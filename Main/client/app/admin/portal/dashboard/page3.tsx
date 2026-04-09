@@ -176,7 +176,7 @@ export default function Dashboard() {
             <div className="flex justify-between items-end">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Daily Queue</h1>
-                    {/* <p className="text-slate-500">Manage 3 consultation rooms</p> */}
+                    
                 </div>
                 <div className="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 border border-green-200">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
