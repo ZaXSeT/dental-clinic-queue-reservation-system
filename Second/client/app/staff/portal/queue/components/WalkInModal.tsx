@@ -156,22 +156,12 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                                 className="w-full flex items-center gap-3 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-left hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                             >
                                 {selectedDoctor ? (
-                                    <>
-                                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColors[doctors.indexOf(selectedDoctor) % avatarColors.length]} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
-                                            {doctorInitials(selectedDoctor.name)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="font-bold text-slate-800 text-sm truncate">{selectedDoctor.name}</div>
-                                            <div className="text-xs text-slate-400">{selectedDoctor.specialization}</div>
-                                        </div>
-                                    </>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-bold text-slate-800 text-sm truncate">{selectedDoctor.name}</div>
+                                        <div className="text-xs text-slate-400">{selectedDoctor.specialization}</div>
+                                    </div>
                                 ) : (
-                                    <>
-                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                                            <Stethoscope className="w-4 h-4 text-slate-400" />
-                                        </div>
-                                        <span className="font-bold text-slate-400 text-sm">Any Available Doctor</span>
-                                    </>
+                                    <span className="font-bold text-slate-400 text-sm flex-1">Any Available Doctor</span>
                                 )}
                                 <ChevronDown className={`w-4 h-4 text-slate-400 ml-auto shrink-0 transition-transform duration-200 ${doctorDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
@@ -182,22 +172,16 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                                         onClick={() => { setDoctorId(""); setDoctorDropdownOpen(false); }}
                                         className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors ${!doctorId ? 'bg-primary/5' : ''}`}
                                     >
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                            <Stethoscope className="w-4 h-4 text-slate-400" />
-                                        </div>
                                         <span className="font-bold text-slate-600 text-sm flex-1">Any Available Doctor</span>
                                         {!doctorId && <Check className="w-4 h-4 text-primary shrink-0" />}
                                     </div>
                                     <div className="border-t border-slate-100" />
-                                    {doctors.map((doc, idx) => (
+                                    {doctors.map((doc) => (
                                         <div
                                             key={doc.id}
                                             onClick={() => { setDoctorId(doc.id); setDoctorDropdownOpen(false); }}
                                             className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors ${doctorId === doc.id ? 'bg-primary/5' : ''}`}
                                         >
-                                            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColors[idx % avatarColors.length]} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
-                                                {doctorInitials(doc.name)}
-                                            </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="font-bold text-slate-800 text-sm truncate">{doc.name}</div>
                                                 <div className="text-xs text-slate-400">{doc.specialization}</div>
@@ -222,9 +206,6 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                                         onClick={() => setTimeDropdownOpen(p => !p)}
                                         className="w-full flex items-center gap-3 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-left hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     >
-                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                                            <Clock className="w-4 h-4 text-slate-400" />
-                                        </div>
                                         <span className={`font-bold text-sm flex-1 ${timeField ? 'text-slate-800' : 'text-slate-400'}`}>
                                             {timeField || "No specific time"}
                                         </span>
