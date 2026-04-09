@@ -50,9 +50,9 @@ export default function ForgotPasswordPage() {
                     <div className="mb-8 inline-flex items-center justify-center p-6 bg-white/10 rounded-3xl backdrop-blur-md border border-white/20">
                         <KeyRound className="h-20 w-20 text-white" />
                     </div>
-                    <h1 className="text-5xl font-extrabold tracking-tight mb-6">Lupa Password?</h1>
+                    <h1 className="text-5xl font-extrabold tracking-tight mb-6">Forgot Password?</h1>
                     <p className="text-xl text-sky-100 font-medium leading-relaxed">
-                        Tenang, masukkan email kamu dan kami akan kirimkan kode OTP untuk mereset password.
+                        Don't worry — enter your email and we'll send you a 6-digit OTP code to reset your password.
                     </p>
                 </div>
             </div>
@@ -60,14 +60,14 @@ export default function ForgotPasswordPage() {
             {/* Right panel */}
             <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-20 xl:px-32 relative">
                 <Link href="/login" className="absolute top-8 left-8 lg:left-12 flex items-center gap-2 text-slate-500 hover:text-primary transition-colors font-bold text-sm tracking-wide bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 hover:shadow-md group">
-                    <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Kembali ke Login
+                    <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Back to Login
                 </Link>
 
                 <div className="mx-auto w-full max-w-sm lg:max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 fill-mode-both">
                     <div className="text-center lg:text-left mb-10">
                         <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Reset Password</h2>
                         <p className="mt-3 text-slate-500 text-base">
-                            Masukkan email yang terdaftar. Kami akan kirimkan kode OTP 6 digit ke email kamu.
+                            Enter your registered email address. We'll send a 6-digit OTP code to reset your password.
                         </p>
                     </div>
 
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
                             disabled={loading}
                             className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-2xl text-base font-bold text-white bg-primary hover:bg-sky-500 focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                         >
-                            {loading ? 'Mengirim OTP...' : 'Kirim Kode OTP'}
+                            {loading ? 'Sending OTP...' : 'Send OTP Code'}
                         </button>
                     </form>
                 </div>

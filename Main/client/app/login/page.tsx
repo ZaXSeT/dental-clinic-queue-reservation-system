@@ -13,7 +13,7 @@ export default function LoginPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [successMsg, setSuccessMsg] = useState(searchParams.get('reset') === 'success' ? 'Password berhasil direset! Silakan login.' : '');
+    const [successMsg, setSuccessMsg] = useState(searchParams.get('reset') === 'success' ? 'Password reset successful! Please sign in.' : '');
 
     useEffect(() => {
         fetch('/api/patient/me')
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
                         <div className="text-center">
                             <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:text-sky-500 transition-colors">
-                                Lupa password?
+                                Forgot password?
                             </Link>
                         </div>
                     </form>
