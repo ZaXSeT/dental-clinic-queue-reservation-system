@@ -119,6 +119,33 @@ export async function registerPatient(prevState: any, formData: FormData) {
         return { message: 'All fields are required' };
     }
 
+    // ── Server-side email domain validation ──
+    const VALID_DOMAINS = [
+        'gmail.com', 'yahoo.com', 'yahoo.co.id', 'hotmail.com', 'outlook.com',
+        'live.com', 'icloud.com', 'me.com', 'protonmail.com', 'mail.com',
+        'ymail.com', 'aol.com', 'msn.com', 'rocketmail.com',
+    ];
+    const TYPO_MAP: Record<string, string> = {
+        'gamil.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gmal.com': 'gmail.com',
+        'gmial.com': 'gmail.com', 'gmil.com': 'gmail.com', 'gnail.com': 'gmail.com',
+        'gmail.co': 'gmail.com', 'gmail.con': 'gmail.com',
+        'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahoo.con': 'yahoo.com',
+        'hotmial.com': 'hotmail.com', 'hotmail.con': 'hotmail.com', 'hotmal.com': 'hotmail.com',
+        'outloo.com': 'outlook.com', 'outlok.com': 'outlook.com',
+    };
+    const emailParts = email.split('@');
+    if (emailParts.length !== 2) {
+        return { message: 'Format email tidak valid.' };
+    }
+    const emailDomain = emailParts[1].toLowerCase();
+    if (TYPO_MAP[emailDomain]) {
+        return { message: `Domain email "${emailDomain}" tidak valid. Maksud kamu "${emailParts[0]}@${TYPO_MAP[emailDomain]}"?` };
+    }
+    if (!VALID_DOMAINS.includes(emailDomain)) {
+        return { message: `Domain email "${emailDomain}" tidak dikenali. Gunakan email yang valid (contoh: @gmail.com, @yahoo.com).` };
+    }
+    // ── End validation ──
+
     try {
         const existing = await prisma.patient.findFirst({
             where: { email, password: { not: null } },
