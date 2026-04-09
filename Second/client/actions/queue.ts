@@ -121,7 +121,10 @@ export async function callNextPatient(roomId: string, doctorId?: string) {
     }
 
     if (!nextPatient) {
-        nextPatient = allWaiting[0];
+        return {
+            success: false,
+            message: "No eligible patients for this doctor. Patients in queue have requested a different doctor."
+        };
     }
 
     try {

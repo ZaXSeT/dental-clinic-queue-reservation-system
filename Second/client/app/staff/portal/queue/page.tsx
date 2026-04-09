@@ -97,7 +97,11 @@ export default function QueueControlPage() {
             }?`,
             "info",
             async () => {
-                await callNextPatient(roomId, assignedDoctor?.id);
+                const res = await callNextPatient(roomId, assignedDoctor?.id);
+                if (!res.success && res.message) {
+                    alert(res.message);
+                    return;
+                }
                 await refreshData();
             }
         );
