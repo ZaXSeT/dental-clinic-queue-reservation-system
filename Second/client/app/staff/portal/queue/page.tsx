@@ -87,12 +87,17 @@ export default function QueueControlPage() {
             return;
         }
 
+        const roomIndex = parseInt(roomId) - 1;
+        const assignedDoctor = doctors[roomIndex];
+
         triggerConfirmation(
             "Call Next Patient?",
-            `Are you sure you want to call the next patient to Room ${roomId}?`,
+            `Are you sure you want to call the next patient to Room ${roomId}${
+                assignedDoctor ? ` (${assignedDoctor.name})` : ''
+            }?`,
             "info",
             async () => {
-                await callNextPatient(roomId);
+                await callNextPatient(roomId, assignedDoctor?.id);
                 await refreshData();
             }
         );

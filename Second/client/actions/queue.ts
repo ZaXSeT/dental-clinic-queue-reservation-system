@@ -64,14 +64,65 @@ export async function callNextPatient(roomId: string, doctorId?: string) {
     const session = await verifySession();
     if (!session) return { success: false, error: "Unauthorized" };
 
-    const nextPatient = await prisma.queue.findFirst({
-        where: {
-            status: { in: ['waiting', 'WAITING'] }
+    const waitingStatuses = ['waiting', 'WAITING'];
+
+    const allWaiting = await prisma.queue.findMany({
+        where: { status: { in: waitingStatuses } },
+        include: {
+            patient: {
+                include: {
+                    appointments: {
+                        where: {
+                            status: { not: 'cancelled' },
+                            date: {
+                                gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                                lt: new Date(new Date().setHours(23, 59, 59, 999)),
+                            }
+                        },
+                        orderBy: { time: 'asc' },
+                        take: 1,
+                    }
+                }
+            }
         },
         orderBy: { number: 'asc' }
     });
 
-    if (!nextPatient) return { success: false, message: "No patients waiting" };
+    if (allWaiting.length === 0) return { success: false, message: "No patients waiting" };
+
+    let nextPatient = null;
+
+    if (doctorId) {
+        const forThisDoctor = allWaiting.filter(q => q.doctorId === doctorId);
+
+        const withAppointment = forThisDoctor.filter(q =>
+            q.patient?.appointments && q.patient.appointments.length > 0
+        );
+
+        if (withAppointment.length > 0) {
+            withAppointment.sort((a, b) => {
+                const tA = a.patient?.appointments?.[0]?.time || '99:99';
+                const tB = b.patient?.appointments?.[0]?.time || '99:99';
+                return tA.localeCompare(tB);
+            });
+            nextPatient = withAppointment[0];
+        }
+
+        if (!nextPatient && forThisDoctor.length > 0) {
+            nextPatient = forThisDoctor[0];
+        }
+    }
+
+    if (!nextPatient) {
+        const anyDoctor = allWaiting.filter(q => !q.doctorId);
+        if (anyDoctor.length > 0) {
+            nextPatient = anyDoctor[0];
+        }
+    }
+
+    if (!nextPatient) {
+        nextPatient = allWaiting[0];
+    }
 
     try {
         await prisma.queue.updateMany({
@@ -89,18 +140,18 @@ export async function callNextPatient(roomId: string, doctorId?: string) {
                 status: 'treating',
                 updatedAt: new Date(),
                 roomId: roomId,
-                doctorId: doctorId || null
+                doctorId: doctorId || nextPatient.doctorId || null
             }
         });
 
         revalidatePath('/staff/queue');
         revalidatePath('/queue');
-        revalidatePath('/dashboard');
         return { success: true };
     } catch (error) {
         return { success: false, error };
     }
 }
+
 
 export async function recallPatient(id: string) {
     const session = await verifySession();
