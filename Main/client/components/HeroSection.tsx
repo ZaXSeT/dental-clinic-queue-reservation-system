@@ -42,8 +42,8 @@ export default function HeroSection() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-5 items-center justify-center">
-                        <Link href="#contact" className="group relative inline-flex h-16 items-center justify-center overflow-hidden rounded-full bg-primary px-10 font-bold text-white duration-300 hover:bg-sky-600 transition-all shadow-xl hover:shadow-primary/40 hover:-translate-y-1">
-                            <span className="mr-3 text-xl">Get In Touch</span>
+                        <Link href="/booking" className="group relative inline-flex h-16 items-center justify-center overflow-hidden rounded-full bg-primary px-10 font-bold text-white duration-300 hover:bg-sky-600 transition-all shadow-xl hover:shadow-primary/40 hover:-translate-y-1">
+                            <span className="mr-3 text-xl">Book Queue</span>
                             <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                         </Link>
                         <Link href="/queue" className="group relative inline-flex h-16 items-center justify-center overflow-hidden rounded-full bg-white/10 backdrop-blur-md border border-white/30 px-10 font-bold text-white duration-300 hover:bg-white/20 transition-all shadow-lg hover:shadow-white/10 hover:-translate-y-1">

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { School, ScrollText, FileText, LayoutDashboard, Users, LogOut, Tv, Calendar, Settings, Stethoscope, ChevronRight, Mail, CreditCard } from "lucide-react";
 
 import { clsx } from "clsx";
-import { logoutAction } from "@/actions/auth";
+import { logoutAction, getSessionUser } from "@/actions/auth";
 
 export default function StaffPortalLayout({
     children,
@@ -22,32 +22,42 @@ export default function StaffPortalLayout({
     const handleLogout = () => {
         startTransition(async () => {
             await logoutAction();
-            sessionStorage.removeItem('staff_auth');
             sessionStorage.removeItem('staff_user');
             router.push('/staff/login');
         });
     };
 
     useEffect(() => {
-        const storedUser = sessionStorage.getItem('staff_user');
-
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        // STRICT TAB-CLOSE LOGOUT: Jika tidak ada flag di memory tab ini, anggap mereka belum login
+        if (!sessionStorage.getItem('staff_auth')) {
+            startTransition(async () => {
+                await logoutAction();
+                router.push('/staff/login');
+            });
+            return;
         }
 
-        setIsLoaded(true);
-    }, [pathname]);
+        const fetchUser = async () => {
+            const serverUser = await getSessionUser();
+            if (serverUser) {
+                setUser(serverUser);
+                // Sinkronisasikan ke sessionStorage kalau-kalau perlu
+                sessionStorage.setItem('staff_user', JSON.stringify(serverUser));
+            } else {
+                // Sengaja push ke login jika sesi server mati
+                router.push('/staff/login');
+            }
+            setIsLoaded(true);
+        };
+        
+        fetchUser();
+    }, [pathname, router]);
 
     if (!isLoaded) return null;
 
     const basePath = '/staff/portal';
 
     const navItems = [
-        {
-            label: 'Dashboard',
-            href: `${basePath}/dashboard`,
-            icon: LayoutDashboard,
-        },
         {
             label: "Queue Control",
             href: `${basePath}/queue`,
@@ -63,11 +73,6 @@ export default function StaffPortalLayout({
             label: "Doctors",
             href: `${basePath}/doctors`,
             icon: Stethoscope,
-        },
-        {
-            label: "Messages",
-            href: `${basePath}/Messages`,
-            icon: Mail,
         },
         {
             label: "Billing",
@@ -138,17 +143,8 @@ export default function StaffPortalLayout({
                 <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                            {pathname !== '/staff/portal/dashboard' && (
-                                <button
-                                    onClick={() => router.push('/staff/portal/dashboard')}
-                                    className="p-1.5 -ml-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                                    title="Back to Dashboard"
-                                >
-                                    <ChevronRight className="h-5 w-5 rotate-180" />
-                                </button>
-                            )}
                             <h2 className="text-xl font-bold text-slate-800">
-                                {navItems.find(i => i.href === pathname)?.label || "Dashboard"}
+                                {navItems.find(i => i.href === pathname)?.label || "Main View"}
                             </h2>
                         </div>
                         <span className="text-sm text-slate-500">Welcome back, {user?.name}</span>

@@ -157,12 +157,13 @@ export default function BillingPage() {
                                                 <Plus className="w-4 h-4" /> Items
                                             </button>
                                             <Link
-                                                href={`/admin/billing/${inv.dbId}`}
+                                                href={`/staff/portal/billing/${inv.dbId}`}
                                                 className="p-2.5 bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all shadow-sm"
                                                 title="View/Print Invoice"
                                             >
                                                 <Printer className="w-5 h-5" />
                                             </Link>
+                                            
                                         </td>
                                     </tr>
                                 ))

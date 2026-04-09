@@ -16,7 +16,15 @@ export async function getQueueState() {
             take: 50,
             orderBy: { createdAt: 'desc' },
             include: {
-                patient: true,
+                patient: {
+                    include: {
+                        appointments: {
+                            where: { status: { not: 'cancelled' } },
+                            orderBy: { date: 'desc' },
+                            take: 1
+                        }
+                    }
+                },
                 doctor: true
             }
         });
@@ -138,6 +146,43 @@ export async function skipPatient(id: string) {
             data: { status: 'skipped' }
         });
         revalidatePath('/staff/queue');
+    } catch (e) {
+        return { success: false };
+    }
+}
+
+export async function removePatientFromQueue(id: string) {
+    const session = await verifySession();
+    if (!session) return { success: false, error: "Unauthorized" };
+
+    try {
+        const queueEntry = await prisma.queue.findUnique({ where: { id } });
+        if (!queueEntry) return { success: false, error: "Not found" };
+
+        // Cancel the corresponding appointment if it exists today
+        if (queueEntry.patientId) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            await prisma.appointment.updateMany({
+                where: {
+                    patientId: queueEntry.patientId,
+                    date: {
+                        gte: today,
+                        lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+                    },
+                    status: 'scheduled'
+                },
+                data: { status: 'cancelled' }
+            });
+        }
+
+        // Delete the queue entirely
+        await prisma.queue.delete({ where: { id } });
+        
+        revalidatePath('/staff/queue');
+        revalidatePath('/queue');
+        revalidatePath('/booking'); // refresh slot availability on booking page
         return { success: true };
     } catch (e) {
         return { success: false };
@@ -150,21 +195,51 @@ export async function resetQueue() {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
+    // Delete all today's queues
     await prisma.queue.deleteMany({
         where: { date: { gte: today } }
     });
 
+    // Cancel all today's appointments so slots are freed for new bookings
+    await prisma.appointment.deleteMany({
+        where: {
+            date: { gte: today, lt: tomorrow },
+            status: { in: ['scheduled', 'cancelled'] }
+        }
+    });
+
     revalidatePath('/staff/queue');
+    revalidatePath('/booking');
     return { success: true };
 }
 
-export async function addWalkIn(name: string, phone: string) {
+export async function addWalkIn(name: string, phone: string, doctorId?: string, time?: string) {
     const session = await verifySession();
     if (!session) return { success: false, error: "Unauthorized" };
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    // If time is selected, check if doctor has that slot free today
+    if (doctorId && time) {
+        const slotTaken = await prisma.appointment.findFirst({
+            where: {
+                doctorID: doctorId,
+                date: {
+                    gte: today,
+                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+                },
+                time: time,
+                status: { not: "cancelled" }
+            }
+        });
+        
+        if (slotTaken) {
+            return { success: false, error: "Slot already booked by another patient" };
+        }
+    }
 
     const lastQ = await prisma.queue.findFirst({
         where: { date: { gte: today } },
@@ -172,15 +247,38 @@ export async function addWalkIn(name: string, phone: string) {
     });
     const nextNumber = (lastQ?.number || 0) + 1;
 
-    await prisma.queue.create({
+    // Create queue entry
+    const q = await prisma.queue.create({
         data: {
             number: nextNumber,
             name: name,
             phone: phone,
             status: 'waiting',
             date: new Date(),
+            doctorId: doctorId || null,
         }
     });
+
+    // Create an Appointment to block the specific schedule
+    if (doctorId && time) {
+        // Need to create or find a dummy patient for walk-in appointment or just save it
+        // The walkin might not have a Patient object, so we'll create a quick guest
+        let p = await prisma.patient.findFirst({ where: { name } });
+        if (!p) {
+            p = await prisma.patient.create({ data: { name, phone } });
+        }
+        
+        await prisma.appointment.create({
+            data: {
+                date: today,
+                time: time,
+                status: "scheduled",
+                patientId: p.id,
+                doctorID: doctorId,
+                treatment: "Walk-In"
+            }
+        });
+    }
 
     revalidatePath('/staff/queue');
     return { success: true };

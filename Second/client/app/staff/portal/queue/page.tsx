@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getQueueState, callNextPatient, completePatient, recallPatient, skipPatient, resetQueue, addWalkIn } from "@/actions/queue";
+import { getQueueState, callNextPatient, completePatient, recallPatient, resetQueue, addWalkIn, removePatientFromQueue } from "@/actions/queue";
 import { getAllDoctors } from "@/actions/doctor";
 
 import RoomCard from "./components/RoomCard";
@@ -121,17 +121,7 @@ export default function QueueControlPage() {
         );
     };
 
-    const handleSkip = (id: string) => {
-        triggerConfirmation(
-            "Skip Patient",
-            "Are you sure you want to skip this patient? They will be marked as skipped.",
-            "danger",
-            async () => {
-                await skipPatient(id);
-                await refreshData();
-            }
-        );
-    };
+
 
     const handleReset = () => {
         triggerConfirmation(
@@ -145,10 +135,14 @@ export default function QueueControlPage() {
         );
     };
 
-    const handleSubmitWalkIn = async (name: string, phone: string) => {
+    const handleSubmitWalkIn = async (name: string, phone: string, doctorId?: string, time?: string) => {
         setIsSubmittingWalkIn(true);
         try {
-            await addWalkIn(name, phone);
+            const res = await addWalkIn(name, phone, doctorId, time);
+            if (!res.success) {
+                alert(res.error || "Failed to add walk-in patient");
+                return;
+            }
             await refreshData();
             setShowWalkInModal(false);
         } catch (error) {
@@ -157,6 +151,17 @@ export default function QueueControlPage() {
             setIsSubmittingWalkIn(false);
         }
     };
+
+    const handleRemove = async (id: string) => {
+        setLoading(true);
+        const res = await removePatientFromQueue(id);
+        if (res.success) {
+            await refreshData();
+        } else {
+            alert("Failed to remove patient");
+        }
+        setLoading(false);
+    }
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-12 relative">
@@ -194,7 +199,7 @@ export default function QueueControlPage() {
                 <NextInLine
                     next={data.next}
                     waitingCount={data.waitingCount}
-                    onSkip={handleSkip}
+                    onRemove={handleRemove}
                 />
 
                 <QuickActions
@@ -208,6 +213,7 @@ export default function QueueControlPage() {
                 onClose={() => setShowWalkInModal(false)}
                 onSubmit={handleSubmitWalkIn}
                 isSubmitting={isSubmittingWalkIn}
+                doctors={doctors}
             />
 
             <ConfirmationModal

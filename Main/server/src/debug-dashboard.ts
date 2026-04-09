@@ -10,12 +10,12 @@ async function main() {
     console.log("Checking appointments where date >= ", today);
 
     const appointments = await prisma.appointment.findMany({
-        where: { date: { gte: today } }
+        where: { dateTime: { gte: today } }
     });
 
     console.log("Total matched in Dashboard Query (date >= today):", appointments.length);
     appointments.forEach(app => {
-        console.log(`- ID: ${app.id}, Date: ${app.date.toISOString()}, Time: ${app.time}, Status: '${app.status}'`);
+        console.log(`- ID: ${app.id}, DateTime: ${app.dateTime.toISOString()}, Status: '${app.status}'`);
     });
 }
 

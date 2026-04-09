@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
 
     const doctor = await prisma.doctor.findFirst({
       where: { name: dentistName },
+      select: { id: true, name: true }
     });
 
     if (!doctor) {
@@ -25,32 +26,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let patient = null;
-
-    if (patientInfo.email && patientInfo.email.trim() !== "") {
-        patient = await prisma.patient.findFirst({
-            where: { email: patientInfo.email },
-        });
-    }
-
+    // Always use the typed name from the booking form.
+    // We NEVER reuse or update the account's profile patient record.
+    // The account profile (login) is separate from appointment patient records.
     const typedName = `${patientInfo.firstName} ${patientInfo.lastName}`.trim();
 
-    if (!patient) {
-      patient = await prisma.patient.create({
+    const patient = await prisma.patient.create({
         data: {
-          name: typedName,
-          email: patientInfo.email || null,
-          phone: patientInfo.phone,
-          birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,
-          address: patientInfo.zipCode || null,
-          medicalHistory: patientInfo.comments || null,
+            name: typedName,
+            // Store email from form - safe because booking records are always
+            // separate from auth account profiles (different patient records)
+            email: patientInfo.email || null,
+            phone: patientInfo.phone || null,
+            birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,
+            address: patientInfo.zipCode || null,
+            medicalHistory: notes || null,
+            bookingFor: bookingFor || "Myself",
+            patientType: patientType || "new",
+            guardianName: patientInfo.guardian ? `${patientInfo.guardian.firstName} ${patientInfo.guardian.lastName}` : null,
         },
-      });
-    } else if (typedName !== "" && typedName !== patient.name) {
-      patient = await prisma.patient.update({
-          where: { id: patient.id },
-          data: { name: typedName, phone: patientInfo.phone || patient.phone }
-      });
+    });
+
+    const slotTaken = await prisma.appointment.findFirst({
+      where: {
+        doctorID: doctor.id,
+        date: new Date(date),
+        time,
+        status: { not: "cancelled" },
+      },
+    });
+
+    if (slotTaken) {
+      return NextResponse.json(
+        { success: false, error: "Slot ini sudah dibooking oleh pasien lain. Silakan pilih waktu yang lain." },
+        { status: 409 }
+      );
     }
 
     const appointment = await prisma.appointment.create({
@@ -59,6 +69,7 @@ export async function POST(req: NextRequest) {
         time,
         treatment,
         patientId: patient.id,
+        doctorID: doctor.id,
         notes,
       },
     });

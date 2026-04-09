@@ -56,7 +56,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
             {}
             <div className="flex items-center justify-between">
-                <Link href="/admin/billing" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-bold transition-all group">
+                <Link href="/staff/portal/billing" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-bold transition-all group">
                     <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                     Back to Billing
                 </Link>
@@ -80,13 +80,11 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
             </div>
 
             {}
-            <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden print:shadow-none print:border-none">
+            <div id="invoice-print" className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden print:shadow-none print:border-none">
                 {}
                 <div className="p-12 border-b border-slate-100 flex justify-between items-start">
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                            <Stethoscope className="w-10 h-10" />
-                        </div>
+                        
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-none uppercase">Go Dental Clinic</h2>
                             <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2">Certified Dental Health Services</p>
@@ -201,22 +199,8 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                             <li>Simpan kuitansi ini untuk klaim asuransi jika diperlukan.</li>
                         </ol>
                     </div>
-                    <div className="flex flex-col items-center justify-center">
-                        <div className="w-32 h-32 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center relative group">
-                            <div className="absolute inset-2 border border-slate-100 rounded-xl bg-white/50 animate-pulse"></div>
-                            <Receipt className="w-12 h-12 text-slate-200 group-hover:text-primary transition-colors" />
-                            <p className="absolute bottom-2 text-slate-300 font-black uppercase text-[8px]">Clinic Stamp</p>
-                        </div>
-                    </div>
-                    <div className="flex flex-col items-center text-center">
-                        <p className="font-black text-slate-400 uppercase tracking-widest mb-12">Authorized Cashier</p>
-                        <div className="w-32 h-px bg-slate-300 mb-2"></div>
-                        <p className="font-black text-slate-900 uppercase">Septiani</p>
-                    </div>
                 </div>
             </div>
-
-            {}
             <div className="text-center">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">N.P.W.P Clinic: 01.234.567.8-901.000 • Issued by Go Dental Financial Dept.</p>
             </div>

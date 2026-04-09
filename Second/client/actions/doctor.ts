@@ -7,7 +7,13 @@ import { verifySession } from './auth';
 export async function getAllDoctors() {
     try {
         const doctors = await prisma.doctor.findMany({
-            orderBy: { name: 'asc' }
+            orderBy: { name: 'asc' },
+            include: {
+                appointments: {
+                    where: { status: { not: "cancelled" } },
+                    select: { date: true, time: true }
+                }
+            }
         });
         return { success: true, data: doctors };
     } catch (error) {

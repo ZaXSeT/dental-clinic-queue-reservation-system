@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, User, Phone, Mail, Calendar, MapPin, Plus, X, Hash } from 'lucide-react';
+import { Search, User, Phone, Mail, Calendar, MapPin, Plus, X, Hash, Stethoscope, Clock, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function PatientsClient({ patients }: { patients: any[] }) {
@@ -178,16 +178,17 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                 {searchTerm && <span className="text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">"{searchTerm}"</span>}
             </div>
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
+                <div className="overflow-x-auto overflow-y-auto max-h-[650px] scrollbar-custom">
+                    <table className="w-full min-w-max text-left relative">
+                        <thead className="sticky top-0 z-10 bg-white shadow-sm ring-1 ring-slate-100">
                             <tr className="border-b border-slate-100">
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Patient</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Contact</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">Visits</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Last Visit</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Registered</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Address</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Appointment</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -206,10 +207,33 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                             ) : (
                                 filteredPatients.map((patient, idx) => {
                                     const visits = patient._count?.appointments || 0;
+                                    const isNewPatient = (patient as any).patientType !== 'returning';
                                     return (
                                         <tr key={patient.id} className="hover:bg-slate-50/70 transition-colors group">
                                             <td className="px-6 py-4">
-                                                <span className="font-semibold text-slate-800 text-sm">{patient.name}</span>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="font-semibold text-slate-800 text-sm">{patient.name}</span>
+                                                    {patient.bookingFor && patient.bookingFor !== "Myself" && (
+                                                        <div className="flex items-center gap-1 mt-0.5">
+                                                            <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-100">
+                                                                {patient.bookingFor}
+                                                            </span>
+                                                            {patient.guardianName && (
+                                                                <span className="text-xs text-slate-400 italic flex items-center gap-1">
+                                                                    (Guardian: {patient.guardianName})
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {(patient.medicalHistory || patient.appointments?.[0]?.notes) && (
+                                                        <div className="flex items-start gap-1.5 mt-2 text-xs text-slate-500 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100/50 w-full max-w-[280px]">
+                                                            <MessageSquare className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+                                                            <span className="italic line-clamp-3 break-words" title={patient.medicalHistory || patient.appointments?.[0]?.notes}>
+                                                                "{patient.medicalHistory || patient.appointments?.[0]?.notes}"
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="space-y-1">
@@ -242,21 +266,55 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                                                    <Calendar className="w-3.5 h-3.5 text-slate-300" />
-                                                    {patient.appointments?.[0]
-                                                        ? format(new Date(patient.appointments[0].date), 'dd MMM yyyy')
-                                                        : <span className="text-slate-300 italic text-xs">Never</span>}
+                                                <div className="flex flex-col gap-1">
+                                                    {patient.appointments?.[0] ? (
+                                                        <>
+                                                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                                                                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                                                {format(new Date(patient.appointments[0].date), 'dd MMM yyyy')}
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                                                <Clock className="w-3.5 h-3.5 text-slate-300" />
+                                                                {patient.appointments[0].time}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1.5 text-xs text-slate-400 italic">
+                                                            <Calendar className="w-3.5 h-3.5 opacity-50" />
+                                                            Never
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-slate-500">
                                                 {format(new Date(patient.createdAt), 'dd MMM yyyy')}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-start gap-1.5 text-sm text-slate-500 max-w-[160px]">
-                                                    <MapPin className="w-3.5 h-3.5 text-slate-300 flex-shrink-0 mt-0.5" />
-                                                    <span className="truncate">{patient.address || <span className="text-slate-300 italic">—</span>}</span>
-                                                </div>
+                                                {patient.appointments?.[0] ? (
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                                                            <Stethoscope className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                                                            Dr. {patient.appointments[0].doctor?.name || '—'}
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                                                            <Clock className="w-3 h-3 flex-shrink-0" />
+                                                            {patient.appointments[0].time} · {format(new Date(patient.appointments[0].date), 'dd MMM yyyy')}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-slate-300 italic text-xs">No appointment</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {isNewPatient ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-violet-50 text-violet-600 border border-violet-100">
+                                                        ✦ New Patient
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                        ↩ Returning
+                                                    </span>
+                                                )}
                                             </td>
                                         </tr>
                                     );

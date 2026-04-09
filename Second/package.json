@@ -3,9 +3,10 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev:client": "cd client && npm run dev",
+        "dev:public": "cd ../Main/client && npm run dev",
+        "dev:admin": "cd client && npm run dev",
         "dev:server": "cd server && npm run start:dev",
-        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" --names \"SERVER,CLIENT\" --prefix-colors \"blue,green\"",
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:public\" \"npm run dev:admin\" --names \"SERVER,PUBLIC,ADMIN\" --prefix-colors \"blue,green,magenta\"",
         "install:all": "cd client && npm install && cd ../server && npm install"
     },
     "devDependencies": {

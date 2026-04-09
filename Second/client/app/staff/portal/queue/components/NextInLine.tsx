@@ -1,14 +1,14 @@
 "use client";
 
-import { SkipForward } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface NextInLineProps {
     next: any[];
     waitingCount: number;
-    onSkip: (id: string) => void;
+    onRemove?: (id: string) => void;
 }
 
-export default function NextInLine({ next, waitingCount, onSkip }: NextInLineProps) {
+export default function NextInLine({ next, waitingCount, onRemove }: NextInLineProps) {
     return (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
             <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
@@ -26,15 +26,26 @@ export default function NextInLine({ next, waitingCount, onSkip }: NextInLinePro
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="font-bold text-slate-700">{p.name || p.patient?.name || "Guest"}</span>
-                                    <span className="text-xs text-slate-400">General Checkup</span>
+                                    <span className="text-xs text-slate-400">
+                                        {p.patient?.appointments?.[0]?.time ? (
+                                            <span className="font-medium text-slate-500 mr-1">{p.patient.appointments[0].time} • </span>
+                                        ) : null}
+                                        {p.doctor ? `Doc: ${p.doctor.name}` : "General Checkup"}
+                                    </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => onSkip(p.id)}
-                                    className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors" title="Skip">
-                                    <SkipForward className="h-4 w-4" />
-                                </button>
+                            <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                {onRemove && (
+                                    <button
+                                        onClick={() => {
+                                            if (confirm(`Remove ${p.name || 'this patient'} from queue? Their appointment slot will be freed up.`)) {
+                                                onRemove(p.id);
+                                            }
+                                        }}
+                                        className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors" title="Remove & Cancel Slot">
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))

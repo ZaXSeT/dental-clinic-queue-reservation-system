@@ -65,9 +65,16 @@ async function main() {
     ];
 
     for (const doc of doctors) {
-        const existing = await prisma.doctor.findFirst({ where: { name: doc.name } });
+        let existing = await prisma.doctor.findFirst({ where: { name: doc.name } });
         if (!existing) {
-            await prisma.doctor.create({ data: doc });
+            existing = await prisma.doctor.findFirst({ where: { username: doc.name.toLowerCase().replace(/[^a-z0-9]/g, '') } });
+        }
+        
+        (doc as any).password = await bcrypt.hash('password123', 10);
+        (doc as any).username = doc.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        if (!existing) {
+            await prisma.doctor.create({ data: doc as any });
             console.log(`Created doctor: ${doc.name}`);
         } else {
             console.log(`Skipped existing doctor: ${doc.name}`);
@@ -160,6 +167,23 @@ async function main() {
     });
 
     console.log("Updated WalterBlack to Owner role.");
+    }
+
+    const rosni = await prisma.admin.findUnique({
+        where: { username: "Rosni" },
+    });
+
+    if (!rosni) {
+        const hashedPassword = await bcrypt.hash("password123", 10);
+        await prisma.admin.create({
+            data: {
+                username: "Rosni",
+                password: hashedPassword,
+                name: "Rosni",
+                role: "admin",
+            },
+        });
+        console.log("Created Admin/Staff: Rosni");
     }
     const products = [
         { name: 'Amoxicillin 500mg', price: 45000, description: 'Antibiotic for dental infections' },

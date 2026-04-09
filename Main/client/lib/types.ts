@@ -4,6 +4,7 @@ export interface Doctor {
     specialization: string;
     image: string | null;
     availability: string | any;
+    bookedSlots?: { date: Date | string; time: string }[];
 }
 
 export interface DateInfo {

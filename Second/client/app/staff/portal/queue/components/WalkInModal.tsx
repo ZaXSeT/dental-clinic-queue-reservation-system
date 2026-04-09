@@ -6,14 +6,54 @@ import { createPortal } from "react-dom";
 interface WalkInModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (name: string, phone: string) => Promise<void>;
+    onSubmit: (name: string, phone: string, doctorId?: string, time?: string) => Promise<void>;
     isSubmitting: boolean;
+    doctors: any[];
 }
 
-export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting }: WalkInModalProps) {
+export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, doctors }: WalkInModalProps) {
     const [name, setName] = (require("react")).useState("");
     const [phone, setPhone] = (require("react")).useState("");
+    const [doctorId, setDoctorId] = (require("react")).useState("");
+    const [timeField, setTimeField] = (require("react")).useState("");
     const [phoneError, setPhoneError] = (require("react")).useState("");
+
+    const selectedDoctor = (require("react")).useMemo(() => {
+        return doctors.find(d => d.id === doctorId);
+    }, [doctorId, doctors]);
+
+    const availableSlots = (require("react")).useMemo(() => {
+        if (!selectedDoctor) return [];
+        const today = new Date();
+        const dayStr = today.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+        
+        let parsedAvailability: Record<string, string[]> = {};
+        try {
+            parsedAvailability = typeof selectedDoctor.availability === 'string' ? JSON.parse(selectedDoctor.availability) : selectedDoctor.availability || {};
+        } catch(e) {}
+        
+        const allDaySlots: string[] = parsedAvailability[dayStr] || [];
+        
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const currentTimeStr = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+
+        return allDaySlots.filter(t => {
+            if (t < currentTimeStr) return false; // Passed time
+            
+            const isBooked = selectedDoctor.appointments?.some((app: any) => {
+                const slDate = new Date(app.date);
+                const slDateStr = `${slDate.getFullYear()}-${String(slDate.getMonth() + 1).padStart(2, '0')}-${String(slDate.getDate()).padStart(2, '0')}`;
+                return slDateStr === todayStr && app.time === t;
+            });
+            
+            return !isBooked;
+        });
+    }, [selectedDoctor]);
+
+    (require("react")).useEffect(() => {
+        setTimeField("");
+    }, [doctorId]);
+
 
     if (!isOpen) return null;
 
@@ -32,7 +72,7 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting }:
             return;
         }
 
-        await onSubmit(name, phone);
+        await onSubmit(name, phone, doctorId || undefined, timeField || undefined);
     };
 
     return createPortal(
@@ -84,6 +124,42 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting }:
                         </div>
                         {phoneError && <p className="text-xs font-bold text-red-500 pl-1">{phoneError}</p>}
                     </div>
+
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Select Doctor <span className="text-slate-300 font-normal normal-case">(Optional)</span></label>
+                        <select
+                            value={doctorId}
+                            onChange={(e) => setDoctorId(e.target.value)}
+                            className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        >
+                            <option value="">Any Available Doctor</option>
+                            {doctors.map(doc => (
+                                <option key={doc.id} value={doc.id}>{doc.name} - {doc.specialization}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {doctorId && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Select Time <span className="text-slate-300 font-normal normal-case">(Optional)</span></label>
+                            {availableSlots.length > 0 ? (
+                                <select
+                                    value={timeField}
+                                    onChange={(e) => setTimeField(e.target.value)}
+                                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                >
+                                    <option value="">No specific time</option>
+                                    {availableSlots.map(t => (
+                                        <option key={t} value={t}>{t}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <div className="w-full px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 text-sm font-medium">
+                                    No available timeslots today for this doctor.
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     <div className="pt-4 flex gap-3">
                         <button

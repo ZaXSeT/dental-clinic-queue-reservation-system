@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
     const url = request.nextUrl;
     const { pathname } = url;
     const hostname = request.headers.get('host') || '';
-    const token = request.cookies.get('staff_token')?.value;
+    const token = request.cookies.get('staff_auth_token')?.value;
 
     const isStaffSubdomain = hostname.startsWith('staff.');
     const isStaffPath = pathname.startsWith('/staff');
@@ -13,13 +13,13 @@ export function middleware(request: NextRequest) {
     if (isStaffSubdomain) {
         const isLoginPage = pathname === '/staff/login' || pathname === '/staff';
 
-        // if (!token && !isLoginPage) {
-        //     const redirectUrl = new URL('/staff/login', request.url);
-        //     return NextResponse.redirect(redirectUrl);
-        // }
+        if (!token && !isLoginPage) {
+            const redirectUrl = new URL('/staff/login', request.url);
+            return NextResponse.redirect(redirectUrl);
+        }
 
-        if (pathname === '/' || pathname === '/dashboard') {
-            url.pathname = '/staff/portal/dashboard';
+        if (pathname === '/' || pathname === '/queue') {
+            url.pathname = '/staff/portal/queue';
             return NextResponse.rewrite(url);
         }
 
@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
         //     return NextResponse.rewrite(url);
         // }
 
-        const staffPortalPaths = ['/dashboard', '/queue', '/Messages', '/appointments', '/patients', '/doctors', '/billing', '/settings'];
+        const staffPortalPaths = ['/queue', '/Messages', '/appointments', '/patients', '/doctors', '/billing', '/settings'];
         const matchedPortalPath = staffPortalPaths.find(p => pathname === p || pathname.startsWith(p + '/'));
         if (matchedPortalPath) {
             url.pathname = `/staff/portal${pathname}`;
@@ -44,13 +44,17 @@ export function middleware(request: NextRequest) {
     if (isStaffPath) {
         const isLoginPage = pathname === '/staff/login';
 
-        // if (!token && !isLoginPage) {
-        //     return NextResponse.redirect(new URL('/staff/login', request.url));
-        // }
+        if (!token && !isLoginPage) {
+            return NextResponse.redirect(new URL('/staff/login', request.url));
+        }
 
         if (pathname === '/staff' || pathname === '/staff/') {
-            return NextResponse.redirect(new URL('/staff/portal/dashboard', request.url));
+            return NextResponse.redirect(new URL('/staff/portal/queue', request.url));
         }
+    }
+
+    if (pathname === '/') {
+       return NextResponse.redirect(new URL('/staff/portal/queue', request.url));
     }
 
     return NextResponse.next();

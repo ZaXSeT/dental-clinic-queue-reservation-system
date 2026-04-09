@@ -45,7 +45,12 @@ export default function RoomCard({
                     <div className="flex-1 flex flex-col justify-center py-4">
                         <div className="text-6xl font-black text-primary mb-2 tracking-tighter">#{active.number}</div>
                         <div className="text-xl font-bold text-slate-900 line-clamp-1">{active.name || active.patient?.name || "Guest"}</div>
-                        <div className="text-sm text-slate-400 mt-1">Check-up</div>
+                        <div className="text-sm text-slate-400 mt-1">
+                            {active.patient?.appointments?.[0]?.time ? (
+                                <span>{active.patient.appointments[0].time} • </span>
+                            ) : null}
+                            Consultation
+                        </div>
                     </div>
                 ) : (
                     <div className="flex-1 flex flex-col justify-center py-8 opacity-50">

@@ -7,7 +7,7 @@ async function main() {
     const appointments = await prisma.appointment.findMany();
     console.log("Total appointments:", appointments.length);
     appointments.forEach(app => {
-        console.log(`- ID: ${app.id}, Date: ${app.date}, Time: ${app.time}, Status: '${app.status}'`);
+        console.log(`- ID: ${app.id}, DateTime: ${app.dateTime}, Status: '${app.status}'`);
     });
 }
 

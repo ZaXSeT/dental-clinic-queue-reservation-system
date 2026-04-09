@@ -30,7 +30,7 @@ export default function StaffLogin() {
         role: state.data.role,
         username: state.data.username
     }));
-            router.push("/staff/portal/dashboard");
+            router.push("/staff/portal/queue");
         }
     }, [state.success, state.data, router]);
 
@@ -52,6 +52,7 @@ export default function StaffLogin() {
                             type="text"
                             name="username"
                             required
+                            autoComplete="off"
                             className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
                             placeholder="username"
                         />
@@ -62,6 +63,7 @@ export default function StaffLogin() {
                             type="password"
                             name="password"
                             required
+                            autoComplete="new-password"
                             className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
                             placeholder="••••••"
                         />

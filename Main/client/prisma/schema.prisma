@@ -32,10 +32,16 @@ model Patient {
   id             String        @id @default(uuid())
   name           String
   phone          String?
-  email          String?       @unique
+  email          String?
+  password       String?
+  emailVerified  Boolean       @default(false)
+  verificationToken String?
   birthDate      DateTime?
   address        String?
   medicalHistory String?
+  bookingFor     String?       @default("Myself")
+  patientType    String?       @default("new")
+  guardianName   String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   appointments   Appointment[]
@@ -83,8 +89,8 @@ model Doctor {
   availability   String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  password       String
-  username       String        @unique
+  password       String?
+  username       String?       @unique
   appointments   Appointment[]
   queues         Queue[]
 }

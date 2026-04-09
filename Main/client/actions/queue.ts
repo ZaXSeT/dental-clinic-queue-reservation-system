@@ -185,3 +185,45 @@ export async function addWalkIn(name: string, phone: string) {
     revalidatePath('/admin/queue');
     return { success: true };
 }
+
+export async function bookQueuePatient(doctorId?: string) {
+    const { verifyPatientSession } = await import('./patientAuth');
+    const session = await verifyPatientSession();
+    if (!session) return { success: false, error: "Unauthorized: Please login first." };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const existing = await prisma.queue.findFirst({
+        where: { 
+            patientId: session.id,
+            date: { gte: today },
+            status: { in: ['waiting', 'treating', 'WAITING', 'TREATING'] }
+        }
+    });
+
+    if (existing) {
+        return { success: false, error: "You already have an active queue for today." };
+    }
+
+    const lastQ = await prisma.queue.findFirst({
+        where: { date: { gte: today } },
+        orderBy: { number: 'desc' }
+    });
+    const nextNumber = (lastQ?.number || 0) + 1;
+
+    await prisma.queue.create({
+        data: {
+            number: nextNumber,
+            patientId: session.id,
+            name: session.name,
+            status: 'waiting',
+            date: new Date(),
+            doctorId: doctorId || null
+        }
+    });
+
+    revalidatePath('/queue');
+    revalidatePath('/admin/queue');
+    return { success: true, queueNumber: nextNumber };
+}

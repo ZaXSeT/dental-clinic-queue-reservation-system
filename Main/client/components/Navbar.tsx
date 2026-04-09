@@ -2,13 +2,30 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { LogOut, User } from "lucide-react";
 
 export default function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
+    const [patient, setPatient] = useState<{ name: string; email: string } | null>(null);
+    const [sessionChecked, setSessionChecked] = useState(false);
 
-    const getLinkHref = (id: string) => {
-        return pathname === '/' ? `#${id}` : `/?scrollTo=${id}`;
+    useEffect(() => {
+        fetch('/api/patient/me')
+            .then(r => r.json())
+            .then(d => {
+                setPatient(d.loggedIn ? { name: d.name, email: d.email } : null);
+                setSessionChecked(true);
+            })
+            .catch(() => setSessionChecked(true));
+    }, [pathname]);
+
+    const handleLogout = async () => {
+        await fetch('/api/patient/logout', { method: 'POST' });
+        setPatient(null);
+        router.push('/');
+        router.refresh();
     };
 
     return (
@@ -43,8 +60,27 @@ export default function Navbar() {
                             </>
                         )}
                     </div>
-                    <div className="flex gap-4">
-                        <Link href="https://wa.me/6280000000000" className="px-5 py-2.5 rounded-full bg-primary hover:bg-sky-600 text-white font-bold transition-all shadow-lg hover:shadow-primary/40">
+                    <div className="flex items-center gap-3">
+                        {sessionChecked && patient ? (
+                            <>
+                                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+                                    <User className="w-3.5 h-3.5 text-primary" />
+                                    <span className="text-xs font-bold text-slate-600 max-w-[90px] truncate">{patient.name}</span>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    title="Log Out"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-red-200 text-red-500 hover:bg-red-50 font-bold text-xs transition-all"
+                                >
+                                    <LogOut className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:block">Log Out</span>
+                                </button>
+                            </>
+                        ) : null}
+                        <Link
+                            href="/booking"
+                            className="px-5 py-2.5 rounded-full bg-primary hover:bg-sky-600 text-white font-bold transition-all shadow-lg hover:shadow-primary/40 text-sm"
+                        >
                             Book Now
                         </Link>
                     </div>

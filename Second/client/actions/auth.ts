@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import bcrypt from 'bcryptjs';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key-change-this';
 const key = new TextEncoder().encode(SECRET_KEY);
@@ -24,8 +25,8 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
             return { message: 'Invalid credentials' };
         }
 
-        // Direct password comparison without bcrypt
-        if (password !== admin.password) {
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) {
             return { message: 'Invalid credentials' };
         }
 
@@ -34,11 +35,10 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
             .setExpirationTime('24h')
             .sign(key);
 
-        cookies().set('admin_token', token, {
+        cookies().set('staff_auth_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            path: '/',
-            maxAge: 60 * 60 * 24 // 24 hours
+            path: '/'
         });
 
         return {
@@ -56,7 +56,7 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
 }
 
 export async function verifySession() {
-    const token = cookies().get('admin_token')?.value;
+    const token = cookies().get('staff_auth_token')?.value;
     if (!token) return null;
 
     try {
@@ -70,5 +70,20 @@ export async function verifySession() {
 }
 
 export async function logoutAction() {
-    cookies().delete('admin_token');
+    cookies().delete('staff_auth_token');
+    cookies().delete('staff_token'); // Clean up old cookie just in case
+}
+
+export async function getSessionUser() {
+    const session = await verifySession();
+    if (!session) return null;
+    try {
+        const admin = await prisma.admin.findUnique({
+            where: { id: session.id },
+            select: { name: true, role: true, username: true }
+        });
+        return admin;
+    } catch {
+        return null;
+    }
 }
