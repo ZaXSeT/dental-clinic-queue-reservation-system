@@ -5,7 +5,58 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { registerPatient } from '@/actions/patientAuth';
 
-import { ArrowLeft, Sparkles, User, Mail, Phone, Lock } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, Lock } from 'lucide-react';
+
+// Daftar domain email yang valid
+const VALID_DOMAINS = [
+    'gmail.com', 'yahoo.com', 'yahoo.co.id', 'hotmail.com', 'outlook.com',
+    'live.com', 'icloud.com', 'me.com', 'protonmail.com', 'mail.com',
+    'ymail.com', 'aol.com', 'msn.com', 'rocketmail.com',
+];
+
+// Peta typo umum → domain yang benar
+const TYPO_MAP: Record<string, string> = {
+    'gamil.com': 'gmail.com',
+    'gmai.com': 'gmail.com',
+    'gmal.com': 'gmail.com',
+    'gmial.com': 'gmail.com',
+    'gmil.com': 'gmail.com',
+    'gnail.com': 'gmail.com',
+    'gmail.co': 'gmail.com',
+    'gmail.con': 'gmail.com',
+    'yaho.com': 'yahoo.com',
+    'yahooo.com': 'yahoo.com',
+    'yahoo.con': 'yahoo.com',
+    'hotmial.com': 'hotmail.com',
+    'hotmail.con': 'hotmail.com',
+    'hotmal.com': 'hotmail.com',
+    'outloo.com': 'outlook.com',
+    'outlok.com': 'outlook.com',
+};
+
+function validateEmailDomain(email: string): { valid: boolean; suggestion?: string; message?: string } {
+    const parts = email.split('@');
+    if (parts.length !== 2) return { valid: false, message: 'Format email tidak valid.' };
+
+    const domain = parts[1].toLowerCase();
+
+    if (TYPO_MAP[domain]) {
+        return {
+            valid: false,
+            suggestion: `${parts[0]}@${TYPO_MAP[domain]}`,
+            message: `Domain "${domain}" tidak dikenali. Maksud kamu "${parts[0]}@${TYPO_MAP[domain]}"?`,
+        };
+    }
+
+    if (!VALID_DOMAINS.includes(domain)) {
+        return {
+            valid: false,
+            message: `Domain email "${domain}" tidak dikenali. Gunakan email yang valid (contoh: @gmail.com, @yahoo.com).`,
+        };
+    }
+
+    return { valid: true };
+}
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -14,6 +65,28 @@ export default function RegisterPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [emailSuggestion, setEmailSuggestion] = useState('');
+
+    const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const email = e.target.value.trim();
+        if (!email) return;
+        const result = validateEmailDomain(email);
+        if (!result.valid) {
+            setEmailError(result.message || '');
+            setEmailSuggestion(result.suggestion || '');
+        } else {
+            setEmailError('');
+            setEmailSuggestion('');
+        }
+    };
+
+    const handleEmailChange = () => {
+        if (emailError) {
+            setEmailError('');
+            setEmailSuggestion('');
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -21,8 +94,18 @@ export default function RegisterPage() {
         setError('');
 
         const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
         const password = formData.get('password') as string;
         const confirmPassword = formData.get('confirm_password') as string;
+
+        // Validasi domain email sebelum submit
+        const emailCheck = validateEmailDomain(email);
+        if (!emailCheck.valid) {
+            setEmailError(emailCheck.message || '');
+            setEmailSuggestion(emailCheck.suggestion || '');
+            setLoading(false);
+            return;
+        }
 
         if (password !== confirmPassword) {
             setError('Passwords do not match');
@@ -105,10 +188,32 @@ export default function RegisterPage() {
                             <label className="block text-sm font-bold text-slate-700 mb-2">Email address</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-400" />
+                                    <Mail className={`h-5 w-5 ${emailError ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="email" type="email" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="you@example.com" />
+                                <input
+                                    name="email"
+                                    type="email"
+                                    required
+                                    onBlur={handleEmailBlur}
+                                    onChange={handleEmailChange}
+                                    className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 transition-all sm:text-sm font-medium outline-none ${
+                                        emailError
+                                            ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                                            : 'border-slate-200 focus:ring-primary/10 focus:border-primary'
+                                    }`}
+                                    placeholder="you@gmail.com"
+                                />
                             </div>
+                            {emailError && (
+                                <div className="mt-2 bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl text-sm font-medium">
+                                    ⚠️ {emailError}
+                                    {emailSuggestion && (
+                                        <span className="block mt-1 font-bold text-red-700">
+                                            Gunakan: {emailSuggestion}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -117,7 +222,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Phone className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="phone" type="tel" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="+1 (555) 000-0000" />
+                                <input name="phone" type="tel" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="+62 812 3456 7890" />
                             </div>
                         </div>
 

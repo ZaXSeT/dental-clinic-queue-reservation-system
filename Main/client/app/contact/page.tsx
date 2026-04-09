@@ -1,3 +1,4 @@
+"use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 

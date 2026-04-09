@@ -71,7 +71,7 @@ export async function loginAction(
       data: {
         name: user.name,
         role: user.role,
-        username: user.username,
+        username: user.username ?? '',
       },
     };
   } catch (error) {

@@ -128,7 +128,7 @@ export async function registerPatient(prevState: any, formData: FormData) {
             if (!existing.emailVerified) {
                 const newToken = Math.floor(100000 + Math.random() * 900000).toString();
                 await prisma.patient.update({
-                    where: { email },
+                    where: { id: existing.id },
                     data: { verificationToken: newToken }
                 });
 
