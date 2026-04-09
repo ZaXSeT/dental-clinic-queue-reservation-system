@@ -145,7 +145,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                             <Calendar className="w-3.5 h-3.5 text-slate-400" />
                                                             {format(new Date(patient.appointments[0].date), 'dd MMM yyyy')}
                                                         </div>
-                                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium italic">
+                                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
                                                             <Clock className="w-3 h-3 text-slate-300" />
                                                             {patient.appointments[0].time}
                                                         </div>
@@ -160,7 +160,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col gap-0.5">
                                                     <span className="text-xs font-semibold text-slate-600">{format(new Date(patient.createdAt), 'dd MMM yyyy')}</span>
-                                                    <span className="text-[10px] text-slate-400 font-medium italic tracking-tight">{format(new Date(patient.createdAt), 'HH:mm')}</span>
+                                                    <span className="text-[10px] text-slate-400 font-medium tracking-tight">{format(new Date(patient.createdAt), 'HH:mm')}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
