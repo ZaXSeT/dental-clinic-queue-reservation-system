@@ -13,6 +13,7 @@ export default function LoginPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [successMsg, setSuccessMsg] = useState(searchParams.get('reset') === 'success' ? 'Password reset successful! Please sign in.' : '');
 
@@ -32,18 +33,29 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setError('');
+        setEmailError('');
         setPasswordError('');
 
         const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
         const password = formData.get('password') as string;
+
+        let hasError = false;
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setEmailError('Format email tidak valid (harus mengandung @ dan domain).');
+            hasError = true;
+        }
 
         if (password.length < 8) {
             setPasswordError('Password minimal 8 karakter.');
-            setLoading(false);
-            return;
-        }
-        if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+            hasError = true;
+        } else if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
             setPasswordError('Password salah atau tidak riwayat kriteria (min 8 karakter, huruf besar, dan angka).');
+            hasError = true;
+        }
+
+        if (hasError) {
             setLoading(false);
             return;
         }
@@ -109,15 +121,20 @@ export default function LoginPage() {
                         </p>
                     </div>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Email address</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-400" />
+                                    <Mail className={`h-5 w-5 ${emailError ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="email" type="email" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="you@example.com" />
+                                <input name="email" type="email" required onChange={() => setEmailError('')} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 transition-all sm:text-sm font-medium outline-none ${emailError ? 'border-red-400 focus:ring-red-100 focus:border-red-400' : 'border-slate-200 focus:ring-primary/10 focus:border-primary'}`} placeholder="you@example.com" />
                             </div>
+                            {emailError && (
+                                <div className="mt-2 text-red-600 text-sm font-medium flex items-center gap-1">
+                                    ⚠️ {emailError}
+                                </div>
+                            )}
                         </div>
 
                         <div>
