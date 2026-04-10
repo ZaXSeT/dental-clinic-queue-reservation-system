@@ -149,9 +149,9 @@ export default function RegisterPage() {
         const res = await registerPatient(null, formData);
 
         if (res?.success && res?.requiresVerification) {
-            router.push(`/verify-email?email=${encodeURIComponent(res.email || '')}&redirect=${encodeURIComponent(redirect)}`);
+            window.location.href = `/verify-email?email=${encodeURIComponent(res.email || '')}&redirect=${encodeURIComponent(redirect)}`;
         } else if (res?.success) {
-            router.push(redirect);
+            window.location.href = redirect;
         } else {
             setError(res?.message || 'Registration failed');
         }

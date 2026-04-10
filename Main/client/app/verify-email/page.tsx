@@ -28,7 +28,7 @@ function VerifyForm() {
         if (res?.success) {
             setSuccess(true);
             setTimeout(() => {
-                router.push(redirect);
+                window.location.href = redirect;
             }, 2000);
         } else {
             setError(res?.message || 'Verification failed');
