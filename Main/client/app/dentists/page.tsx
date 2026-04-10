@@ -61,12 +61,7 @@ const DentistCard = ({ dentist }: { dentist: Dentist }) => {
                     </div>
                 </div>
 
-                <Link
-                    href="/booking"
-                    className="block w-full text-center py-3 bg-slate-50 text-slate-900 font-bold rounded-lg border border-slate-200 hover:bg-primary hover:text-white hover:border-primary transition-colors mt-auto"
-                >
-                    Book Appointment
-                </Link>
+
             </div>
         </div>
     );
