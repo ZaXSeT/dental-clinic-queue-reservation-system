@@ -120,7 +120,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } else if (res?.success) {
         const params = new URLSearchParams(window.location.search);
-        router.push(params.get('callbackUrl') || '/');
+        // FORCE a hard navigation so the Next.js router cache is cleared
+        // and middleware authentically recognizes the new cookie.
+        window.location.href = params.get('callbackUrl') || '/';
     } else {
         setEmailError(res?.message || 'Login failed');
     }
