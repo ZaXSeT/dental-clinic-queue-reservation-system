@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, User, UserPlus, Calendar, MapPin } from "lucide-react";
 import { BookingSelection, Doctor, BookingForType, PatientType } from "@/lib/types";
 
@@ -38,7 +38,6 @@ export default function Step4({
     const [isEmailLocked, setIsEmailLocked] = useState(false);
 
     // Auto-fill logged-in patient details
-    import { useEffect } from "react";
     useEffect(() => {
         fetch('/api/patient/me')
             .then(res => res.json())
