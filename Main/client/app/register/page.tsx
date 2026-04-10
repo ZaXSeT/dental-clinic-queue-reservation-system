@@ -94,7 +94,9 @@ export default function RegisterPage() {
         setError('');
 
         const formData = new FormData(e.currentTarget);
+        const name = formData.get('name') as string;
         const email = formData.get('email') as string;
+        const phone = formData.get('phone') as string;
         const password = formData.get('password') as string;
         const confirmPassword = formData.get('confirm_password') as string;
 
@@ -103,6 +105,25 @@ export default function RegisterPage() {
         if (!emailCheck.valid) {
             setEmailError(emailCheck.message || '');
             setEmailSuggestion(emailCheck.suggestion || '');
+            setLoading(false);
+            return;
+        }
+
+        if (name.trim().length < 3) {
+            setError('Nama harus memiliki minimal 3 karakter.');
+            setLoading(false);
+            return;
+        }
+
+        const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,10}$/;
+        if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
+            setError('Format nomor HP tidak valid (harus diawali 08, 628, atau +628 dan panjang 10-14 angka).');
+            setLoading(false);
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Password harus memiliki minimal 6 karakter.');
             setLoading(false);
             return;
         }
@@ -180,7 +201,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <User className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="name" type="text" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="John Doe" />
+                                <input name="name" type="text" required minLength={3} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="John Doe" />
                             </div>
                         </div>
 
@@ -222,7 +243,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Phone className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="phone" type="tel" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="+62 812 3456 7890" />
+                                <input name="phone" type="tel" required pattern="^(\+62|62|0)8[1-9][0-9]{6,10}$" title="Format nomor HP harus diawali 08, 628, atau +628 dan panjang minimal 10 angka" className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="081234567890" />
                             </div>
                         </div>
 
@@ -232,7 +253,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="password" type="password" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="password" type="password" required minLength={6} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
                             </div>
                         </div>
 
@@ -242,7 +263,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="confirm_password" type="password" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="confirm_password" type="password" required minLength={6} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
                             </div>
                         </div>
 
