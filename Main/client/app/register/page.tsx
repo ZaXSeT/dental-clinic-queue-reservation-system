@@ -260,7 +260,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Phone className={`h-5 w-5 ${phoneError ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="phone" type="tel" required onChange={() => setPhoneError('')} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 transition-all sm:text-sm font-medium outline-none ${phoneError ? 'border-red-400 focus:ring-red-100 focus:border-red-400' : 'border-slate-200 focus:ring-primary/10 focus:border-primary'}`} placeholder="081234567890" />
+                                <input name="phone" type="tel" required maxLength={13} onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, ''); }} onChange={() => setPhoneError('')} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 transition-all sm:text-sm font-medium outline-none ${phoneError ? 'border-red-400 focus:ring-red-100 focus:border-red-400' : 'border-slate-200 focus:ring-primary/10 focus:border-primary'}`} placeholder="081234567890" />
                             </div>
                             {phoneError && (
                                 <div className="mt-2 text-red-600 text-sm font-medium flex items-center gap-1">
