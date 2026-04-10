@@ -13,6 +13,7 @@ export default function LoginPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [successMsg, setSuccessMsg] = useState(searchParams.get('reset') === 'success' ? 'Password reset successful! Please sign in.' : '');
 
     useEffect(() => {
@@ -31,12 +32,13 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setError('');
+        setPasswordError('');
 
         const formData = new FormData(e.currentTarget);
         const password = formData.get('password') as string;
 
         if (password.length < 6) {
-            setError('Password minimal 6 karakter.');
+            setPasswordError('Password minimal 6 karakter.');
             setLoading(false);
             return;
         }
@@ -117,10 +119,15 @@ export default function LoginPage() {
                             <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-400" />
+                                    <Lock className={`h-5 w-5 ${passwordError ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="password" type="password" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="password" type="password" required onChange={() => setPasswordError('')} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 transition-all sm:text-sm font-medium outline-none ${passwordError ? 'border-red-400 focus:ring-red-100 focus:border-red-400' : 'border-slate-200 focus:ring-primary/10 focus:border-primary'}`} placeholder="••••••••" />
                             </div>
+                            {passwordError && (
+                                <div className="mt-2 text-red-600 text-sm font-medium flex items-center gap-1">
+                                    ⚠️ {passwordError}
+                                </div>
+                            )}
                         </div>
 
                         {successMsg && (
