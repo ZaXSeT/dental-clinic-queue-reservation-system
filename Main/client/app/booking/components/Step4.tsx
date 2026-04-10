@@ -35,6 +35,27 @@ export default function Step4({
     const [comments, setComments] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [isEmailLocked, setIsEmailLocked] = useState(false);
+
+    // Auto-fill logged-in patient details
+    import { useEffect } from "react";
+    useEffect(() => {
+        fetch('/api/patient/me')
+            .then(res => res.json())
+            .then(data => {
+                if (data.loggedIn && data.email) {
+                    setEmail(data.email);
+                    setIsEmailLocked(true);
+                    
+                    if (data.name) {
+                        const parts = data.name.trim().split(" ");
+                        setFirstName(parts[0] || "");
+                        setLastName(parts.slice(1).join(" ") || "");
+                    }
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     const [gFirstName, setGFirstName] = useState("");
     const [gLastName, setGLastName] = useState("");
@@ -313,9 +334,10 @@ export default function Step4({
                                     type="email"
                                     maxLength={100}
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    readOnly={isEmailLocked}
+                                    onChange={(e) => !isEmailLocked && setEmail(e.target.value)}
                                     placeholder="e.g. john@email.com"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                    className={`w-full p-3 rounded-xl border border-slate-200 outline-none transition-all font-medium ${isEmailLocked ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2]'}`}
                                 />
                             </div>
                             <div className="space-y-2">

@@ -28,19 +28,29 @@ export async function POST(req: NextRequest) {
 
     const typedName = `${patientInfo.firstName} ${patientInfo.lastName}`.trim();
 
-    const patient = await prisma.patient.create({
-        data: {
-            name: typedName,
-            email: patientInfo.email || null,
-            phone: patientInfo.phone || null,
-            birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,
-            address: patientInfo.zipCode || null,
-            medicalHistory: notes || null,
-            bookingFor: bookingFor || "Myself",
-            patientType: patientType || "new",
-            guardianName: patientInfo.guardian ? `${patientInfo.guardian.firstName} ${patientInfo.guardian.lastName}` : null,
-        },
-    });
+    // Prevent duplicate patients, search for an existing account first!
+    let patient = null;
+    if (patientInfo.email) {
+        patient = await prisma.patient.findFirst({
+            where: { email: patientInfo.email },
+        });
+    }
+
+    if (!patient) {
+        patient = await prisma.patient.create({
+            data: {
+                name: typedName,
+                email: patientInfo.email || null,
+                phone: patientInfo.phone || null,
+                birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,
+                address: patientInfo.zipCode || null,
+                medicalHistory: notes || null,
+                bookingFor: bookingFor || "Myself",
+                patientType: patientType || "new",
+                guardianName: patientInfo.guardian ? `${patientInfo.guardian.firstName} ${patientInfo.guardian.lastName}` : null,
+            },
+        });
+    }
 
     const slotTaken = await prisma.appointment.findFirst({
       where: {
