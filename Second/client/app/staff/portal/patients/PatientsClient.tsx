@@ -91,7 +91,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                                 </span>
                                                             )}
                                                             {patient.guardianName && (
-                                                                <span className="text-[9px] text-slate-400 italic truncate max-w-[100px]">via {patient.guardianName}</span>
+                                                                <span className="text-[9px] text-slate-500 font-semibold truncate max-w-[120px]">Parent/Guardian: {patient.guardianName}</span>
                                                             )}
                                                         </div>
                                                         {(patient.medicalHistory || patient.appointments?.[0]?.notes) && (
