@@ -90,10 +90,12 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                                     <Users className="w-2.5 h-2.5" /> {bookingFor}
                                                                 </span>
                                                             )}
-                                                            {patient.guardianName && (
-                                                                <span className="text-[9px] text-slate-500 font-semibold truncate max-w-[120px]">Parent/Guardian: {patient.guardianName}</span>
-                                                            )}
                                                         </div>
+                                                        {patient.guardianName && (
+                                                            <span className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                                                                Parent/Guardian: {patient.guardianName}
+                                                            </span>
+                                                        )}
                                                         {(patient.medicalHistory || patient.appointments?.[0]?.notes) && (
                                                             <div className="flex items-start gap-1.5 mt-2 text-xs text-slate-500 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100/50 w-full max-w-[280px]">
                                                                 <MessageSquare className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
