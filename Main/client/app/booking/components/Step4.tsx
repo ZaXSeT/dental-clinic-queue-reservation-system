@@ -36,6 +36,7 @@ export default function Step4({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [isEmailLocked, setIsEmailLocked] = useState(false);
+    const [isPhoneLocked, setIsPhoneLocked] = useState(false);
 
     // Auto-fill logged-in patient details
     useEffect(() => {
@@ -50,6 +51,11 @@ export default function Step4({
                         const parts = data.name.trim().split(" ");
                         setFirstName(parts[0] || "");
                         setLastName(parts.slice(1).join(" ") || "");
+                    }
+
+                    if (data.phone) {
+                        setPhone(data.phone);
+                        setIsPhoneLocked(true);
                     }
                 }
             })
@@ -345,9 +351,10 @@ export default function Step4({
                                     type="tel"
                                     maxLength={15}
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                                    readOnly={isPhoneLocked}
+                                    onChange={(e) => !isPhoneLocked && setPhone(e.target.value.replace(/\D/g, ""))}
                                     placeholder="e.g. +62 812 3456 7890"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                    className={`w-full p-3 rounded-xl border border-slate-200 outline-none transition-all font-medium ${isPhoneLocked ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2]'}`}
                                 />
                             </div>
                         </div>
