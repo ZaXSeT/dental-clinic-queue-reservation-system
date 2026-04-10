@@ -121,14 +121,20 @@ export default function RegisterPage() {
             hasError = true;
         }
 
-        const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,10}$/;
-        if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
-            setPhoneError('Format nomor HP tidak valid (harus diawali 08, 628, atau +628 dan panjang 10-14 angka).');
+        const phoneRegex = /^08[0-9]{5,11}$/;
+        if (!phoneRegex.test(phone)) {
+            setPhoneError('Nomor HP harus dimulai dengan 08, hanya angka, dan memiliki panjang 7 hingga 13 digit.');
             hasError = true;
         }
 
-        if (password.length < 6) {
-            setPasswordError('Password harus memiliki minimal 6 karakter.');
+        if (password.length < 8) {
+            setPasswordError('Password harus memiliki minimal 8 karakter.');
+            hasError = true;
+        } else if (!/[A-Z]/.test(password)) {
+            setPasswordError('Password harus mengandung minimal satu huruf besar (uppercase).');
+            hasError = true;
+        } else if (!/[0-9]/.test(password)) {
+            setPasswordError('Password harus mengandung minimal satu angka.');
             hasError = true;
         } else if (password !== confirmPassword) {
             setPasswordError('Password dan konfirmasi password tidak cocok.');

@@ -37,8 +37,13 @@ export default function LoginPage() {
         const formData = new FormData(e.currentTarget);
         const password = formData.get('password') as string;
 
-        if (password.length < 6) {
-            setPasswordError('Password minimal 6 karakter.');
+        if (password.length < 8) {
+            setPasswordError('Password minimal 8 karakter.');
+            setLoading(false);
+            return;
+        }
+        if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+            setPasswordError('Password salah atau tidak riwayat kriteria (min 8 karakter, huruf besar, dan angka).');
             setLoading(false);
             return;
         }
