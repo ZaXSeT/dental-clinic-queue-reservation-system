@@ -55,10 +55,7 @@ const DentistCard = ({ dentist }: { dentist: Dentist }) => {
                         <Clock className="h-4 w-4 text-secondary" />
                         {dentist.experience} Exp.
                     </div>
-                    <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4 text-secondary" />
-                        {dentist.schedule.length} Days/Wk
-                    </div>
+
                 </div>
 
 
