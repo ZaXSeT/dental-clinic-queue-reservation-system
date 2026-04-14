@@ -1,12 +1,55 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, User, Phone, Mail, Calendar, Hash, Stethoscope, Clock, MessageSquare, Users } from 'lucide-react';
+import { Search, User, Phone, Mail, Calendar, Hash, Stethoscope, Clock, MessageSquare, Users, Pencil, X, Save } from 'lucide-react';
 import { format } from 'date-fns';
+import { updatePatient } from '@/actions/patient';
 
 export default function PatientsClient({ patients }: { patients: any[] }) {
     const [searchTerm, setSearchTerm] = useState('');
-    const [localPatients] = useState(patients);
+    const [localPatients, setLocalPatients] = useState(patients);
+
+    // Edit logic
+    const [editingPatient, setEditingPatient] = useState<any>(null);
+    const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '' });
+    const [isSaving, setIsSaving] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+
+    const startEdit = (patient: any) => {
+        setFormData({
+            name: patient.name || '',
+            phone: patient.phone || '',
+            email: patient.email || '',
+            address: patient.address || ''
+        });
+        setErrorMsg('');
+        setEditingPatient(patient);
+    };
+
+    const handleSave = async () => {
+        if (!formData.name) {
+            setErrorMsg("Name cannot be empty");
+            return;
+        }
+        setIsSaving(true);
+        setErrorMsg('');
+        
+        try {
+            const res = await updatePatient(editingPatient.id, formData);
+            if (res.success) {
+                // Update local list
+                setLocalPatients(localPatients.map(p => 
+                    p.id === editingPatient.id ? { ...p, ...formData } : p
+                ));
+                setEditingPatient(null);
+            } else {
+                setErrorMsg(res.error || "Failed to update patient");
+            }
+        } catch (e) {
+            setErrorMsg("Server error");
+        }
+        setIsSaving(false);
+    };
 
     const filteredPatients = localPatients.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,12 +90,13 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Registered</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Appointment</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Status</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {filteredPatients.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="py-16 text-center">
+                                    <td colSpan={8} className="py-16 text-center">
                                         <div className="flex flex-col items-center gap-3 text-slate-400">
                                             <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
                                                 <User className="w-7 h-7 opacity-40" />
@@ -196,6 +240,15 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                     </span>
                                                 )}
                                             </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <button
+                                                    onClick={() => startEdit(patient)}
+                                                    className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-primary rounded-xl transition-colors border border-slate-100 shadow-sm"
+                                                    title="Edit Patient"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                            </td>
                                         </tr>
                                     );
                                 })
@@ -204,6 +257,73 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                     </table>
                 </div>
             </div>
+
+            {/* Edit Modal */}
+            {editingPatient && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50">
+                            <h3 className="font-bold text-lg text-slate-800">Edit Patient Profile</h3>
+                            <button onClick={() => setEditingPatient(null)} className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-xl transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            {errorMsg && <div className="p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl">{errorMsg}</div>}
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value.replace(/\d/g, "") })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 uppercase">Phone Number</label>
+                                <input
+                                    type="text"
+                                    value={formData.phone}
+                                    onChange={e => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 uppercase">Email (Optional)</label>
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 uppercase">Address (Optional)</label>
+                                <textarea
+                                    value={formData.address}
+                                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                                    rows={2}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                                />
+                            </div>
+
+                            <div className="pt-4">
+                                <button
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-all shadow-md shadow-primary/20 flex justify-center items-center gap-2"
+                                >
+                                    {isSaving ? "Saving..." : <><Save className="w-4 h-4"/> Save Changes</>}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

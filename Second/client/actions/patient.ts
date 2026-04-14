@@ -59,12 +59,12 @@ export async function deletePatient(id: string) {
     }
 }
 
-export async function updatePatientName(id: string, name: string) {
+export async function updatePatient(id: string, data: { name: string, phone: string, email?: string, address?: string }) {
     const session = await verifySession();
     if (!session) return { success: false, error: "Unauthorized" };
 
     try {
-        await prisma.patient.update({ where: { id }, data: { name } });
+        await prisma.patient.update({ where: { id }, data });
         revalidatePath('/staff/portal/patients');
         return { success: true };
     } catch (error) {
