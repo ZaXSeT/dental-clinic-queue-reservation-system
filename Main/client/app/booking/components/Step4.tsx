@@ -12,7 +12,7 @@ interface Step4Props {
     patientType: PatientType;
     onBack: () => void;
     onSetBookingFor: (type: BookingForType) => void;
-    loggedInUser?: {name: string, email: string} | null;
+    loggedInUser?: any;
     onComplete: (data: { doctor: string; date: string; time: string; treatment: string; name: string }) => void;
 }
 
@@ -44,10 +44,20 @@ export default function Step4({
             setEmail(loggedInUser.email);
             
             // Auto complete first/last name if user is booking for themselves
-            if (bookingFor === "Myself" && !firstName && !lastName) {
-                const parts = loggedInUser.name.split(' ');
-                setFirstName(parts[0] || "");
-                setLastName(parts.slice(1).join(' ') || "");
+            if (bookingFor === "Myself") {
+                if (!firstName && !lastName) {
+                    const parts = loggedInUser.name.split(' ');
+                    setFirstName(parts[0] || "");
+                    setLastName(parts.slice(1).join(' ') || "");
+                }
+                
+                if (loggedInUser.phone && !phone) {
+                    setPhone(loggedInUser.phone);
+                }
+                
+                if (loggedInUser.birthDate && !birthDate) {
+                    setBirthDate(new Date(loggedInUser.birthDate).toISOString().split('T')[0]);
+                }
             }
         }
     }, [loggedInUser, bookingFor]);
