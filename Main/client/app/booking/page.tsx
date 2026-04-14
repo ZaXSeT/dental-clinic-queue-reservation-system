@@ -24,6 +24,18 @@ export default function BookingPage() {
     const [dates, setDates] = useState<DateInfo[]>([]);
     const [dateOffset, setDateOffset] = useState<number>(0);
     const [bookingData, setBookingData] = useState<BookingSelection | null>(null);
+    const [loggedInUser, setLoggedInUser] = useState<{name: string, email: string} | null>(null);
+
+    useEffect(() => {
+        fetch('/api/patient/me')
+            .then(res => res.json())
+            .then(data => {
+                if (data.loggedIn && data.email) {
+                    setLoggedInUser({ name: data.name, email: data.email });
+                }
+            })
+            .catch(console.error);
+    }, []);
 
     useEffect(() => {
         const stepParam = searchParams.get("step");
@@ -151,6 +163,7 @@ export default function BookingPage() {
                         appointmentType={appointmentType}
                         bookingFor={bookingFor}
                         patientType={patientType}
+                        loggedInUser={loggedInUser}
                         onBack={handleBack}
                         onSetBookingFor={setBookingFor}
                         onComplete={(data) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, User, UserPlus, Calendar, MapPin } from "lucide-react";
 import { BookingSelection, Doctor, BookingForType, PatientType } from "@/lib/types";
 
@@ -12,6 +12,7 @@ interface Step4Props {
     patientType: PatientType;
     onBack: () => void;
     onSetBookingFor: (type: BookingForType) => void;
+    loggedInUser?: {name: string, email: string} | null;
     onComplete: (data: { doctor: string; date: string; time: string; treatment: string; name: string }) => void;
 }
 
@@ -21,6 +22,7 @@ export default function Step4({
     appointmentType,
     bookingFor,
     patientType,
+    loggedInUser,
     onBack,
     onSetBookingFor,
     onComplete,
@@ -35,6 +37,20 @@ export default function Step4({
     const [comments, setComments] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+
+    useEffect(() => {
+        if (loggedInUser && loggedInUser.email) {
+            setEmail(loggedInUser.email);
+            
+            // Auto complete first/last name if user is booking for themselves
+            if (bookingFor === "Myself" && !firstName && !lastName) {
+                const parts = loggedInUser.name.split(' ');
+                setFirstName(parts[0] || "");
+                setLastName(parts.slice(1).join(' ') || "");
+            }
+        }
+    }, [loggedInUser, bookingFor]);
 
     const [gFirstName, setGFirstName] = useState("");
     const [gLastName, setGLastName] = useState("");
@@ -314,8 +330,9 @@ export default function Step4({
                                     maxLength={100}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    disabled={!!loggedInUser?.email}
                                     placeholder="e.g. john@email.com"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                    className={`w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium ${loggedInUser?.email ? 'bg-slate-100 text-slate-500 cursor-not-allowed border-slate-300' : 'bg-white'}`}
                                 />
                             </div>
                             <div className="space-y-2">
