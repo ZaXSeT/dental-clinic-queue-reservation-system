@@ -32,7 +32,7 @@ export default function DentistsSection() {
                             </div>
 
                             <div className="p-3 md:p-8">
-                                <div className="mb-3 md:mb-6">
+                                <div>
                                     <h3 className="text-xs md:text-xl font-bold mb-0.5 md:mb-1 text-slate-900 truncate">{dentist.name}</h3>
                                     <p className="text-primary font-bold text-[8px] md:text-sm uppercase tracking-wider truncate">{dentist.specialization}</p>
                                 </div>

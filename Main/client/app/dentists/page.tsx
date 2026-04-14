@@ -50,7 +50,7 @@ const DentistCard = ({ dentist }: { dentist: Dentist }) => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-sm text-slate-500 mb-6 border-t border-slate-100 pt-4 mt-auto">
+                <div className="flex items-center gap-4 text-sm text-slate-500 border-t border-slate-100 pt-4 mt-auto">
                     <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4 text-secondary" />
                         {dentist.experience} Exp.
