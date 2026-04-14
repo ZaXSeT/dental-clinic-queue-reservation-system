@@ -301,16 +301,6 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                 />
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-500 uppercase">Address (Optional)</label>
-                                <textarea
-                                    value={formData.address}
-                                    onChange={e => setFormData({ ...formData, address: e.target.value })}
-                                    rows={2}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-                                />
-                            </div>
-
                             <div className="pt-4">
                                 <button
                                     onClick={handleSave}
