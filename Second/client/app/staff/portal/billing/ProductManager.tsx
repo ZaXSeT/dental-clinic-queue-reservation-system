@@ -39,13 +39,23 @@ export default function ProductManager({ products: initialProducts, onClose }: P
 
     const handleSave = async () => {
         if (!formData.name || !formData.price) return;
+        const priceVal = Number(formData.price);
+        if (priceVal <= 0) {
+            alert("Price must be greater than 0");
+            return;
+        }
+        const stockVal = Number(formData.stock) || 0;
+        if (stockVal < 0) {
+            alert("Stock cannot be negative");
+            return;
+        }
         setIsLoading(true);
 
         const payload = {
             name: formData.name,
-            price: Number(formData.price),
+            price: priceVal,
             description: formData.description,
-            stock: Number(formData.stock) || 0
+            stock: stockVal
         };
 
         let res;
@@ -199,6 +209,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+                                        maxLength={100}
                                         placeholder="e.g. Paracetamol 500mg"
                                     />
                                 </div>
@@ -210,6 +221,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                                         value={formData.price}
                                         onChange={e => setFormData({ ...formData, price: e.target.value })}
                                         className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+                                        min={1}
                                         placeholder="0"
                                     />
                                 </div>
@@ -221,6 +233,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                                         rows={3}
                                         className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all resize-none text-sm"
+                                        maxLength={500}
                                         placeholder="Product details..."
                                     />
                                 </div>
@@ -232,6 +245,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                                         value={formData.stock}
                                         onChange={e => setFormData({ ...formData, stock: e.target.value })}
                                         className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+                                        min={0}
                                         placeholder="0"
                                     />
                                 </div>

@@ -109,7 +109,7 @@ export default function LoginPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Mail className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="email" type="email" required className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="you@example.com" />
+                                <input name="email" type="email" required maxLength={255} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="you@example.com" />
                             </div>
                         </div>
 
@@ -119,7 +119,7 @@ export default function LoginPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="password" type="password" required minLength={6} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="password" type="password" required minLength={6} maxLength={100} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
                             </div>
                         </div>
 

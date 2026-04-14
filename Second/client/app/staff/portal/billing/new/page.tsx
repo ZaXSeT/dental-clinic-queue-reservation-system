@@ -178,6 +178,7 @@ export default function NewInvoicePage() {
                                     value={customTreatment}
                                     onChange={e => setCustomTreatment(e.target.value)}
                                     className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                    maxLength={300}
                                 />
                             )}
                         </div>
@@ -194,7 +195,7 @@ export default function NewInvoicePage() {
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-semibold">Rp</span>
                                 <input
                                     type="number"
-                                    min="0"
+                                    min="1"
                                     value={fee}
                                     onChange={e => setFee(e.target.value)}
                                     className="pl-12 pr-4 h-11 w-full bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"

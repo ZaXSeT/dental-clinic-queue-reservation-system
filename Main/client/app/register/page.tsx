@@ -201,7 +201,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <User className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="name" type="text" required minLength={3} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="John Doe" />
+                                <input name="name" type="text" required minLength={3} maxLength={100} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="John Doe" />
                             </div>
                         </div>
 
@@ -215,6 +215,7 @@ export default function RegisterPage() {
                                     name="email"
                                     type="email"
                                     required
+                                    maxLength={255}
                                     onBlur={handleEmailBlur}
                                     onChange={handleEmailChange}
                                     className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 transition-all sm:text-sm font-medium outline-none ${
@@ -243,7 +244,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Phone className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="phone" type="tel" required pattern="^(\+62|62|0)8[1-9][0-9]{6,10}$" title="Format nomor HP harus diawali 08, 628, atau +628 dan panjang minimal 10 angka" className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="081234567890" />
+                                <input name="phone" type="tel" required pattern="^(\+62|62|0)8[1-9][0-9]{6,10}$" maxLength={15} title="Format nomor HP harus diawali 08, 628, atau +628 dan panjang minimal 10 angka" className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="081234567890" />
                             </div>
                         </div>
 
@@ -253,7 +254,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="password" type="password" required minLength={6} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="password" type="password" required minLength={6} maxLength={100} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
                             </div>
                         </div>
 
@@ -263,7 +264,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input name="confirm_password" type="password" required minLength={6} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="confirm_password" type="password" required minLength={6} maxLength={100} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
                             </div>
                         </div>
 

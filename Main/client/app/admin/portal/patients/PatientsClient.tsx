@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, User, Phone, Mail, Calendar, MapPin, Plus, X, Hash } from 'lucide-react';
+import { Search, User, Phone, Mail, Calendar, MapPin, Plus, X, Hash, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
+import { updatePatient } from '@/actions/patient';
 
 export default function PatientsClient({ patients }: { patients: any[] }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [localPatients, setLocalPatients] = useState(patients);
+    const [editingPatientId, setEditingPatientId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -27,7 +29,10 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        if (name === 'name' && !/^[A-Za-z\s]*$/.test(value)) return;
+        if (name === 'name') {
+            setFormData({ ...formData, [name]: value.replace(/\d/g, "") });
+            return;
+        }
         if (name === 'phone') {
             const digits = value.replace(/\D/g, '');
             setFormData({ ...formData, phone: digits });
@@ -57,22 +62,33 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/patients', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+            if (editingPatientId) {
+                const res = await updatePatient(editingPatientId, formData);
+                if (!res.success) {
+                    setErrors({ api: res.error || 'Failed to update' });
+                    setLoading(false);
+                    return;
+                }
+                setLocalPatients(localPatients.map(p => p.id === editingPatientId ? { ...p, ...formData } : p));
+            } else {
+                const res = await fetch('/api/patients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
 
-            const data = await res.json();
-            if (!res.ok) {
-                setErrors({ api: data.error || 'Failed to save' });
-                setLoading(false);
-                return;
+                const data = await res.json();
+                if (!res.ok) {
+                    setErrors({ api: data.error || 'Failed to save' });
+                    setLoading(false);
+                    return;
+                }
+                setLocalPatients([data, ...localPatients]);
             }
-
-            setLocalPatients([data, ...localPatients]);
+            
             setFormData({ name: '', phone: '', email: '', address: '' });
             setShowForm(false);
+            setEditingPatientId(null);
             setErrors({});
         } catch (err) {
             console.error(err);
@@ -80,6 +96,17 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEdit = (patient: any) => {
+        setFormData({
+            name: patient.name,
+            phone: patient.phone || '',
+            email: patient.email || '',
+            address: patient.address || '',
+        });
+        setEditingPatientId(patient.id);
+        setShowForm(true);
     };
 
 
@@ -101,8 +128,9 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
             </div>
             {showForm && (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
-                        <h3 className="text-sm font-bold text-slate-700">New Patient</h3>
+                    <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex justify-between items-center">
+                        <h3 className="text-sm font-bold text-slate-700">{editingPatientId ? 'Edit Patient' : 'New Patient'}</h3>
+                        <button onClick={() => { setShowForm(false); setEditingPatientId(null); setFormData({ name: '', phone: '', email: '', address: '' }); }} className="text-xs text-slate-500 hover:text-slate-800">Close</button>
                     </div>
                     <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
@@ -182,6 +210,7 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Last Visit</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Registered</th>
                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Address</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -251,6 +280,15 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                     <MapPin className="w-3.5 h-3.5 text-slate-300 flex-shrink-0 mt-0.5" />
                                                     <span className="truncate">{patient.address || <span className="text-slate-300 italic">—</span>}</span>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <button
+                                                    onClick={() => handleEdit(patient)}
+                                                    className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-primary rounded-xl transition-colors"
+                                                    title="Edit Patient"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
                                             </td>
                                         </tr>
                                     );

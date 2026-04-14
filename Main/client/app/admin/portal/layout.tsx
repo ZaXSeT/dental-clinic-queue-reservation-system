@@ -8,7 +8,7 @@ import { School, ScrollText, FileText, LayoutDashboard, Users, LogOut, Tv, Calen
 import { clsx } from "clsx";
 import { logoutAction } from "@/actions/auth";
 
-export default function StaffPortalLayout({
+export default function AdminPortalLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -24,7 +24,7 @@ export default function StaffPortalLayout({
             await logoutAction();
             sessionStorage.removeItem('staff_auth');
             sessionStorage.removeItem('staff_user');
-            router.push('/staff/login');
+            router.push('/admin/login');
         });
     };
 
@@ -40,7 +40,7 @@ export default function StaffPortalLayout({
 
     if (!isLoaded) return null;
 
-    const basePath = '/staff/portal';
+    const basePath = '/admin/portal';
 
     const navItems = [
         {
@@ -88,7 +88,7 @@ export default function StaffPortalLayout({
                         <div className="h-10 w-10 bg-primary shadow-lg shadow-primary/20" style={{ maskImage: 'url(/resources/clean.png)', WebkitMaskImage: 'url(/resources/clean.png)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
                         <div>
                             <h1 className="font-bold text-lg tracking-tight text-slate-900">Dental</h1>
-                            <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">Staff Portal</p>
+                            <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">Admin Portal</p>
                         </div>
                     </div>
                 </div>
@@ -138,9 +138,9 @@ export default function StaffPortalLayout({
                 <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                            {pathname !== '/staff/portal/dashboard' && (
+                            {pathname !== '/admin/portal/dashboard' && (
                                 <button
-                                    onClick={() => router.push('/staff/portal/dashboard')}
+                                    onClick={() => router.push('/admin/portal/dashboard')}
                                     className="p-1.5 -ml-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
                                     title="Back to Dashboard"
                                 >

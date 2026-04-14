@@ -78,9 +78,15 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
-        if (phone && (phone.length < 10 || phone.length > 14)) {
-            setPhoneError("Phone number must be between 10-14 digits");
-            return;
+        if (phone) {
+            if (!/^08/.test(phone)) {
+                setPhoneError("Phone number must start with 08");
+                return;
+            }
+            if (phone.length < 10 || phone.length > 14) {
+                setPhoneError("Phone number must be between 10-14 digits");
+                return;
+            }
         }
         await onSubmit(name, phone, doctorId || undefined, timeField || undefined);
     };
@@ -116,7 +122,8 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                             <input
                                 type="text"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => setName(e.target.value.replace(/\d/g, ""))}
+                                maxLength={50}
                                 placeholder="e.g. John Doe"
                                 className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                 autoFocus

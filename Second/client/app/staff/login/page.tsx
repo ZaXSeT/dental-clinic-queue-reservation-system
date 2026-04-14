@@ -50,6 +50,7 @@ export default function StaffLogin() {
                             type="text"
                             name="username"
                             required
+                            maxLength={50}
                             autoComplete="off"
                             className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
                             placeholder="username"
@@ -61,6 +62,8 @@ export default function StaffLogin() {
                             type="password"
                             name="password"
                             required
+                            minLength={6}
+                            maxLength={100}
                             autoComplete="new-password"
                             className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
                             placeholder="••••••"
