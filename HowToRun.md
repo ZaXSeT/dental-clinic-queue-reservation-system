@@ -11,8 +11,14 @@ Semuanya telah dikonfigurasi untuk berjalan secara bersamaan dengan sekali perin
 
 Untuk menyalakan semua bagian aplikasi secara otomatis, cukup copy-paste 1 baris perintah (command) di bawah ini ke dalam Command Prompt (CMD) Anda dan tekan **Enter**:
 
+**Untuk Laptop (Drive C):**
 ```cmd
 cd /d "c:\Antigravity Projects\AntriReservasiKlinikGigi\Second" && npm run dev
+```
+
+**Untuk PC (Drive E):**
+```cmd
+cd /d "e:\Antigravity\AntriReservasiKlinikGigi\Second" && npm run dev
 ```
 
 **Penjelasan proses:**
@@ -26,22 +32,40 @@ Jika Anda sedang memperbaiki satu bagian tertentu dan hanya ingin menyalakan bag
 
 ### 1. Menjalankan Backend Server Saja
 Server NestJS ini Wajib dijalankan lebih dulu karena menyimpan koneksi Database (Prisma).
+**Untuk Laptop (Drive C):**
 ```cmd
 cd /d "c:\Antigravity Projects\AntriReservasiKlinikGigi\Second\server" && npm run start:dev
+```
+
+**Untuk PC (Drive E):**
+```cmd
+cd /d "e:\Antigravity\AntriReservasiKlinikGigi\Second\server" && npm run start:dev
 ```
 *(Server berjalan di port 3003)*
 
 ### 2. Menjalankan Public Portal (Halaman Pasien) Saja
 Aplikasi web untuk halaman depan utama.
+**Untuk Laptop (Drive C):**
 ```cmd
 cd /d "c:\Antigravity Projects\AntriReservasiKlinikGigi\Main\client" && npm run dev
+```
+
+**Untuk PC (Drive E):**
+```cmd
+cd /d "e:\Antigravity\AntriReservasiKlinikGigi\Main\client" && npm run dev
 ```
 *(Aplikasi berjalan di port 3000)*
 
 ### 3. Menjalankan Admin/Staff Portal Saja
 Aplikasi Dashboard staf klinik.
+**Untuk Laptop (Drive C):**
 ```cmd
 cd /d "c:\Antigravity Projects\AntriReservasiKlinikGigi\Second\client" && npm run dev
+```
+
+**Untuk PC (Drive E):**
+```cmd
+cd /d "e:\Antigravity\AntriReservasiKlinikGigi\Second\client" && npm run dev
 ```
 *(Dashboard berjalan di port 3001)*
 
