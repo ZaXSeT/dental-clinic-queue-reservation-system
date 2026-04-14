@@ -272,7 +272,7 @@ export async function resetPassword(prevState: any, formData: FormData) {
     const confirmPassword = formData.get('confirmPassword') as string;
     if (!email || !otp || !newPassword || !confirmPassword) return { message: 'Semua field wajib diisi' };
     if (newPassword !== confirmPassword) return { message: 'Password baru dan konfirmasi tidak sama' };
-    if (newPassword.length < 8) return { message: 'Password minimal 8 karakter' };
+    if (newPassword.length < 6) return { message: 'Password minimal 6 karakter' };
     try {
         const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
         if (!patient) return { message: 'Akun tidak ditemukan' };
