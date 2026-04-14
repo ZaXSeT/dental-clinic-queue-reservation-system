@@ -37,13 +37,7 @@ export default function DentistsSection() {
                                     <p className="text-primary font-bold text-[8px] md:text-sm uppercase tracking-wider truncate">{dentist.specialization}</p>
                                 </div>
 
-                                <Link
-                                    href="https://wa.me/6280000000000"
-                                    className="block w-full text-center py-2 md:py-4 bg-slate-50 text-slate-900 font-bold rounded-lg md:rounded-xl border border-slate-200 hover:bg-primary hover:text-white hover:border-primary transition-colors text-[10px] md:text-base"
-                                >
-                                    <span className="md:hidden">Book</span>
-                                    <span className="hidden md:inline">Book Appointment</span>
-                                </Link>
+
                             </div>
                         </div>
                     ))}
