@@ -154,7 +154,7 @@ export async function registerPatient(prevState: any, formData: FormData) {
         if (existing) {
             if (!existing.emailVerified) {
                 const plainToken = Math.floor(100000 + Math.random() * 900000).toString();
-                const expiresAt = Date.now() + 15 * 60 * 1000;
+                const expiresAt = Date.now() + 2 * 60 * 1000;
                 const newToken = `${plainToken}_${expiresAt}`;
                 await prisma.patient.update({
                     where: { id: existing.id },
@@ -171,7 +171,7 @@ export async function registerPatient(prevState: any, formData: FormData) {
         const hashedPassword = await bcrypt.hash(password, 10);
         
         const plainToken = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = Date.now() + 15 * 60 * 1000;
+        const expiresAt = Date.now() + 2 * 60 * 1000;
         const verificationToken = `${plainToken}_${expiresAt}`;
 
         const patient = await prisma.patient.create({
@@ -217,7 +217,7 @@ export async function verifyRegistrationToken(email: string, token: string) {
         }
 
         if (expiresAt && Date.now() > parseInt(expiresAt)) {
-            return { success: false, message: 'Kode OTP sudah kadaluarsa (batas waktu 15 menit). Silakan daftar ulang.' };
+            return { success: false, message: 'Kode OTP sudah kadaluarsa (batas waktu 2 menit). Silakan daftar ulang.' };
         }
 
         await prisma.patient.updateMany({
@@ -269,7 +269,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
         const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
         if (!patient) return { success: true, email };
         const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = Date.now() + 15 * 60 * 1000;
+        const expiresAt = Date.now() + 2 * 60 * 1000;
         const otpWithExpiry = `${plainOtp}_${expiresAt}`;
         await prisma.patient.update({ where: { id: patient.id }, data: { verificationToken: otpWithExpiry } });
         await sendVerificationEmail(email, patient.name, plainOtp);
@@ -295,7 +295,7 @@ export async function resetPassword(prevState: any, formData: FormData) {
         if (!patient.verificationToken) return { message: 'Kode OTP salah atau sudah kadaluarsa' };
         const [storedOtp, expiresAt] = patient.verificationToken.split('_');
         if (storedOtp !== otp) return { message: 'Kode OTP salah' };
-        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'Kode OTP sudah kadaluarsa (batas waktu 15 menit). Silakan ulangi "Forgot Password".' };
+        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'Kode OTP sudah kadaluarsa (batas waktu 2 menit). Silakan ulangi "Forgot Password".' };
         const hashed = await bcrypt.hash(newPassword, 10);
         await prisma.patient.update({ where: { id: patient.id }, data: { password: hashed, verificationToken: null } });
         return { success: true };
