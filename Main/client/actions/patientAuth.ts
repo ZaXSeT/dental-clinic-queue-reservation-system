@@ -68,18 +68,24 @@ async function sendVerificationEmail(email: string, name: string, token: string)
     console.log(`Your Verification Code is: ${token}`);
     console.log(`==========================================\n`);
 
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    const user = process.env.EMAIL_USER || process.env.SMTP_USER;
+    const pass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
+
+    if (user && pass) {
         try {
             const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
+                auth: { user, pass },
+                tls: {
+                    // Do not fail on invalid certs (helpful for some proxy/node envs)
+                    rejectUnauthorized: false
                 }
             });
 
             await transporter.sendMail({
-                from: `"Dental Clinic" <${process.env.EMAIL_USER}>`,
+                from: `"Dental Clinic" <${user}>`,
                 to: email,
                 subject: 'Your Account Verification Code',
                 html: `
