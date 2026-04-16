@@ -22,12 +22,12 @@ export async function loginAction(prevState: any, formData: FormData): Promise<{
         });
 
         if (!admin) {
-            return { message: 'Invalid credentials' };
+            return { message: 'Wrong username or password.' };
         }
 
         const isMatch = await bcrypt.compare(password, admin.password);
         if (!isMatch) {
-            return { message: 'Invalid credentials' };
+            return { message: 'Wrong username or password.' };
         }
 
         const token = await new SignJWT({ id: admin.id, username: admin.username, role: admin.role })
