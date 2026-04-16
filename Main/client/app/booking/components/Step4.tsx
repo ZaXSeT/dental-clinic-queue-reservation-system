@@ -48,22 +48,25 @@ export default function Step4({
     useEffect(() => {
         if (loggedInUser && loggedInUser.email) {
             setEmail(loggedInUser.email);
+            if (loggedInUser.phone) setPhone(loggedInUser.phone);
             
-            // Auto complete first/last name if user is booking for themselves
             if (bookingFor === "Myself") {
-                if (!firstName && !lastName) {
-                    const parts = loggedInUser.name.split(' ');
-                    setFirstName(parts[0] || "");
-                    setLastName(parts.slice(1).join(' ') || "");
-                }
+                const parts = loggedInUser.name.split(' ');
+                setFirstName(parts[0] || "");
+                setLastName(parts.slice(1).join(' ') || "");
                 
-                if (loggedInUser.phone && !phone) {
-                    setPhone(loggedInUser.phone);
-                }
-                
-                if (loggedInUser.birthDate && !birthDate) {
+                if (loggedInUser.birthDate) {
                     setBirthDate(new Date(loggedInUser.birthDate).toISOString().split('T')[0]);
                 }
+                if (loggedInUser.gender) {
+                    setLegalSex(loggedInUser.gender as "Male" | "Female");
+                }
+            } else {
+                // Clear patient-specific fields when booking for someone else
+                setFirstName("");
+                setLastName("");
+                setBirthDate("");
+                // We keep email and phone as they are the account holder's contact points
             }
         }
     }, [loggedInUser, bookingFor]);
