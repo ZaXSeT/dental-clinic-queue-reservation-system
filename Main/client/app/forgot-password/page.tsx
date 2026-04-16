@@ -11,6 +11,7 @@ export default function ForgotPasswordPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({ email: '' });
     const [sent, setSent] = useState(false);
 
     useEffect(() => {
@@ -25,12 +26,25 @@ export default function ForgotPasswordPage() {
         setError('');
 
         const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
+
+        if (!email) {
+            setFieldErrors({ email: 'email is required' });
+            setLoading(false);
+            return;
+        }
+
         const res = await forgotPassword(null, formData);
 
         if (res?.success) {
             router.push(`/reset-password?email=${encodeURIComponent(res.email || '')}`);
         } else {
-            setError(res?.message || 'Terjadi kesalahan');
+            const msg = res?.message || 'Terjadi kesalahan';
+            if (msg.includes('registered')) {
+                setFieldErrors({ email: msg });
+            } else {
+                setError(msg);
+            }
         }
         setLoading(false);
     };
@@ -71,21 +85,35 @@ export default function ForgotPasswordPage() {
                         </p>
                     </div>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Email address</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-400" />
+                                    <Mail className={`h-5 w-5 ${fieldErrors.email ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
                                 <input
                                     name="email"
                                     type="email"
                                     required
-                                    className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none"
+                                    maxLength={50}
+                                    onChange={(e) => {
+                                        let val = e.target.value;
+                                        const atIndex = val.indexOf("@");
+                                        if (atIndex !== -1 && atIndex > 20 && e.nativeEvent instanceof InputEvent && e.nativeEvent.data === '@') {
+                                            if (val.substring(0, atIndex).length > 20) {
+                                                e.target.value = val.substring(0, 20) + val.substring(atIndex);
+                                            }
+                                        } else if (atIndex === -1 && val.length > 20) {
+                                            e.target.value = val.slice(0, 20);
+                                        }
+                                        setFieldErrors({ email: '' });
+                                    }}
+                                    className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`}
                                     placeholder="you@gmail.com"
                                 />
                             </div>
+                            {fieldErrors.email && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.email}</p>}
                         </div>
 
                         {error && (

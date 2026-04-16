@@ -271,7 +271,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
     if (!email) return { message: 'Email wajib diisi' };
     try {
         const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
-        if (!patient) return { success: true, email };
+        if (!patient) return { message: 'Email is not registered. Please create a new account first.' };
         const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = Date.now() + 2 * 60 * 1000;
         const otpWithExpiry = `${plainOtp}_${expiresAt}`;
