@@ -14,6 +14,20 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
     const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '' });
     const [isSaving, setIsSaving] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({ name: '', phone: '', email: '' });
+
+    const ALLOWED_DOMAINS = ['gmail.com', 'yahoo.com', 'yahoo.co.id', 'outlook.com'];
+
+    const validateEmailField = (email: string): string => {
+        if (!email) return '';
+        if (!email.includes('@')) return 'Email must contain @';
+        const parts = email.split('@');
+        if (parts.length > 2 || parts[1] === '') return 'Invalid email format';
+        const domain = parts[1].toLowerCase();
+        if (!ALLOWED_DOMAINS.includes(domain))
+            return `Email domain "${domain}" not allowed (only gmail.com, yahoo.com, yahoo.co.id, outlook.com)`;
+        return '';
+    };
 
     const startEdit = (patient: any) => {
         setFormData({
@@ -23,21 +37,47 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
             address: patient.address || ''
         });
         setErrorMsg('');
+        setFieldErrors({ name: '', phone: '', email: '' });
         setEditingPatient(patient);
     };
 
     const handleSave = async () => {
-        if (!formData.name) {
-            setErrorMsg("Name cannot be empty");
-            return;
+        let hasError = false;
+        const newErrors = { name: '', phone: '', email: '' };
+
+        if (!formData.name.trim()) {
+            newErrors.name = 'Name is required';
+            hasError = true;
+        } else if (formData.name.trim().length < 2 || formData.name.trim().length > 16) {
+            newErrors.name = 'Name must be 2-16 letters and only contain letters';
+            hasError = true;
         }
+
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+            hasError = true;
+        } else if (!formData.phone.startsWith('08') || formData.phone.length < 7 || formData.phone.length > 13) {
+            newErrors.phone = 'Phone must be 7-13 numbers long and start with 08.';
+            hasError = true;
+        }
+
+        if (formData.email) {
+            const emailErr = validateEmailField(formData.email);
+            if (emailErr) {
+                newErrors.email = emailErr;
+                hasError = true;
+            }
+        }
+
+        setFieldErrors(newErrors);
+        if (hasError) return;
+
         setIsSaving(true);
         setErrorMsg('');
         
         try {
             const res = await updatePatient(editingPatient.id, formData);
             if (res.success) {
-                // Update local list
                 setLocalPatients(localPatients.map(p => 
                     p.id === editingPatient.id ? { ...p, ...formData } : p
                 ));
@@ -276,9 +316,17 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                 <input
                                     type="text"
                                     value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value.replace(/\d/g, "") })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                        if (val.length <= 16) setFormData({ ...formData, name: val });
+                                        if (fieldErrors.name) setFieldErrors(p => ({ ...p, name: '' }));
+                                    }}
+                                    maxLength={16}
+                                    className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 transition-all ${
+                                        fieldErrors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/20'
+                                    }`}
                                 />
+                                {fieldErrors.name && <p className="text-xs font-bold text-red-500 pl-1">{fieldErrors.name}</p>}
                             </div>
 
                             <div className="space-y-1.5">
@@ -286,19 +334,38 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                 <input
                                     type="text"
                                     value={formData.phone}
-                                    onChange={e => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/\D/g, '');
+                                        if (val.length <= 13) setFormData({ ...formData, phone: val });
+                                        if (fieldErrors.phone) setFieldErrors(p => ({ ...p, phone: '' }));
+                                    }}
+                                    maxLength={13}
+                                    className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 transition-all ${
+                                        fieldErrors.phone ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/20'
+                                    }`}
                                 />
+                                {fieldErrors.phone && <p className="text-xs font-bold text-red-500 pl-1">{fieldErrors.phone}</p>}
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-500 uppercase">Email (Optional)</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase">Email <span className="font-normal normal-case text-slate-300">(Optional)</span></label>
                                 <input
-                                    type="email"
+                                    type="text"
                                     value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        const atIdx = val.indexOf('@');
+                                        // Block prefix > 20 chars before @
+                                        if (atIdx > 20) return;
+                                        setFormData({ ...formData, email: val });
+                                        if (fieldErrors.email) setFieldErrors(p => ({ ...p, email: '' }));
+                                    }}
+                                    maxLength={33}
+                                    className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 transition-all ${
+                                        fieldErrors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/20'
+                                    }`}
                                 />
+                                {fieldErrors.email && <p className="text-xs font-bold text-red-500 pl-1">{fieldErrors.email}</p>}
                             </div>
 
                             <div className="pt-4">
