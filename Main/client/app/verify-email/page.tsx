@@ -16,12 +16,19 @@ function VerifyForm() {
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldError, setFieldError] = useState('');
     const [success, setSuccess] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        if (!token) {
+            setFieldError('Verification code is required');
+            setLoading(false);
+            return;
+        }
 
         const res = await verifyRegistrationToken(email, token);
 
@@ -54,7 +61,7 @@ function VerifyForm() {
                     </div>
                 </div>
             ) : (
-                <form className="space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-6" onSubmit={handleSubmit} noValidate>
                     <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center">
                         <div className="text-sm text-slate-500 mb-2">Code sent to</div>
                         <div className="font-bold text-slate-800 break-all">{email}</div>
@@ -69,11 +76,15 @@ function VerifyForm() {
                             required 
                             maxLength={6}
                             value={token}
-                            onChange={e => setToken(e.target.value)}
+                            onChange={e => {
+                                setToken(e.target.value);
+                                setFieldError('');
+                            }}
                             pattern="[0-9]*"
                             placeholder="123456"
-                            className="text-center text-4xl tracking-[0.5em] font-black appearance-none block w-full px-3 py-6 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none" 
+                            className={`text-center text-4xl tracking-[0.5em] font-black appearance-none block w-full px-3 py-6 bg-slate-50 border ${fieldError ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all outline-none`}
                         />
+                        {fieldError && <p className="mt-2 text-center text-xs font-bold text-red-500 overflow-visible break-words">{fieldError}</p>}
                     </div>
 
                     {error && (
