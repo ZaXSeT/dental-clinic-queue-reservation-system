@@ -280,17 +280,6 @@ export default function RegisterPage() {
                                     maxLength={33}
                                     onBlur={handleEmailBlur}
                                     onChange={(e) => {
-                                        const val = e.target.value;
-                                        const atIndex = val.indexOf('@');
-                                        if (atIndex !== -1 && atIndex > 20 && e.nativeEvent instanceof InputEvent && e.nativeEvent.data === '@') {
-                                            // Handle dynamically if they type @ too late, but easier to just let submit validate, 
-                                            // or slice prefix. We will just slice the input if prefix logic fails.
-                                            if (val.substring(0, atIndex).length > 20) {
-                                                e.target.value = val.substring(0, 20) + val.substring(atIndex);
-                                            }
-                                        } else if (atIndex === -1 && val.length > 20) {
-                                            e.target.value = val.slice(0, 20);
-                                        }
                                         handleEmailChange();
                                         setFieldErrors(p => ({ ...p, email: '' }));
                                     }}

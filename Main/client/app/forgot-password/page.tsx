@@ -96,19 +96,8 @@ export default function ForgotPasswordPage() {
                                     name="email"
                                     type="email"
                                     required
-                                    maxLength={50}
-                                    onChange={(e) => {
-                                        let val = e.target.value;
-                                        const atIndex = val.indexOf("@");
-                                        if (atIndex !== -1 && atIndex > 20 && e.nativeEvent instanceof InputEvent && e.nativeEvent.data === '@') {
-                                            if (val.substring(0, atIndex).length > 20) {
-                                                e.target.value = val.substring(0, 20) + val.substring(atIndex);
-                                            }
-                                        } else if (atIndex === -1 && val.length > 20) {
-                                            e.target.value = val.slice(0, 20);
-                                        }
-                                        setFieldErrors({ email: '' });
-                                    }}
+                                    maxLength={33}
+                                    onChange={() => setFieldErrors({ email: '' })}
                                     className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`}
                                     placeholder="you@gmail.com"
                                 />

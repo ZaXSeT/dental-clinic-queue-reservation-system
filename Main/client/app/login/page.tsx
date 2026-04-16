@@ -62,7 +62,7 @@ export default function LoginPage() {
             router.push(`/verify-email?email=${encodeURIComponent(formData.get('email') as string)}`);
         } else if (res?.success) {
             const params = new URLSearchParams(window.location.search);
-            router.push(params.get('callbackUrl') || '/');
+            window.location.href = params.get('callbackUrl') || '/';
         } else {
             const msg = res?.message || '';
             if (msg.includes('registered') || msg.includes('registered')) {
