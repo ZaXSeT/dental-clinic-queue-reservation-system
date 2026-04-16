@@ -194,7 +194,7 @@ export default function RegisterPage() {
                         </p>
                     </div>
 
-                    <form className="space-y-5" onSubmit={handleSubmit}>
+                    <form className="space-y-5" onSubmit={handleSubmit} noValidate>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
                             <div className="relative">
