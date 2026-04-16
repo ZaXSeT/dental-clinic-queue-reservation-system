@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; 
+import { prisma } from "@/lib/prisma";
+import { verifyPatientSession } from "@/actions/patientAuth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,19 +29,41 @@ export async function POST(req: NextRequest) {
 
     const typedName = `${patientInfo.firstName} ${patientInfo.lastName}`.trim();
 
-    const patient = await prisma.patient.create({
+    // Check if the user is logged in
+    const session = await verifyPatientSession();
+
+    let patient;
+
+    if (session && session.id && bookingFor === "Myself") {
+      // Logged-in patient booking for themselves: update their existing record
+      patient = await prisma.patient.update({
+        where: { id: session.id },
         data: {
-            name: typedName,
-            email: patientInfo.email || null,
-            phone: patientInfo.phone || null,
-            birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,
-            address: patientInfo.zipCode || null,
-            medicalHistory: notes || null,
-            bookingFor: bookingFor || "Myself",
-            patientType: patientType || "new",
-            guardianName: patientInfo.guardian ? `${patientInfo.guardian.firstName} ${patientInfo.guardian.lastName}` : null,
+          name: typedName,
+          phone: patientInfo.phone || undefined,
+          birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : undefined,
+          address: patientInfo.zipCode || undefined,
+          medicalHistory: notes || undefined,
+          bookingFor: bookingFor || "Myself",
+          patientType: patientType || "returning",
         },
-    });
+      });
+    } else {
+      // Guest or booking for someone else: create a new patient record
+      patient = await prisma.patient.create({
+        data: {
+          name: typedName,
+          email: patientInfo.email || null,
+          phone: patientInfo.phone || null,
+          birthDate: patientInfo.birthDate ? new Date(patientInfo.birthDate) : null,
+          address: patientInfo.zipCode || null,
+          medicalHistory: notes || null,
+          bookingFor: bookingFor || "Myself",
+          patientType: patientType || "new",
+          guardianName: patientInfo.guardian ? `${patientInfo.guardian.firstName} ${patientInfo.guardian.lastName}` : null,
+        },
+      });
+    }
 
     const slotTaken = await prisma.appointment.findFirst({
       where: {
