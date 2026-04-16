@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="scroll-smooth">
-            <body className={`${jakarta.variable} font-sans`}>
+            <body className={jakarta.className}>
                 <Suspense fallback={null}>
                     {children}
                 </Suspense>
