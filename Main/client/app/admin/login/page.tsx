@@ -3,7 +3,7 @@
 import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { loginAction } from "@/actions/auth";
 
 const initialState: { message?: string; success?: boolean; data?: { name: string, role: string, username: string } } = {
@@ -14,6 +14,7 @@ const initialState: { message?: string; success?: boolean; data?: { name: string
 export default function StaffLogin() {
     const [state, formAction] = useFormState(loginAction, initialState);
     const router = useRouter();
+    const [username, setUsername] = useState("");
 
     useEffect(() => {
         sessionStorage.removeItem('staff_user');
@@ -23,12 +24,12 @@ export default function StaffLogin() {
     useEffect(() => {
         if (state.success && state.data) {
             sessionStorage.setItem('staff_auth', 'true');
-    sessionStorage.setItem('staff_user', JSON.stringify({
-        name: state.data.username,  // <- if you want the username as the display name
-        role: state.data.role,
-        username: state.data.username
-    }));
-            router.push("/staff/portal/dashboard");
+            sessionStorage.setItem('staff_user', JSON.stringify({
+                name: state.data.username,
+                role: state.data.role,
+                username: state.data.username
+            }));
+            router.push("/admin/portal/dashboard");
         }
     }, [state.success, state.data, router]);
 
@@ -49,8 +50,10 @@ export default function StaffLogin() {
                         <input
                             type="text"
                             name="username"
+                            value={username}
                             required
                             maxLength={50}
+                            onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))}
                             className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
                             placeholder="username"
                         />

@@ -11,6 +11,9 @@ export default function StaffLogin() {
     const [error, setError] = useState("");
     const [fieldErrors, setFieldErrors] = useState({ username: "", password: "" });
 
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
     useEffect(() => {
         sessionStorage.removeItem('staff_user');
         sessionStorage.removeItem('staff_auth');
@@ -20,10 +23,6 @@ export default function StaffLogin() {
         e.preventDefault();
         setLoading(true);
         setError("");
-
-        const formData = new FormData(e.currentTarget);
-        const username = formData.get("username") as string;
-        const password = formData.get("password") as string;
 
         let hasError = false;
         const newFieldErrors = { username: "", password: "" };
@@ -37,6 +36,10 @@ export default function StaffLogin() {
             return;
         }
 
+        const formData = new FormData();
+        formData.set("username", username);
+        formData.set("password", password);
+
         const res = await loginAction(null, formData);
         
         if (res?.success && res?.data) {
@@ -48,12 +51,7 @@ export default function StaffLogin() {
             }));
             router.push("/staff/portal/queue");
         } else {
-            const msg = res?.message || "Login failed";
-            if (msg.includes("Wrong username")) {
-                setError(msg);
-            } else {
-                setError(msg);
-            }
+            setError(res?.message || "Login failed");
         }
         setLoading(false);
     };
@@ -79,10 +77,15 @@ export default function StaffLogin() {
                             <input
                                 type="text"
                                 name="username"
+                                value={username}
                                 required
                                 maxLength={16}
                                 autoComplete="off"
-                                onChange={() => setFieldErrors(p => ({ ...p, username: '' }))}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
+                                    setUsername(val);
+                                    setFieldErrors(p => ({ ...p, username: '' }));
+                                }}
                                 className={`w-full pl-10 p-3 border rounded-lg focus:ring-2 outline-none text-slate-900 transition-colors ${fieldErrors.username ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-slate-300 focus:ring-primary focus:border-primary'}`}
                                 placeholder="username"
                             />
@@ -98,10 +101,14 @@ export default function StaffLogin() {
                             <input
                                 type="password"
                                 name="password"
+                                value={password}
                                 required
                                 maxLength={16}
                                 autoComplete="new-password"
-                                onChange={() => setFieldErrors(p => ({ ...p, password: '' }))}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    setFieldErrors(p => ({ ...p, password: '' }));
+                                }}
                                 className={`w-full pl-10 p-3 border rounded-lg focus:ring-2 outline-none text-slate-900 transition-colors ${fieldErrors.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-slate-300 focus:ring-primary focus:border-primary'}`}
                                 placeholder="••••••"
                             />
@@ -110,12 +117,12 @@ export default function StaffLogin() {
                     </div>
 
                     {error && (
-                        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center font-bold border border-red-100">
+                        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center font-bold border border-red-100 animate-in fade-in duration-300">
                             {error}
                         </div>
                     )}
 
-                    <button type="submit" disabled={loading} className="w-full bg-[#009ae2] text-white font-bold py-3 rounded-lg hover:bg-[#0088cc] transition-colors disabled:opacity-50">
+                    <button type="submit" disabled={loading} className="w-full bg-[#009ae2] text-white font-bold py-3 rounded-lg hover:bg-[#0088cc] transition-all disabled:opacity-50 shadow-md hover:shadow-lg active:scale-[0.98]">
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
