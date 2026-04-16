@@ -19,14 +19,14 @@ const allowedDomains = ["gmail.com", "yahoo.com", "yahoo.co.id", "outlook.com"];
   const validateField = (field: string, value: string) => {
     switch (field) {
       case "name":
-        if (!value) return "Name is required";
-        if (!/^[A-Za-z\s'-]{2,16}$/.test(value))
+        if (!value) return "name is required";
+        if (value.length < 2 || value.length > 16 || /[^a-zA-Z\s]/.test(value))
           return "Name must be 2-16 letters and only contain letters";
         return "";
       case "message":
-        if (!value) return "Message is required";
-        if (value.length < 10) return "Message must be at least 10 characters";
-        if (value.length > 300) return "Message must be less than 300 characters";
+        if (!value) return "message is required";
+        if (value.length < 10) return "Message must be at least 10 characters.";
+        if (value.length > 300) return "Message must be less than 300 characters.";
         return "";
       default:
         return "";
@@ -34,85 +34,46 @@ const allowedDomains = ["gmail.com", "yahoo.com", "yahoo.co.id", "outlook.com"];
   };
 
   const validateEmail = (value: string) => {
-  if (!value) return "Email is required";
-  if (!value.includes("@")) return "Email must contain @";
+    if (!value) return "email is required";
+    if (!value.includes("@")) return "email must contain @";
 
-  const [local, domain] = value.split("@");
-  if (!local || !domain) return "Invalid email format";
+    const parts = value.split('@');
+    if (parts.length > 2) return "Invalid email format";
 
-  if (local.length > 20) return "Local part too long";
-  if (!allowedDomains.includes(domain)) return "Email domain not allowed (only gmail.com, yahoo.com, yahoo.co.id, outlook.com)";
+    const domain = parts[1];
+    if (!allowedDomains.includes(domain)) return `Email domain "${domain}" not allowed (only gmail.com, yahoo.com, yahoo.co.id, outlook.com)`;
 
-  return "";
-};
+    return "";
+  };
 
   // --- handle input change with live validation ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name: field, value } = e.target;
+    let finalValue = value;
 
     if (field === "name") {
-      if (value.length <= 16) setName(value); // hard max
+      finalValue = value.replace(/[^a-zA-Z\s]/g, '');
+      if (finalValue.length <= 16) setName(finalValue);
     }
     else if (field === "email") {
-  const atIndex = value.indexOf("@");
-
-  if (atIndex === -1) {
-    // No @ yet → only local part
-    setEmail(value.slice(0, 20));
-  } else {
-    // Local part
-    const local = value.slice(0, atIndex).slice(0, 20);
-
-    // After @
-    let afterAt = value.slice(atIndex + 1);
-    const lastDot = afterAt.lastIndexOf(".");
-    let domain = afterAt;
-    let tld = "";
-
-    if (lastDot !== -1) {
-      domain = afterAt.slice(0, lastDot).slice(0, 20); // max 20 chars
-      tld = afterAt.slice(lastDot + 1).slice(0, 6);   // max 6 chars
-    } else {
-      domain = afterAt.slice(0, 20);
+      const atIndex = value.indexOf("@");
+      
+      if (atIndex !== -1 && atIndex > 20 && (e.nativeEvent as any).data === '@') {
+        if (value.substring(0, atIndex).length > 20) {
+            finalValue = value.substring(0, 20) + value.substring(atIndex);
+        }
+      } else if (atIndex === -1 && value.length > 20) {
+          finalValue = value.slice(0, 20);
+      }
+      setEmail(finalValue);
     }
-
-    const newValue = lastDot === -1 ? `${local}@${domain}` : `${local}@${domain}.${tld}`;
-    setEmail(newValue);
-  }
-}
     else if (field === "message") {
-      if (value.length <= 300) setMessage(value); // hard max
+      if (value.length <= 300) setMessage(value);
+      finalValue = value.slice(0, 300);
     }
 
-    // Validate
-    let errorMsg = "";
-    if (field === "email") errorMsg = validateEmail(value);
-    else errorMsg = validateField(field, value);
-
-    setErrors(prev => ({ ...prev, [field]: errorMsg }));
+    setErrors(prev => ({ ...prev, [field]: '' }));
   };
-const handleEmailChange = (value: string) => {
-  const atIndex = value.indexOf("@");
-  
-  if (atIndex === -1) {
-    // Before @ → limit to 20 chars
-    setEmail(value.slice(0, 20));
-  } else {
-    // Local part
-    const local = value.slice(0, atIndex).slice(0, 20);
-
-    // Domain → only allow typing if it starts with a valid domain
-    const typedDomain = value.slice(atIndex + 1);
-    const matchingDomain = allowedDomains.find(d => d.startsWith(typedDomain));
-    
-    if (matchingDomain) {
-      setEmail(`${local}@${typedDomain}`);
-    } else {
-      // block further typing if domain is invalid
-      setEmail(`${local}@${typedDomain.slice(0, typedDomain.length - 1)}`);
-    }
-  }
-};
   const handleSubmit = async () => {
     const newErrors: { [key: string]: string } = {
       name: validateField("name", name),
@@ -121,7 +82,10 @@ const handleEmailChange = (value: string) => {
     };
 
     setErrors(newErrors);
-    if (Object.values(newErrors).some(err => err)) return;
+    if (Object.values(newErrors).some(err => err)) {
+        alert("can't send");
+        return;
+    }
 
     setLoading(true);
     try {
@@ -134,7 +98,7 @@ const handleEmailChange = (value: string) => {
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error(err);
-      alert('Failed to send message.');
+      alert("can't send");
     } finally {
       setLoading(false);
     }
@@ -157,6 +121,7 @@ const handleEmailChange = (value: string) => {
                 name="name"
                 placeholder="Your name"
                 value={name}
+                maxLength={16}
                 onChange={handleChange}
                 autoComplete="new-name"
                 className={`w-full px-4 py-3 rounded-xl border outline-none ${errors.name ? "border-red-500" : "border-slate-200"}`}
@@ -168,10 +133,11 @@ const handleEmailChange = (value: string) => {
             <div className="relative">
               <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <input
-                type="text"
+                type="email"
                 name="email"
                 placeholder="example@gmail.com"
                 value={email}
+                maxLength={50}
                 onChange={handleChange}
                 autoComplete="new-email"
                 className={`w-full px-4 py-3 rounded-xl border outline-none ${errors.email ? "border-red-500" : "border-slate-200"}`}
@@ -186,6 +152,7 @@ const handleEmailChange = (value: string) => {
                 name="message"
                 placeholder="How can we help you?"
                 value={message}
+                maxLength={300}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 rounded-xl border outline-none resize-none h-32 ${errors.message ? "border-red-500" : "border-slate-200"}`}
               />
