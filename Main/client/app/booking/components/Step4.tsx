@@ -78,8 +78,8 @@ export default function Step4({
 
         const nameRegex = /^[a-zA-Z\s\-']{2,50}$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^[0-9]{8,15}$/;
-        const zipRegex = /^[0-9]{4,10}$/; 
+        const phoneRegex = /^[0-9]{8,13}$/;
+        const zipRegex = /^[0-9]{4,10}$/;
 
         if (!firstName || !lastName || !email || !phone || !birthDate || !zipCode) {
             const errs: Record<string, string> = {};
@@ -368,7 +368,7 @@ export default function Step4({
                                 <label className="text-sm font-bold text-slate-700">Phone number <span className="text-red-400">*</span></label>
                                 <input
                                     type="tel"
-                                    maxLength={15}
+                                    maxLength={13}
                                     value={phone}
                                     onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); clearFieldError('phone'); }}
                                     placeholder="e.g. +62 812 3456 7890"
