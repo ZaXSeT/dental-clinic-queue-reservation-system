@@ -221,7 +221,7 @@ export async function verifyRegistrationToken(email: string, token: string) {
         }
 
         if (expiresAt && Date.now() > parseInt(expiresAt)) {
-            return { success: false, message: 'OTP code has expired (2-minute limit). Please register again.' };
+            return { success: false, message: 'OTP code has expired. Please register again.' };
         }
 
         await prisma.patient.updateMany({
@@ -299,7 +299,7 @@ export async function resetPassword(prevState: any, formData: FormData) {
         if (!patient.verificationToken) return { message: 'OTP code is incorrect or has expired' };
         const [storedOtp, expiresAt] = patient.verificationToken.split('_');
         if (storedOtp !== otp) return { message: 'OTP code is incorrect' };
-        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'OTP code has expired (2-minute limit). Please repeat Forgot Password.' };
+        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'OTP code has expired. Please repeat Forgot Password.' };
         const hashed = await bcrypt.hash(newPassword, 10);
         await prisma.patient.update({ where: { id: patient.id }, data: { password: hashed, verificationToken: null } });
         return { success: true };
