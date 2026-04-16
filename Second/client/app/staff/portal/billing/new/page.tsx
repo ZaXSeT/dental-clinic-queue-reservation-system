@@ -169,8 +169,8 @@ export default function NewInvoicePage() {
                     </div>
 
                     
-                    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
+                    <div className="bg-white border border-slate-200 rounded-2xl overflow-visible shadow-sm">
+                        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2 rounded-t-2xl">
                             <Stethoscope className="w-4 h-4 text-primary" />
                             <span className="text-sm font-bold text-slate-700">Treatment / Service</span>
                         </div>
