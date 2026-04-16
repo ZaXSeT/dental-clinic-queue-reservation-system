@@ -14,6 +14,10 @@ function VerifyForm() {
     const redirect = searchParams.get('redirect') || '/';
     
     const [token, setToken] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [fieldError, setFieldError] = useState('');
+    const [success, setSuccess] = useState(false);
     const [resending, setResending] = useState(false);
     const [resendMessage, setResendMessage] = useState('');
     const [cooldown, setCooldown] = useState(0);
