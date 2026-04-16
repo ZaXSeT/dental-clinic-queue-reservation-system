@@ -249,6 +249,25 @@ export async function verifyRegistrationToken(email: string, token: string) {
 
 export async function resendVerificationToken(email: string) {
     if (!email) return { success: false, message: 'Invalid payload' };
+
+    const blockUntil = cookies().get('otp_block')?.value;
+    if (blockUntil && Date.now() < parseInt(blockUntil)) {
+        const remaining = Math.ceil((parseInt(blockUntil) - Date.now()) / 1000 / 60);
+        return { success: false, message: `Too many attempts. Please try again in ${remaining} minutes.` };
+    }
+
+    let attempts = parseInt(cookies().get('otp_attempts')?.value || '0');
+    attempts += 1;
+
+    if (attempts > 3) {
+        const blockTime = Date.now() + 5 * 60 * 1000;
+        cookies().set('otp_block', blockTime.toString(), { maxAge: 5 * 60, path: '/' });
+        cookies().set('otp_attempts', '0', { maxAge: 0, path: '/' });
+        return { success: false, message: 'Too many attempts. Please try again in 5 minutes.' };
+    }
+
+    cookies().set('otp_attempts', attempts.toString(), { maxAge: 5 * 60, path: '/' });
+
     try {
         const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
         if (!patient) return { success: false, message: 'Account not found' };

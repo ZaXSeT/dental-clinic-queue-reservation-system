@@ -14,21 +14,27 @@ function VerifyForm() {
     const redirect = searchParams.get('redirect') || '/';
     
     const [token, setToken] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [fieldError, setFieldError] = useState('');
-    const [success, setSuccess] = useState(false);
     const [resending, setResending] = useState(false);
     const [resendMessage, setResendMessage] = useState('');
+    const [cooldown, setCooldown] = useState(0);
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (cooldown > 0) {
+            timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+        }
+        return () => clearTimeout(timer);
+    }, [cooldown]);
 
     const handleResend = async () => {
-        if (!email) return;
+        if (!email || cooldown > 0) return;
         setResending(true);
         setResendMessage('');
         setError('');
         const res = await resendVerificationToken(email);
         if (res?.success) {
             setResendMessage('OTP code has been resent to your email.');
+            setCooldown(30); // 30 second cooldown
         } else {
             setError(res?.message || 'Error resending code.');
         }
@@ -120,10 +126,10 @@ function VerifyForm() {
                         <button
                             type="button"
                             onClick={handleResend}
-                            disabled={resending || loading}
+                            disabled={resending || loading || cooldown > 0}
                             className="font-bold text-primary hover:text-sky-500 transition-colors disabled:opacity-50"
                         >
-                            {resending ? 'Resending...' : 'Resend code'}
+                            {resending ? 'Resending...' : cooldown > 0 ? `Resend code (${cooldown}s)` : 'Resend code'}
                         </button>
                     </p>
                     {resendMessage && (
