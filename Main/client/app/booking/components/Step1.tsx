@@ -26,7 +26,7 @@ export default function Step1({ onSelect }: Step1Props) {
                         <div className="flex items-center gap-6">
                             <div className="text-left">
                                 <div className="font-bold text-lg text-slate-900 group-hover:text-[#009ae2] transition-colors">Reguler patient</div>
-                                <div className="text-slate-400 text-sm">First time visiting us</div>
+                                <div className="text-slate-400 text-sm">General or first time visit</div>
                             </div>
                         </div>
                         <div className="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#009ae2] transition-all duration-300 group-hover:scale-110">
