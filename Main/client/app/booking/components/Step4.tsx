@@ -81,57 +81,69 @@ export default function Step4({
         const phoneRegex = /^[0-9]{8,13}$/;
         const zipRegex = /^[0-9]{4,10}$/;
 
-        if (!firstName || !lastName || !email || !phone || !birthDate || !zipCode) {
-            const errs: Record<string, string> = {};
-            if (!firstName) errs.firstName = "First name is required.";
-            if (!lastName) errs.lastName = "Last name is required.";
-            if (!birthDate) errs.birthDate = "Date of birth is required.";
-            if (!zipCode) errs.zipCode = "Zip/postal code is required.";
-            if (!email) errs.email = "Email is required.";
-            if (!phone) errs.phone = "Phone number is required.";
+        let hasError = false;
+        const errs: Record<string, string> = {};
+
+        if (!firstName) errs.firstName = "First name is required.";
+        if (!lastName) errs.lastName = "Last name is required.";
+        if (!birthDate) errs.birthDate = "Date of birth is required.";
+        if (!zipCode) errs.zipCode = "Zip/postal code is required.";
+        if (!email) errs.email = "Email is required.";
+        if (!phone) errs.phone = "Phone number is required.";
+
+        if (bookingFor === "Child or dependent") {
+            if (!gFirstName) errs.gFirstName = "Guardian first name is required.";
+            if (!gLastName) errs.gLastName = "Guardian last name is required.";
+            if (!gBirthDate) errs.gBirthDate = "Guardian date of birth is required.";
+        }
+
+        if (Object.keys(errs).length > 0) {
             setFieldErrors(errs);
             setError("Please fill in all required fields.");
             return;
         }
 
+        // --- Regex/Format Validations ---
         if (!nameRegex.test(firstName.trim())) {
-            setError("Please enter a valid first name (letters only, min 2 characters).");
-            return;
+            setFieldErrors(prev => ({ ...prev, firstName: "Please enter a valid first name (letters only)." }));
+            hasError = true;
         }
         if (!nameRegex.test(lastName.trim())) {
-            setError("Please enter a valid last name (letters only, min 2 characters).");
-            return;
+            setFieldErrors(prev => ({ ...prev, lastName: "Please enter a valid last name (letters only)." }));
+            hasError = true;
         }
         if (!emailRegex.test(email.trim())) {
-            setError("Please enter a valid email address.");
-            return;
+            setFieldErrors(prev => ({ ...prev, email: "Please enter a valid email address." }));
+            hasError = true;
         }
         if (!phoneRegex.test(phone.trim())) {
-            setError("Please enter a valid phone number.");
-            return;
+            setFieldErrors(prev => ({ ...prev, phone: "Phone must be 8-13 digits long." }));
+            hasError = true;
         }
         if (!zipRegex.test(zipCode.trim())) {
-            setError("Please enter a valid zip/postal code.");
-            return;
-        }
-        if (comments && comments.length > 300) {
-            setError("Comments must not exceed 300 characters.");
-            return;
+            setFieldErrors(prev => ({ ...prev, zipCode: "Please enter a valid zip/postal code." }));
+            hasError = true;
         }
 
         if (bookingFor === "Child or dependent") {
-            if (!gFirstName || !gLastName || !gBirthDate) {
-                setError("Please fill in all required fields in Parent/Guardian Details.");
-                return;
+            if (gFirstName && !nameRegex.test(gFirstName.trim())) {
+                setFieldErrors(prev => ({ ...prev, gFirstName: "Please enter a valid guardian first name." }));
+                hasError = true;
             }
-            if (!nameRegex.test(gFirstName.trim())) {
-                setError("Please enter a valid guardian first name.");
-                return;
+            if (gLastName && !nameRegex.test(gLastName.trim())) {
+                setFieldErrors(prev => ({ ...prev, gLastName: "Please enter a valid guardian last name." }));
+                hasError = true;
             }
-            if (!nameRegex.test(gLastName.trim())) {
-                setError("Please enter a valid guardian last name.");
-                return;
-            }
+        }
+
+        if (hasError) {
+            setError("Please correct the errors before submitting.");
+            return;
+        }
+
+        if (comments && comments.length > 300) {
+            setError("Comments must not exceed 300 characters.");
+            return;
         }
 
         setLoading(true);
@@ -305,9 +317,10 @@ export default function Step4({
                                         type="text"
                                         maxLength={50}
                                         value={gFirstName}
-                                        onChange={(e) => setGFirstName(e.target.value)}
-                                        className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                        onChange={(e) => { setGFirstName(e.target.value); clearFieldError('gFirstName'); }}
+                                        className={`w-full p-3 rounded-xl border ${fieldErrors.gFirstName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                     />
+                                    {fieldErrors.gFirstName && <p className="text-red-500 text-xs font-medium">{fieldErrors.gFirstName}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold text-slate-700">Parent/Guardian last name <span className="text-red-400">*</span></label>
@@ -315,9 +328,10 @@ export default function Step4({
                                         type="text"
                                         maxLength={50}
                                         value={gLastName}
-                                        onChange={(e) => setGLastName(e.target.value)}
-                                        className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                        onChange={(e) => { setGLastName(e.target.value); clearFieldError('gLastName'); }}
+                                        className={`w-full p-3 rounded-xl border ${fieldErrors.gLastName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                     />
+                                    {fieldErrors.gLastName && <p className="text-red-500 text-xs font-medium">{fieldErrors.gLastName}</p>}
                                 </div>
                             </div>
 
@@ -339,9 +353,10 @@ export default function Step4({
                                         type="date"
                                         max={new Date().toISOString().split("T")[0]}
                                         value={gBirthDate}
-                                        onChange={(e) => setGBirthDate(e.target.value)}
-                                        className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium text-slate-600"
+                                        onChange={(e) => { setGBirthDate(e.target.value); clearFieldError('gBirthDate'); }}
+                                        className={`w-full p-3 rounded-xl border ${fieldErrors.gBirthDate ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium text-slate-600`}
                                     />
+                                    {fieldErrors.gBirthDate && <p className="text-red-500 text-xs font-medium">{fieldErrors.gBirthDate}</p>}
                                 </div>
                             </div>
                         </div>
