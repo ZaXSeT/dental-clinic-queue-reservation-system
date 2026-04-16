@@ -83,7 +83,6 @@ const allowedDomains = ["gmail.com", "yahoo.com", "yahoo.co.id", "outlook.com"];
 
     setErrors(newErrors);
     if (Object.values(newErrors).some(err => err)) {
-        alert("can't send");
         return;
     }
 
@@ -98,7 +97,7 @@ const allowedDomains = ["gmail.com", "yahoo.com", "yahoo.co.id", "outlook.com"];
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error(err);
-      alert("can't send");
+      setErrors(prev => ({ ...prev, _form: "Failed to send message. Please try again." }));
     } finally {
       setLoading(false);
     }
