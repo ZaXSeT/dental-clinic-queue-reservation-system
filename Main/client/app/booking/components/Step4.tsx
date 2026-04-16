@@ -247,9 +247,9 @@ export default function Step4({
                                 <label className="text-sm font-bold text-slate-700">First name <span className="text-red-400">*</span></label>
                                 <input
                                     type="text"
-                                    maxLength={50}
+                                    maxLength={16}
                                     value={firstName}
-                                    onChange={(e) => { setFirstName(e.target.value); clearFieldError('firstName'); }}
+                                    onChange={(e) => { setFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, "")); clearFieldError('firstName'); }}
                                     placeholder="e.g. John"
                                     className={`w-full p-3 rounded-xl border ${fieldErrors.firstName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                 />
@@ -259,9 +259,9 @@ export default function Step4({
                                 <label className="text-sm font-bold text-slate-700">Last name <span className="text-red-400">*</span></label>
                                 <input
                                     type="text"
-                                    maxLength={50}
+                                    maxLength={16}
                                     value={lastName}
-                                    onChange={(e) => { setLastName(e.target.value); clearFieldError('lastName'); }}
+                                    onChange={(e) => { setLastName(e.target.value.replace(/[^a-zA-Z\s]/g, "")); clearFieldError('lastName'); }}
                                     placeholder="e.g. Doe"
                                     className={`w-full p-3 rounded-xl border ${fieldErrors.lastName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                 />
@@ -318,9 +318,9 @@ export default function Step4({
                                     <label className="text-sm font-bold text-slate-700">Parent/Guardian first name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
-                                        maxLength={50}
+                                        maxLength={16}
                                         value={gFirstName}
-                                        onChange={(e) => { setGFirstName(e.target.value); clearFieldError('gFirstName'); }}
+                                        onChange={(e) => { setGFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, "")); clearFieldError('gFirstName'); }}
                                         className={`w-full p-3 rounded-xl border ${fieldErrors.gFirstName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                     />
                                     {fieldErrors.gFirstName && <p className="text-red-500 text-xs font-medium">{fieldErrors.gFirstName}</p>}
@@ -329,9 +329,9 @@ export default function Step4({
                                     <label className="text-sm font-bold text-slate-700">Parent/Guardian last name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
-                                        maxLength={50}
+                                        maxLength={16}
                                         value={gLastName}
-                                        onChange={(e) => { setGLastName(e.target.value); clearFieldError('gLastName'); }}
+                                        onChange={(e) => { setGLastName(e.target.value.replace(/[^a-zA-Z\s]/g, "")); clearFieldError('gLastName'); }}
                                         className={`w-full p-3 rounded-xl border ${fieldErrors.gLastName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                     />
                                     {fieldErrors.gLastName && <p className="text-red-500 text-xs font-medium">{fieldErrors.gLastName}</p>}
