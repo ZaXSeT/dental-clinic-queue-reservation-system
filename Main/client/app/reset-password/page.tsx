@@ -16,11 +16,29 @@ function ResetPasswordForm() {
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [pwError, setPwError] = useState('');
+    const [confirmError, setConfirmError] = useState('');
+    const [otpError, setOtpError] = useState('');
+
+    const SIMPLE_PASSWORDS = ['password', 'password123', '12345678', '123456789', 'qwerty123', 'iloveyou', 'admin123'];
+
+    const validatePassword = (val: string): string => {
+        if (val.length < 8) return 'Password should be 8-16 characters long.';
+        if (val.length > 16) return ''; // blocked by maxLength, won't happen
+        if (!/[A-Z]/.test(val)) return 'Password should contain at least one uppercase letter.';
+        if (!/[0-9]/.test(val)) return 'Password should contain at least one number.';
+        if (SIMPLE_PASSWORDS.includes(val.toLowerCase())) return 'Simple passwords like "password", "password123" are not allowed.';
+        return '';
+    };
+
     const handleOtpChange = (index: number, value: string) => {
         if (!/^\d*$/.test(value)) return;
         const newOtp = [...otp];
         newOtp[index] = value.slice(-1);
         setOtp(newOtp);
+        setOtpError('');
         if (value && index < 5) {
             inputRefs.current[index + 1]?.focus();
         }
@@ -32,6 +50,20 @@ function ResetPasswordForm() {
         }
     };
 
+    const handlePasswordChange = (val: string) => {
+        if (val.length > 16) return; // block input past 16
+        setNewPassword(val);
+        setPwError(val ? validatePassword(val) : '');
+        if (confirmPassword) {
+            setConfirmError(val !== confirmPassword ? "Passwords didn't match, please try again." : '');
+        }
+    };
+
+    const handleConfirmChange = (val: string) => {
+        setConfirmPassword(val);
+        setConfirmError(val && val !== newPassword ? "Passwords didn't match, please try again." : '');
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
@@ -39,14 +71,29 @@ function ResetPasswordForm() {
 
         const otpCode = otp.join('');
         if (otpCode.length !== 6) {
-            setError('Please enter the 6-digit OTP code');
+            setOtpError('Please enter the 6-digit OTP code.');
             setLoading(false);
             return;
         }
 
-        const formData = new FormData(e.currentTarget);
+        const pwValidationError = validatePassword(newPassword);
+        if (pwValidationError) {
+            setPwError(pwValidationError);
+            setLoading(false);
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setConfirmError("Passwords didn't match, please try again.");
+            setLoading(false);
+            return;
+        }
+
+        const formData = new FormData();
         formData.set('otp', otpCode);
         formData.set('email', email);
+        formData.set('newPassword', newPassword);
+        formData.set('confirmPassword', confirmPassword);
 
         const res = await resetPassword(null, formData);
 
@@ -82,10 +129,11 @@ function ResetPasswordForm() {
                                 value={digit}
                                 onChange={e => handleOtpChange(i, e.target.value)}
                                 onKeyDown={e => handleOtpKeyDown(i, e)}
-                                className="w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                className={`w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 ${otpError ? 'border-red-400 bg-red-50' : 'border-slate-200'} rounded-xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none`}
                             />
                         ))}
                     </div>
+                    {otpError && <p className="mt-2 text-red-500 text-xs font-medium">{otpError}</p>}
                 </div>
 
                 {/* New password */}
@@ -96,14 +144,15 @@ function ResetPasswordForm() {
                             <Lock className="h-5 w-5 text-slate-400" />
                         </div>
                         <input
-                            name="newPassword"
                             type="password"
-                            required
-                            minLength={8}
-                            className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none"
+                            maxLength={16}
+                            value={newPassword}
+                            onChange={e => handlePasswordChange(e.target.value)}
+                            className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${pwError ? 'border-red-400 bg-red-50' : 'border-slate-200'} rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none`}
                             placeholder="At least 8 characters"
                         />
                     </div>
+                    {pwError && <p className="mt-1 text-red-500 text-xs font-medium">{pwError}</p>}
                 </div>
 
                 {/* Confirm password */}
@@ -114,14 +163,15 @@ function ResetPasswordForm() {
                             <Lock className="h-5 w-5 text-slate-400" />
                         </div>
                         <input
-                            name="confirmPassword"
                             type="password"
-                            required
-                            minLength={8}
-                            className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none"
+                            maxLength={16}
+                            value={confirmPassword}
+                            onChange={e => handleConfirmChange(e.target.value)}
+                            className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${confirmError ? 'border-red-400 bg-red-50' : 'border-slate-200'} rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none`}
                             placeholder="Re-enter new password"
                         />
                     </div>
+                    {confirmError && <p className="mt-1 text-red-500 text-xs font-medium">{confirmError}</p>}
                 </div>
 
                 {error && (

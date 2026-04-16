@@ -37,6 +37,12 @@ export default function Step4({
     const [comments, setComments] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+    const setFieldError = (field: string, msg: string) =>
+        setFieldErrors(prev => ({ ...prev, [field]: msg }));
+    const clearFieldError = (field: string) =>
+        setFieldErrors(prev => { const n = { ...prev }; delete n[field]; return n; });
 
 
     useEffect(() => {
@@ -76,7 +82,15 @@ export default function Step4({
         const zipRegex = /^[0-9]{4,10}$/; 
 
         if (!firstName || !lastName || !email || !phone || !birthDate || !zipCode) {
-            setError("Please fill in all required fields in Patient Details.");
+            const errs: Record<string, string> = {};
+            if (!firstName) errs.firstName = "First name is required.";
+            if (!lastName) errs.lastName = "Last name is required.";
+            if (!birthDate) errs.birthDate = "Date of birth is required.";
+            if (!zipCode) errs.zipCode = "Zip/postal code is required.";
+            if (!email) errs.email = "Email is required.";
+            if (!phone) errs.phone = "Phone number is required.";
+            setFieldErrors(errs);
+            setError("Please fill in all required fields.");
             return;
         }
 
@@ -214,27 +228,29 @@ export default function Step4({
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-sm font-bold text-slate-700">First name <span className="text-red-400">*</span></label>
                                 <input
                                     type="text"
                                     maxLength={50}
                                     value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    onChange={(e) => { setFirstName(e.target.value); clearFieldError('firstName'); }}
                                     placeholder="e.g. John"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                    className={`w-full p-3 rounded-xl border ${fieldErrors.firstName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                 />
+                                {fieldErrors.firstName && <p className="text-red-500 text-xs font-medium">{fieldErrors.firstName}</p>}
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-sm font-bold text-slate-700">Last name <span className="text-red-400">*</span></label>
                                 <input
                                     type="text"
                                     maxLength={50}
                                     value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
+                                    onChange={(e) => { setLastName(e.target.value); clearFieldError('lastName'); }}
                                     placeholder="e.g. Doe"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                    className={`w-full p-3 rounded-xl border ${fieldErrors.lastName ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                 />
+                                {fieldErrors.lastName && <p className="text-red-500 text-xs font-medium">{fieldErrors.lastName}</p>}
                             </div>
                         </div>
 
@@ -250,28 +266,30 @@ export default function Step4({
                                     <option>Female</option>
                                 </select>
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-sm font-bold text-slate-700">Date of birth <span className="text-red-400">*</span></label>
                                 <input
                                     type="date"
                                     max={new Date().toISOString().split("T")[0]}
                                     value={birthDate}
-                                    onChange={(e) => setBirthDate(e.target.value)}
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium text-slate-600"
+                                    onChange={(e) => { setBirthDate(e.target.value); clearFieldError('birthDate'); }}
+                                    className={`w-full p-3 rounded-xl border ${fieldErrors.birthDate ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium text-slate-600`}
                                 />
+                                {fieldErrors.birthDate && <p className="text-red-500 text-xs font-medium">{fieldErrors.birthDate}</p>}
                             </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                             <label className="text-sm font-bold text-slate-700">Zip/postal code <span className="text-red-400">*</span></label>
                             <input
                                 type="text"
                                 maxLength={10}
                                 value={zipCode}
-                                onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
+                                onChange={(e) => { setZipCode(e.target.value.replace(/\D/g, "")); clearFieldError('zipCode'); }}
                                 placeholder="e.g. 20351"
-                                className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                className={`w-full p-3 rounded-xl border ${fieldErrors.zipCode ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                             />
+                            {fieldErrors.zipCode && <p className="text-red-500 text-xs font-medium">{fieldErrors.zipCode}</p>}
                         </div>
                     </div>
 
@@ -333,28 +351,30 @@ export default function Step4({
                     <div className="mb-10">
                         <h2 className="text-2xl font-bold text-slate-900 mb-6">Contact details</h2>
                         <div className="space-y-6">
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-sm font-bold text-slate-700">Email <span className="text-red-400">*</span></label>
                                 <input
                                     type="email"
                                     maxLength={100}
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }}
                                     disabled={!!loggedInUser?.email}
                                     placeholder="e.g. john@email.com"
-                                    className={`w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium ${loggedInUser?.email ? 'bg-slate-100 text-slate-500 cursor-not-allowed border-slate-300' : 'bg-white'}`}
+                                    className={`w-full p-3 rounded-xl border ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium ${loggedInUser?.email ? 'bg-slate-100 text-slate-500 cursor-not-allowed border-slate-300' : 'bg-white'}`}
                                 />
+                                {fieldErrors.email && <p className="text-red-500 text-xs font-medium">{fieldErrors.email}</p>}
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <label className="text-sm font-bold text-slate-700">Phone number <span className="text-red-400">*</span></label>
                                 <input
                                     type="tel"
                                     maxLength={15}
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                                    onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); clearFieldError('phone'); }}
                                     placeholder="e.g. +62 812 3456 7890"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium"
+                                    className={`w-full p-3 rounded-xl border ${fieldErrors.phone ? 'border-red-400 bg-red-50' : 'border-slate-200'} focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium`}
                                 />
+                                {fieldErrors.phone && <p className="text-red-500 text-xs font-medium">{fieldErrors.phone}</p>}
                             </div>
                         </div>
                     </div>
