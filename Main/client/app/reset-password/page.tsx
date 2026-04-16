@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { resetPassword } from '@/actions/patientAuth';
+import { resetPassword, forgotPassword } from '@/actions/patientAuth';
 import { ArrowLeft, Lock, ShieldCheck } from 'lucide-react';
 
 function ResetPasswordForm() {
@@ -15,6 +15,18 @@ function ResetPasswordForm() {
     const [error, setError] = useState('');
     const [otp, setOtp] = useState('');
     const otpRef = useRef<HTMLInputElement | null>(null);
+
+    const [resending, setResending] = useState(false);
+    const [resendMessage, setResendMessage] = useState('');
+    const [cooldown, setCooldown] = useState(0);
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (cooldown > 0) {
+            timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+        }
+        return () => clearTimeout(timer);
+    }, [cooldown]);
 
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,6 +43,26 @@ function ResetPasswordForm() {
         if (!/[0-9]/.test(val)) return 'Password should contain at least one number.';
         if (SIMPLE_PASSWORDS.includes(val.toLowerCase())) return 'Simple passwords like "password", "password123" are not allowed.';
         return '';
+    };
+
+    const handleResend = async () => {
+        if (!email || cooldown > 0) return;
+        setResending(true);
+        setResendMessage('');
+        setError('');
+        
+        const formData = new FormData();
+        formData.set('email', email);
+        
+        const res = await forgotPassword(null, formData);
+        
+        if (res?.success) {
+            setResendMessage('OTP code has been resent to your email.');
+            setCooldown(30); 
+        } else {
+            setError(res?.message || 'Error resending code.');
+        }
+        setResending(false);
     };
 
 
@@ -177,19 +209,29 @@ function ResetPasswordForm() {
 
                 <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || resending}
                     className="w-full flex justify-center items-center gap-2 py-4 px-4 border border-transparent rounded-2xl text-base font-bold text-white bg-primary hover:bg-sky-500 focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                 >
                     <ShieldCheck className="w-5 h-5" />
                     {loading ? 'Saving...' : 'Save New Password'}
                 </button>
 
-                <p className="text-center text-sm text-slate-500">
-                    Didn't receive the code?{' '}
-                    <Link href="/forgot-password" className="font-bold text-primary hover:text-sky-500 transition-colors">
-                        Resend code
-                    </Link>
+                <p className="text-center text-sm text-slate-500 pt-2">
+                    Didn't receive the code or it expired?{' '}
+                    <button
+                        type="button"
+                        onClick={handleResend}
+                        disabled={resending || loading || cooldown > 0}
+                        className="font-bold text-primary hover:text-sky-500 transition-colors disabled:opacity-50"
+                    >
+                        {resending ? 'Resending...' : cooldown > 0 ? `Resend code (${cooldown}s)` : 'Resend code'}
+                    </button>
                 </p>
+                {resendMessage && (
+                    <div className="text-center text-sm font-bold text-green-600 bg-green-50 p-2 rounded-xl border border-green-100 mt-2">
+                        ✓ {resendMessage}
+                    </div>
+                )}
             </form>
         </div>
     );
