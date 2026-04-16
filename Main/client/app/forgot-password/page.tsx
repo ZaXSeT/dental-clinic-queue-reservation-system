@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
         if (res?.success) {
             router.push(`/reset-password?email=${encodeURIComponent(res.email || '')}`);
         } else {
-            const msg = res?.message || 'Terjadi kesalahan';
+            const msg = res?.message || 'An error occurred';
             if (msg.includes('registered')) {
                 setFieldErrors({ email: msg });
             } else {

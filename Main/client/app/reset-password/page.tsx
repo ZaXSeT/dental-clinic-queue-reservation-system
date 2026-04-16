@@ -53,7 +53,7 @@ function ResetPasswordForm() {
         if (res?.success) {
             router.push('/login?reset=success');
         } else {
-            setError(res?.message || 'Terjadi kesalahan');
+            setError(res?.message || 'An error occurred');
         }
         setLoading(false);
     };

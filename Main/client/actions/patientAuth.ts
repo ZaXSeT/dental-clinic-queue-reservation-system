@@ -139,14 +139,14 @@ export async function registerPatient(prevState: any, formData: FormData) {
     };
     const emailParts = email.split('@');
     if (emailParts.length !== 2) {
-        return { message: 'Format email tidak valid.' };
+        return { message: 'Invalid email format' };
     }
     const emailDomain = emailParts[1].toLowerCase();
     if (TYPO_MAP[emailDomain]) {
-        return { message: `Domain email "${emailDomain}" tidak valid. Maksud kamu "${emailParts[0]}@${TYPO_MAP[emailDomain]}"?` };
+        return { message: `Invalid email domain "${emailDomain}". Did you mean "${emailParts[0]}@${TYPO_MAP[emailDomain]}"?` };
     }
     if (!VALID_DOMAINS.includes(emailDomain)) {
-        return { message: `Domain email "${emailDomain}" tidak dikenali. Gunakan email yang valid (contoh: @gmail.com, @yahoo.com).` };
+        return { message: `Email domain "${emailDomain}" is not allowed. Please use a valid email (e.g. @gmail.com, @yahoo.com).` };
     }
     // ── End validation ──
 
@@ -221,7 +221,7 @@ export async function verifyRegistrationToken(email: string, token: string) {
         }
 
         if (expiresAt && Date.now() > parseInt(expiresAt)) {
-            return { success: false, message: 'Kode OTP sudah kadaluarsa (batas waktu 2 menit). Silakan daftar ulang.' };
+            return { success: false, message: 'OTP code has expired (2-minute limit). Please register again.' };
         }
 
         await prisma.patient.updateMany({
@@ -268,7 +268,7 @@ export async function logoutPatientAction() {
 // --- Forgot Password ---
 export async function forgotPassword(prevState: any, formData: FormData) {
     const email = formData.get('email') as string;
-    if (!email) return { message: 'Email wajib diisi' };
+    if (!email) return { message: 'Email is required' };
     try {
         const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
         if (!patient) return { message: 'Email is not registered. Please create a new account first.' };
@@ -280,7 +280,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
         return { success: true, email };
     } catch (err) {
         console.error('Forgot password error:', err);
-        return { message: 'Terjadi kesalahan. Coba lagi.' };
+        return { message: 'An error occurred. Please try again.' };
     }
 }
 
@@ -290,21 +290,21 @@ export async function resetPassword(prevState: any, formData: FormData) {
     const otp = formData.get('otp') as string;
     const newPassword = formData.get('newPassword') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
-    if (!email || !otp || !newPassword || !confirmPassword) return { message: 'Semua field wajib diisi' };
-    if (newPassword !== confirmPassword) return { message: 'Password baru dan konfirmasi tidak sama' };
-    if (newPassword.length < 6) return { message: 'Password minimal 6 karakter' };
+    if (!email || !otp || !newPassword || !confirmPassword) return { message: 'All fields are required' };
+    if (newPassword !== confirmPassword) return { message: 'New password and confirmation do not match' };
+    if (newPassword.length < 6) return { message: 'Password must be at least 6 characters' };
     try {
         const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
-        if (!patient) return { message: 'Akun tidak ditemukan' };
-        if (!patient.verificationToken) return { message: 'Kode OTP salah atau sudah kadaluarsa' };
+        if (!patient) return { message: 'Account not found' };
+        if (!patient.verificationToken) return { message: 'OTP code is incorrect or has expired' };
         const [storedOtp, expiresAt] = patient.verificationToken.split('_');
-        if (storedOtp !== otp) return { message: 'Kode OTP salah' };
-        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'Kode OTP sudah kadaluarsa (batas waktu 2 menit). Silakan ulangi "Forgot Password".' };
+        if (storedOtp !== otp) return { message: 'OTP code is incorrect' };
+        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'OTP code has expired (2-minute limit). Please repeat Forgot Password.' };
         const hashed = await bcrypt.hash(newPassword, 10);
         await prisma.patient.update({ where: { id: patient.id }, data: { password: hashed, verificationToken: null } });
         return { success: true };
     } catch (err) {
         console.error('Reset password error:', err);
-        return { message: 'Terjadi kesalahan. Coba lagi.' };
+        return { message: 'An error occurred. Please try again.' };
     }
 }

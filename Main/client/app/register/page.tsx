@@ -53,7 +53,7 @@ function validateEmailDomain(email: string): { valid: boolean; suggestion?: stri
         return {
             valid: false,
             suggestion: `${parts[0]}@${TYPO_MAP[domain]}`,
-            message: `Domain "${domain}" tidak dikenali. Maksud kamu "${parts[0]}@${TYPO_MAP[domain]}"?`,
+            message: `Invalid email domain "${domain}". Did you mean "${parts[0]}@${TYPO_MAP[domain]}"?`,
         };
     }
 
@@ -308,7 +308,7 @@ export default function RegisterPage() {
                                     ⚠️ {emailError}
                                     {emailSuggestion && (
                                         <span className="block mt-1 font-bold text-red-700">
-                                            Gunakan: {emailSuggestion}
+                                            Did you mean: {emailSuggestion}
                                         </span>
                                     )}
                                 </div>
