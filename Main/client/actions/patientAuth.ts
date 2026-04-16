@@ -312,6 +312,25 @@ export async function logoutPatientAction() {
 export async function forgotPassword(prevState: any, formData: FormData) {
     const email = formData.get('email') as string;
     if (!email) return { message: 'Email is required' };
+
+    const blockUntil = cookies().get('otp_block')?.value;
+    if (blockUntil && Date.now() < parseInt(blockUntil)) {
+        const remaining = Math.ceil((parseInt(blockUntil) - Date.now()) / 1000 / 60);
+        return { message: `Too many attempts. Please try again in ${remaining} minutes.` };
+    }
+
+    let attempts = parseInt(cookies().get('otp_attempts')?.value || '0');
+    attempts += 1;
+
+    if (attempts > 3) {
+        const blockTime = Date.now() + 5 * 60 * 1000;
+        cookies().set('otp_block', blockTime.toString(), { maxAge: 5 * 60, path: '/' });
+        cookies().set('otp_attempts', '0', { maxAge: 0, path: '/' });
+        return { message: 'Too many attempts. Please try again in 5 minutes.' };
+    }
+
+    cookies().set('otp_attempts', attempts.toString(), { maxAge: 5 * 60, path: '/' });
+
     try {
         const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
         if (!patient) return { message: 'Email is not registered. Please create a new account first.' };
