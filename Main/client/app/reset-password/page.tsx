@@ -100,7 +100,22 @@ function ResetPasswordForm() {
         if (res?.success) {
             router.push('/login?reset=success');
         } else {
-            setError(res?.message || 'An error occurred');
+            const msg = res?.message || 'An error occurred';
+            // Route OTP-related errors inline below the OTP input
+            if (
+                msg.toLowerCase().includes('otp') ||
+                msg.toLowerCase().includes('incorrect') ||
+                msg.toLowerCase().includes('expired') ||
+                msg.toLowerCase().includes('kode') ||
+                msg.toLowerCase().includes('kadaluarsa')
+            ) {
+                setOtpError(msg);
+                // Clear OTP inputs so user can re-enter
+                setOtp(['', '', '', '', '', '']);
+                setTimeout(() => inputRefs.current[0]?.focus(), 50);
+            } else {
+                setError(msg);
+            }
         }
         setLoading(false);
     };

@@ -341,8 +341,8 @@ export async function resetPassword(prevState: any, formData: FormData) {
         if (!patient) return { message: 'Account not found' };
         if (!patient.verificationToken) return { message: 'OTP code is incorrect or has expired' };
         const [storedOtp, expiresAt] = patient.verificationToken.split('_');
-        if (storedOtp !== otp) return { message: 'OTP code is incorrect' };
-        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'OTP code has expired. Please repeat Forgot Password.' };
+        if (storedOtp !== otp) return { message: 'OTP code is incorrect.' };
+        if (expiresAt && Date.now() > parseInt(expiresAt)) return { message: 'OTP code has expired.' };
         const hashed = await bcrypt.hash(newPassword, 10);
         await prisma.patient.update({ where: { id: patient.id }, data: { password: hashed, verificationToken: null } });
         return { success: true };
