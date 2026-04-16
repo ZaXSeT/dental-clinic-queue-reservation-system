@@ -17,6 +17,7 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
     const [phone, setPhone] = useState("");
     const [doctorId, setDoctorId] = useState("");
     const [timeField, setTimeField] = useState("");
+    const [nameError, setNameError] = useState("");
     const [phoneError, setPhoneError] = useState("");
     const [doctorDropdownOpen, setDoctorDropdownOpen] = useState(false);
     const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
@@ -77,17 +78,27 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name.trim()) return;
+        let hasError = false;
+
+        if (!name.trim()) {
+            setNameError('Name is required');
+            hasError = true;
+        } else if (name.trim().length < 2 || name.trim().length > 16) {
+            setNameError('Name must be 2-16 letters and only contain letters');
+            hasError = true;
+        }
+
         if (phone) {
             if (!/^08/.test(phone)) {
                 setPhoneError("Phone number must start with 08");
-                return;
-            }
-            if (phone.length < 10 || phone.length > 14) {
+                hasError = true;
+            } else if (phone.length < 10 || phone.length > 14) {
                 setPhoneError("Phone number must be between 10-14 digits");
-                return;
+                hasError = true;
             }
         }
+
+        if (hasError) return;
         await onSubmit(name, phone, doctorId || undefined, timeField || undefined);
     };
 
@@ -112,24 +123,32 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Full Name</label>
                         <div className="relative">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                <User className="w-5 h-5" />
+                                <User className={`w-5 h-5 ${nameError ? 'text-red-400' : 'text-slate-400'}`} />
                             </div>
                             <input
                                 type="text"
                                 value={name}
-                                onChange={(e) => setName(e.target.value.replace(/\d/g, ""))}
-                                maxLength={50}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                    if (val.length <= 16) setName(val);
+                                    if (nameError) setNameError('');
+                                }}
+                                maxLength={16}
                                 placeholder="e.g. John Doe"
-                                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                                    nameError
+                                        ? 'border-red-400 focus:ring-red-200 focus:border-red-500'
+                                        : 'border-slate-200 focus:ring-primary/20 focus:border-primary'
+                                }`}
                                 autoFocus
-                                required
                             />
                         </div>
+                        {nameError && <p className="text-xs font-bold text-red-500 pl-1">{nameError}</p>}
                     </div>
 
                     <div className="space-y-2">
