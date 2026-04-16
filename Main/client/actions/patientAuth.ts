@@ -221,7 +221,7 @@ export async function verifyRegistrationToken(email: string, token: string) {
         }
 
         if (expiresAt && Date.now() > parseInt(expiresAt)) {
-            return { success: false, message: 'OTP code has expired. Please register again.' };
+            return { success: false, message: 'OTP code has expired.' };
         }
 
         await prisma.patient.updateMany({
@@ -244,6 +244,30 @@ export async function verifyRegistrationToken(email: string, token: string) {
         return { success: true, message: 'Verified successfully' };
     } catch(err) {
         return { success: false, message: 'Verification error' };
+    }
+}
+
+export async function resendVerificationToken(email: string) {
+    if (!email) return { success: false, message: 'Invalid payload' };
+    try {
+        const patient = await prisma.patient.findFirst({ where: { email, password: { not: null } } });
+        if (!patient) return { success: false, message: 'Account not found' };
+        if (patient.emailVerified) return { success: true, message: 'Already verified' };
+        
+        const plainToken = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = Date.now() + 2 * 60 * 1000;
+        const verificationToken = `${plainToken}_${expiresAt}`;
+
+        await prisma.patient.update({
+            where: { id: patient.id },
+            data: { verificationToken: verificationToken }
+        });
+
+        await sendVerificationEmail(email, patient.name, plainToken);
+
+        return { success: true, message: 'OTP sent' };
+    } catch(err) {
+        return { success: false, message: 'Error resending OTP' };
     }
 }
 

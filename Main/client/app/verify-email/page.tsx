@@ -4,7 +4,7 @@ import { useState, Suspense, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import Link from 'next/link';
-import { verifyRegistrationToken } from '@/actions/patientAuth';
+import { verifyRegistrationToken, resendVerificationToken } from '@/actions/patientAuth';
 import { ArrowLeft, MailCheck, ShieldCheck } from 'lucide-react';
 
 function VerifyForm() {
@@ -18,6 +18,22 @@ function VerifyForm() {
     const [error, setError] = useState('');
     const [fieldError, setFieldError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [resending, setResending] = useState(false);
+    const [resendMessage, setResendMessage] = useState('');
+
+    const handleResend = async () => {
+        if (!email) return;
+        setResending(true);
+        setResendMessage('');
+        setError('');
+        const res = await resendVerificationToken(email);
+        if (res?.success) {
+            setResendMessage('OTP code has been resent to your email.');
+        } else {
+            setError(res?.message || 'Error resending code.');
+        }
+        setResending(false);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -94,10 +110,27 @@ function VerifyForm() {
                     )}
 
                     <div className="pt-4">
-                        <button type="submit" disabled={loading} className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-2xl text-base font-bold text-white bg-primary hover:bg-sky-500 focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                        <button type="submit" disabled={loading || resending} className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-2xl text-base font-bold text-white bg-primary hover:bg-sky-500 focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                             {loading ? 'Verifying...' : 'Verify Identity'}
                         </button>
                     </div>
+
+                    <p className="text-center text-sm text-slate-500 pt-2">
+                        Didn't receive the code or it expired?{' '}
+                        <button
+                            type="button"
+                            onClick={handleResend}
+                            disabled={resending || loading}
+                            className="font-bold text-primary hover:text-sky-500 transition-colors disabled:opacity-50"
+                        >
+                            {resending ? 'Resending...' : 'Resend code'}
+                        </button>
+                    </p>
+                    {resendMessage && (
+                        <div className="text-center text-sm font-bold text-green-600 bg-green-50 p-2 rounded-xl border border-green-100">
+                            ✓ {resendMessage}
+                        </div>
+                    )}
                 </form>
             )}
         </div>
