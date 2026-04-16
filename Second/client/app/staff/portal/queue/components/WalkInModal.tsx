@@ -116,7 +116,7 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900">Add Walk-In</h2>
-                        <p className="text-slate-500 text-sm">Register a new patient to the queue</p>
+                        <p className="text-slate-500 text-sm">Register a reguler patient to the queue</p>
                     </div>
                     <button onClick={onClose} className="bg-slate-50 hover:bg-slate-100 p-2 rounded-full text-slate-400 hover:text-slate-700 transition-colors">
                         <X className="w-5 h-5" />

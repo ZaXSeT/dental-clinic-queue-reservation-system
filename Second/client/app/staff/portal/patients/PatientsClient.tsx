@@ -271,12 +271,12 @@ export default function PatientsClient({ patients }: { patients: any[] }) {
                                                 {isNew ? (
                                                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-violet-50 text-violet-600 border border-violet-100 shadow-sm shadow-violet-100/50">
                                                         <div className="h-1.5 w-1.5 rounded-full bg-violet-500 animate-pulse" />
-                                                        New Patient
+                                                        Reguler
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm shadow-emerald-100/50">
                                                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                                        Returning
+                                                        Follow-up
                                                     </span>
                                                 )}
                                             </td>
