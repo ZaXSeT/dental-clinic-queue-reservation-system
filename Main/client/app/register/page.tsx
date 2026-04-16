@@ -35,8 +35,17 @@ const TYPO_MAP: Record<string, string> = {
 };
 
 function validateEmailDomain(email: string): { valid: boolean; suggestion?: string; message?: string } {
+    if (!email.includes('@')) {
+        return { valid: false, message: 'email must contain @' };
+    }
     const parts = email.split('@');
-    if (parts.length !== 2) return { valid: false, message: 'Format email tidak valid.' };
+    if (parts.length > 2) {
+        return { valid: false, message: 'Invalid email format' };
+    }
+    
+    if (parts[0].length > 20) {
+        return { valid: false, message: 'Email prefix cannot exceed 20 characters' };
+    }
 
     const domain = parts[1].toLowerCase();
 
@@ -48,10 +57,11 @@ function validateEmailDomain(email: string): { valid: boolean; suggestion?: stri
         };
     }
 
-    if (!VALID_DOMAINS.includes(domain)) {
+    const ALLOWED_DOMAINS = ['gmail.com', 'yahoo.com', 'yahoo.co.id', 'outlook.com'];
+    if (!ALLOWED_DOMAINS.includes(domain)) {
         return {
             valid: false,
-            message: `Domain email "${domain}" tidak dikenali. Gunakan email yang valid (contoh: @gmail.com, @yahoo.com).`,
+            message: `Email domain "${domain}" not allowed (only gmail.com, yahoo.com, yahoo.co.id, outlook.com)`,
         };
     }
 
@@ -125,30 +135,51 @@ export default function RegisterPage() {
             return;
         }
 
-        if (name.trim().length < 3) {
-            newFieldErrors.name = 'Nama harus memiliki minimal 3 karakter.';
+        if (name.length < 2 || name.length > 16 || /[^a-zA-Z\s]/.test(name)) {
+            newFieldErrors.name = 'Name must be 2-16 letters and only contain letters';
             setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
         }
 
-        const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,10}$/;
-        if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
-            newFieldErrors.phone = 'Format nomor HP tidak valid.';
+        if (!phone.startsWith('08') || phone.length < 7 || phone.length > 13) {
+            newFieldErrors.phone = 'Phone must be 7-13 numbers long and start with 08.';
             setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
         }
 
-        if (password.length < 6) {
-            newFieldErrors.password = 'Password minimal 6 karakter.';
+        if (password.length < 8 || password.length > 16) {
+            newFieldErrors.password = 'Password should be 8-16 characters long.';
+            setFieldErrors({ ...newFieldErrors });
+            setLoading(false);
+            return;
+        }
+
+        if (!/[A-Z]/.test(password)) {
+            newFieldErrors.password = 'Password should contain at least one uppercase letter';
+            setFieldErrors({ ...newFieldErrors });
+            setLoading(false);
+            return;
+        }
+
+        if (!/[0-9]/.test(password)) {
+            newFieldErrors.password = 'Password should contain at least one number';
+            setFieldErrors({ ...newFieldErrors });
+            setLoading(false);
+            return;
+        }
+
+        const simplePasswords = ['password', 'password123'];
+        if (simplePasswords.includes(password.toLowerCase())) {
+            newFieldErrors.password = 'Simple passwords like password, password123 is not allowed.';
             setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
         }
 
         if (password !== confirmPassword) {
-            newFieldErrors.confirm_password = 'Passwords do not match';
+            newFieldErrors.confirm_password = "Password didn't match, please try again.";
             setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
@@ -161,7 +192,12 @@ export default function RegisterPage() {
         } else if (res?.success) {
             router.push(redirect);
         } else {
-            setError(res?.message || 'Registration failed');
+            const msg = res?.message || 'Registration failed';
+            if (msg.includes('registered')) {
+                setEmailError('Email is already registered. Please click already have an account instead.');
+            } else {
+                setError(msg);
+            }
         }
         setLoading(false);
     };
@@ -221,7 +257,12 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <User className={`h-5 w-5 ${fieldErrors.name ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="name" type="text" required minLength={3} maxLength={16} onChange={() => setFieldErrors(p => ({ ...p, name: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="John Doe" />
+                                <input name="name" type="text" required maxLength={16}
+                                    onChange={(e) => {
+                                        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                        setFieldErrors(p => ({ ...p, name: '' }));
+                                    }} 
+                                    className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="John Doe" />
                             </div>
                             {fieldErrors.name && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.name}</p>}
                         </div>
@@ -239,6 +280,17 @@ export default function RegisterPage() {
                                     maxLength={50}
                                     onBlur={handleEmailBlur}
                                     onChange={(e) => {
+                                        const val = e.target.value;
+                                        const atIndex = val.indexOf('@');
+                                        if (atIndex !== -1 && atIndex > 20 && e.nativeEvent instanceof InputEvent && e.nativeEvent.data === '@') {
+                                            // Handle dynamically if they type @ too late, but easier to just let submit validate, 
+                                            // or slice prefix. We will just slice the input if prefix logic fails.
+                                            if (val.substring(0, atIndex).length > 20) {
+                                                e.target.value = val.substring(0, 20) + val.substring(atIndex);
+                                            }
+                                        } else if (atIndex === -1 && val.length > 20) {
+                                            e.target.value = val.slice(0, 20);
+                                        }
                                         handleEmailChange();
                                         setFieldErrors(p => ({ ...p, email: '' }));
                                     }}
@@ -269,7 +321,11 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Phone className={`h-5 w-5 ${fieldErrors.phone ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="phone" type="tel" required pattern="^(\+62|62|0)8[1-9][0-9]{6,10}$" maxLength={15} onChange={() => setFieldErrors(p => ({ ...p, phone: '' }))} title="Format nomor HP harus diawali 08, 628, atau +628 dan panjang minimal 10 angka" className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.phone ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="081234567890" />
+                                <input name="phone" type="tel" required maxLength={13} 
+                                    onChange={(e) => {
+                                        e.target.value = e.target.value.replace(/\D/g, '');
+                                        setFieldErrors(p => ({ ...p, phone: '' }));
+                                    }} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.phone ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="081234567890" />
                             </div>
                             {fieldErrors.phone && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.phone}</p>}
                         </div>
@@ -280,7 +336,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className={`h-5 w-5 ${fieldErrors.password ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="password" type="password" required minLength={6} maxLength={50} onChange={() => setFieldErrors(p => ({ ...p, password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
+                                <input name="password" type="password" required maxLength={16} onChange={() => setFieldErrors(p => ({ ...p, password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
                             </div>
                             {fieldErrors.password && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.password}</p>}
                         </div>
@@ -291,7 +347,7 @@ export default function RegisterPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className={`h-5 w-5 ${fieldErrors.confirm_password ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="confirm_password" type="password" required minLength={6} maxLength={50} onChange={() => setFieldErrors(p => ({ ...p, confirm_password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.confirm_password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
+                                <input name="confirm_password" type="password" required maxLength={16} onChange={() => setFieldErrors(p => ({ ...p, confirm_password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.confirm_password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
                             </div>
                             {fieldErrors.confirm_password && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.confirm_password}</p>}
                         </div>
