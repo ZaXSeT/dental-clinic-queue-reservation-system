@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, User, UserPlus, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, User, UserPlus, Calendar, MapPin, ChevronDown, Check } from "lucide-react";
 import { BookingSelection, Doctor, BookingForType, PatientType } from "@/lib/types";
 
 interface Step4Props {
@@ -30,6 +30,9 @@ export default function Step4({
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [legalSex, setLegalSex] = useState<"Male" | "Female">("Male");
+    const [gLegalSex, setGLegalSex] = useState<"Male" | "Female">("Male");
+    const [showSexDropdown, setShowSexDropdown] = useState(false);
+    const [showGSexDropdown, setShowGSexDropdown] = useState(false);
     const [birthDate, setBirthDate] = useState("");
     const [zipCode, setZipCode] = useState("");
     const [email, setEmail] = useState("");
@@ -272,14 +275,37 @@ export default function Step4({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-slate-700">Legal sex</label>
-                                <select
-                                    value={legalSex}
-                                    onChange={(e) => setLegalSex(e.target.value as "Male" | "Female")}
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium bg-white text-slate-600"
-                                >
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                </select>
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSexDropdown(!showSexDropdown)}
+                                        className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:border-[#009ae2] transition-all font-medium text-slate-600 focus:ring-1 focus:ring-[#009ae2] outline-none"
+                                    >
+                                        <span>{legalSex}</span>
+                                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showSexDropdown ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    
+                                    {showSexDropdown && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" onClick={() => setShowSexDropdown(false)} />
+                                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                                {(["Male", "Female"] as const).map((opt) => (
+                                                    <div
+                                                        key={opt}
+                                                        onClick={() => {
+                                                            setLegalSex(opt);
+                                                            setShowSexDropdown(false);
+                                                        }}
+                                                        className={`px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors ${legalSex === opt ? 'bg-blue-50/50 text-[#009ae2]' : 'text-slate-600'}`}
+                                                    >
+                                                        <span className="font-bold text-sm">{opt}</span>
+                                                        {legalSex === opt && <Check className="w-4 h-4" />}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             <div className="space-y-1">
                                 <label className="text-sm font-bold text-slate-700">Date of birth <span className="text-red-400">*</span></label>
@@ -341,14 +367,37 @@ export default function Step4({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold text-slate-700">Parent/Guardian legal sex</label>
-                                    <select
-                                        value={gLegalSex}
-                                        onChange={(e) => setGLegalSex(e.target.value as "Male" | "Female")}
-                                        className="w-full p-3 rounded-xl border border-slate-200 focus:border-[#009ae2] focus:ring-1 focus:ring-[#009ae2] outline-none transition-all font-medium bg-white text-slate-600"
-                                    >
-                                        <option>Male</option>
-                                        <option>Female</option>
-                                    </select>
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowGSexDropdown(!showGSexDropdown)}
+                                            className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:border-[#009ae2] transition-all font-medium text-slate-600 focus:ring-1 focus:ring-[#009ae2] outline-none"
+                                        >
+                                            <span>{gLegalSex}</span>
+                                            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showGSexDropdown ? 'rotate-180' : ''}`} />
+                                        </button>
+                                        
+                                        {showGSexDropdown && (
+                                            <>
+                                                <div className="fixed inset-0 z-10" onClick={() => setShowGSexDropdown(false)} />
+                                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                                    {(["Male", "Female"] as const).map((opt) => (
+                                                        <div
+                                                            key={opt}
+                                                            onClick={() => {
+                                                                setGLegalSex(opt);
+                                                                setShowGSexDropdown(false);
+                                                            }}
+                                                            className={`px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors ${gLegalSex === opt ? 'bg-blue-50/50 text-[#009ae2]' : 'text-slate-600'}`}
+                                                        >
+                                                            <span className="font-bold text-sm">{opt}</span>
+                                                            {gLegalSex === opt && <Check className="w-4 h-4" />}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold text-slate-700">Parent/Guardian date of birth <span className="text-red-400">*</span></label>
