@@ -30,7 +30,6 @@ export default function Step4({
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [legalSex, setLegalSex] = useState<"Male" | "Female">("Male");
-    const [gLegalSex, setGLegalSex] = useState<"Male" | "Female">("Male");
     const [showSexDropdown, setShowSexDropdown] = useState(false);
     const [showGSexDropdown, setShowGSexDropdown] = useState(false);
     const [birthDate, setBirthDate] = useState("");
