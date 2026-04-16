@@ -1,36 +1,62 @@
 'use client';
 
-import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Lock } from "lucide-react";
-import { useEffect } from "react";
+import { Lock, User } from "lucide-react";
+import { useState, useEffect } from "react";
 import { loginAction } from "@/actions/auth";
 
-const initialState: { message?: string; success?: boolean; data?: { name: string, role: string, username: string } } = {
-    message: "",
-    success: false,
-};
-
 export default function StaffLogin() {
-    const [state, formAction] = useFormState(loginAction, initialState);
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState({ username: "", password: "" });
 
     useEffect(() => {
         sessionStorage.removeItem('staff_user');
         sessionStorage.removeItem('staff_auth');
     }, []);
 
-    useEffect(() => {
-        if (state.success && state.data) {
-            sessionStorage.setItem('staff_auth', 'true');
-    sessionStorage.setItem('staff_user', JSON.stringify({
-        name: state.data.username,  // <- if you want the username as the display name
-        role: state.data.role,
-        username: state.data.username
-    }));
-            router.push("/staff/portal/queue");
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+
+        const formData = new FormData(e.currentTarget);
+        const username = formData.get("username") as string;
+        const password = formData.get("password") as string;
+
+        let hasError = false;
+        const newFieldErrors = { username: "", password: "" };
+
+        if (!username) { newFieldErrors.username = "Username is required"; hasError = true; }
+        if (!password) { newFieldErrors.password = "Password is required"; hasError = true; }
+
+        if (hasError) {
+            setFieldErrors(newFieldErrors);
+            setLoading(false);
+            return;
         }
-    }, [state.success, state.data, router]);
+
+        const res = await loginAction(null, formData);
+        
+        if (res?.success && res?.data) {
+            sessionStorage.setItem('staff_auth', 'true');
+            sessionStorage.setItem('staff_user', JSON.stringify({
+                name: res.data.username,
+                role: res.data.role,
+                username: res.data.username
+            }));
+            router.push("/staff/portal/queue");
+        } else {
+            const msg = res?.message || "Login failed";
+            if (msg.includes("Wrong username")) {
+                setError(msg);
+            } else {
+                setError(msg);
+            }
+        }
+        setLoading(false);
+    };
 
     return (
         <main className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
@@ -43,41 +69,54 @@ export default function StaffLogin() {
                     <p className="text-slate-500">Sign in to manage clinic operations</p>
                 </div>
 
-                <form action={formAction} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            required
-                            maxLength={50}
-                            autoComplete="off"
-                            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
-                            placeholder="username"
-                        />
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <User className={`h-5 w-5 ${fieldErrors.username ? 'text-red-400' : 'text-slate-400'}`} />
+                            </div>
+                            <input
+                                type="text"
+                                name="username"
+                                required
+                                maxLength={50}
+                                autoComplete="off"
+                                onChange={() => setFieldErrors(p => ({ ...p, username: '' }))}
+                                className={`w-full pl-10 p-3 border rounded-lg focus:ring-2 outline-none text-slate-900 transition-colors ${fieldErrors.username ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-slate-300 focus:ring-primary focus:border-primary'}`}
+                                placeholder="username"
+                            />
+                        </div>
+                        {fieldErrors.username && <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.username}</p>}
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            required
-                            minLength={6}
-                            maxLength={100}
-                            autoComplete="new-password"
-                            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-slate-900"
-                            placeholder="••••••"
-                        />
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Lock className={`h-5 w-5 ${fieldErrors.password ? 'text-red-400' : 'text-slate-400'}`} />
+                            </div>
+                            <input
+                                type="password"
+                                name="password"
+                                required
+                                maxLength={50}
+                                autoComplete="new-password"
+                                onChange={() => setFieldErrors(p => ({ ...p, password: '' }))}
+                                className={`w-full pl-10 p-3 border rounded-lg focus:ring-2 outline-none text-slate-900 transition-colors ${fieldErrors.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-slate-300 focus:ring-primary focus:border-primary'}`}
+                                placeholder="••••••"
+                            />
+                        </div>
+                        {fieldErrors.password && <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.password}</p>}
                     </div>
 
-                    {state.message && (
-                        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center">
-                            {state.message}
+                    {error && (
+                        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center font-bold border border-red-100">
+                            {error}
                         </div>
                     )}
 
-                    <button type="submit" className="w-full bg-[#009ae2] text-white font-bold py-3 rounded-lg hover:bg-[#0088cc] transition-colors">
-                        Sign In
+                    <button type="submit" disabled={loading} className="w-full bg-[#009ae2] text-white font-bold py-3 rounded-lg hover:bg-[#0088cc] transition-colors disabled:opacity-50">
+                        {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
             </div>
