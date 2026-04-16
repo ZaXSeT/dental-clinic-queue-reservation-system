@@ -13,6 +13,7 @@ export default function LoginPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
     const [successMsg, setSuccessMsg] = useState(searchParams.get('reset') === 'success' ? 'Password reset successful! Please sign in.' : '');
 
     useEffect(() => {
@@ -33,10 +34,24 @@ export default function LoginPage() {
         setError('');
 
         const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
         const password = formData.get('password') as string;
 
-        if (password.length < 6) {
-            setError('Password minimal 6 karakter.');
+        let hasError = false;
+        const newFieldErrors = { email: '', password: '' };
+
+        if (!email) {
+            newFieldErrors.email = 'name is required';
+            hasError = true;
+        }
+
+        if (!password) {
+            newFieldErrors.password = 'password is required';
+            hasError = true;
+        }
+
+        if (hasError) {
+            setFieldErrors(newFieldErrors);
             setLoading(false);
             return;
         }
@@ -49,7 +64,14 @@ export default function LoginPage() {
             const params = new URLSearchParams(window.location.search);
             router.push(params.get('callbackUrl') || '/');
         } else {
-            setError(res?.message || 'Login failed');
+            const msg = res?.message || '';
+            if (msg.includes('registered') || msg.includes('registered')) {
+                setFieldErrors({ ...newFieldErrors, email: msg });
+            } else if (msg.includes('Wrong password')) {
+                setFieldErrors({ ...newFieldErrors, password: msg });
+            } else {
+                setError(msg || 'Login failed');
+            }
         }
         setLoading(false);
     };
@@ -107,20 +129,22 @@ export default function LoginPage() {
                             <label className="block text-sm font-bold text-slate-700 mb-2">Email address</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-400" />
+                                    <Mail className={`h-5 w-5 ${fieldErrors.email ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="email" type="email" required maxLength={255} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="you@example.com" />
+                                <input name="email" type="email" required maxLength={50} onChange={() => setFieldErrors(prev => ({ ...prev, email: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="you@example.com" />
                             </div>
+                            {fieldErrors.email && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.email}</p>}
                         </div>
 
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-400" />
+                                    <Lock className={`h-5 w-5 ${fieldErrors.password ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="password" type="password" required minLength={6} maxLength={100} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="password" type="password" required maxLength={50} onChange={() => setFieldErrors(prev => ({ ...prev, password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
                             </div>
+                            {fieldErrors.password && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500">{fieldErrors.password}</p>}
                         </div>
 
                         {successMsg && (

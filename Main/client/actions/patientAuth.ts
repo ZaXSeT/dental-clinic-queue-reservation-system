@@ -23,7 +23,7 @@ export async function loginPatient(prevState: any, formData: FormData) {
         });
 
         if (!patient || !patient.password) {
-            return { message: 'Invalid email or password' };
+            return { message: 'Email is not registered. Please create a new account first.' };
         }
 
         if (!patient.emailVerified) {
@@ -32,7 +32,7 @@ export async function loginPatient(prevState: any, formData: FormData) {
 
         const isMatch = await bcrypt.compare(password, patient.password);
         if (!isMatch) {
-            return { message: 'Invalid email or password' };
+            return { message: 'Wrong password or email. Please click forgot password.' };
         }
 
         const token = await new SignJWT({ id: patient.id, email: patient.email, name: patient.name, role: 'patient' })
