@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createManualInvoice } from '@/actions/billing';
 import { getPatients } from '@/actions/patient';
-import { ArrowLeft, Receipt, User, Stethoscope, DollarSign, Search, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Receipt, User, Stethoscope, DollarSign, Search, CheckCircle, ChevronDown, Check } from 'lucide-react';
 import Link from 'next/link';
 
 const TREATMENTS = [
@@ -26,11 +26,23 @@ export default function NewInvoicePage() {
     const [search, setSearch] = useState('');
     const [selectedPatient, setSelectedPatient] = useState<any>(null);
     const [treatment, setTreatment] = useState(TREATMENTS[0]);
+    const [treatmentOpen, setTreatmentOpen] = useState(false);
+    const treatmentRef = useRef<HTMLDivElement>(null);
     const [customTreatment, setCustomTreatment] = useState('');
     const [fee, setFee] = useState('200000');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (treatmentRef.current && !treatmentRef.current.contains(e.target as Node)) {
+                setTreatmentOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         getPatients().then(res => {
@@ -49,8 +61,8 @@ export default function NewInvoicePage() {
         e.preventDefault();
         if (!selectedPatient) { setError('Please select a patient.'); return; }
         if (!finalTreatment.trim()) { setError('Please enter a treatment description.'); return; }
-        const feeNum = parseFloat(fee.replace(/\D/g, ''));
-        if (!feeNum || feeNum <= 0) { setError('Please enter a valid fee amount.'); return; }
+        const feeNum = parseFloat(fee.replace(/[^0-9.]/g, ''));
+        if (isNaN(feeNum) || feeNum < 0) { setError('Please enter a valid fee amount (0 for free).'); return; }
 
         setLoading(true);
         setError('');
@@ -163,14 +175,40 @@ export default function NewInvoicePage() {
                             <span className="text-sm font-bold text-slate-700">Treatment / Service</span>
                         </div>
                         <div className="p-5 space-y-3">
-                            <select
-                                value={treatment}
-                                onChange={e => setTreatment(e.target.value)}
-                                className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
-                            >
-                                {TREATMENTS.map(t => <option key={t}>{t}</option>)}
-                                <option>Other (custom)</option>
-                            </select>
+                            {/* Custom styled dropdown */}
+                            <div className="relative" ref={treatmentRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setTreatmentOpen(o => !o)}
+                                    className="w-full h-11 px-4 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-left flex items-center justify-between hover:bg-white"
+                                >
+                                    <span className="text-slate-700 truncate">{treatment}</span>
+                                    <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${treatmentOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {treatmentOpen && (
+                                    <div className="absolute z-50 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                                        <div className="max-h-60 overflow-y-auto py-1">
+                                            {[...TREATMENTS, 'Other (custom)'].map(t => (
+                                                <button
+                                                    key={t}
+                                                    type="button"
+                                                    onClick={() => { setTreatment(t); setTreatmentOpen(false); }}
+                                                    className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors text-left ${
+                                                        treatment === t
+                                                            ? 'bg-primary/8 text-primary'
+                                                            : 'text-slate-700 hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    <span>{t}</span>
+                                                    {treatment === t && <Check className="w-4 h-4 text-primary shrink-0" />}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             {treatment === 'Other (custom)' && (
                                 <input
                                     type="text"
@@ -195,7 +233,7 @@ export default function NewInvoicePage() {
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-semibold">Rp</span>
                                 <input
                                     type="number"
-                                    min="1"
+                                    min="0"
                                     value={fee}
                                     onChange={e => setFee(e.target.value)}
                                     className="pl-12 pr-4 h-11 w-full bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
