@@ -85,7 +85,7 @@ export default function Navbar() {
                             </Link>
                         ) : null}
                         <Link
-                            href={patient ? '/booking' : '/login?callbackUrl=/booking'}
+                            href="/booking"
                             className="px-5 py-2.5 rounded-full bg-primary hover:bg-sky-600 text-white font-bold transition-all shadow-lg hover:shadow-primary/40 text-sm"
                         >
                             Book Now
