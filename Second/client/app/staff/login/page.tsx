@@ -80,7 +80,7 @@ export default function StaffLogin() {
                                 type="text"
                                 name="username"
                                 required
-                                maxLength={50}
+                                maxLength={16}
                                 autoComplete="off"
                                 onChange={() => setFieldErrors(p => ({ ...p, username: '' }))}
                                 className={`w-full pl-10 p-3 border rounded-lg focus:ring-2 outline-none text-slate-900 transition-colors ${fieldErrors.username ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-slate-300 focus:ring-primary focus:border-primary'}`}
@@ -99,7 +99,7 @@ export default function StaffLogin() {
                                 type="password"
                                 name="password"
                                 required
-                                maxLength={50}
+                                maxLength={16}
                                 autoComplete="new-password"
                                 onChange={() => setFieldErrors(p => ({ ...p, password: '' }))}
                                 className={`w-full pl-10 p-3 border rounded-lg focus:ring-2 outline-none text-slate-900 transition-colors ${fieldErrors.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-slate-300 focus:ring-primary focus:border-primary'}`}
