@@ -13,8 +13,8 @@ function ResetPasswordForm() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [otp, setOtp] = useState(['', '', '', '', '', '']);
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const [otp, setOtp] = useState('');
+    const otpRef = useRef<HTMLInputElement | null>(null);
 
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,22 +33,6 @@ function ResetPasswordForm() {
         return '';
     };
 
-    const handleOtpChange = (index: number, value: string) => {
-        if (!/^\d*$/.test(value)) return;
-        const newOtp = [...otp];
-        newOtp[index] = value.slice(-1);
-        setOtp(newOtp);
-        setOtpError('');
-        if (value && index < 5) {
-            inputRefs.current[index + 1]?.focus();
-        }
-    };
-
-    const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Backspace' && !otp[index] && index > 0) {
-            inputRefs.current[index - 1]?.focus();
-        }
-    };
 
     const handlePasswordChange = (val: string) => {
         if (val.length > 16) return; // block input past 16
@@ -69,7 +53,7 @@ function ResetPasswordForm() {
         setLoading(true);
         setError('');
 
-        const otpCode = otp.join('');
+        const otpCode = otp.trim();
         if (otpCode.length !== 6) {
             setOtpError('Please enter the 6-digit OTP code.');
             setLoading(false);
@@ -110,9 +94,9 @@ function ResetPasswordForm() {
                 msg.toLowerCase().includes('kadaluarsa')
             ) {
                 setOtpError(msg);
-                // Clear OTP inputs so user can re-enter
-                setOtp(['', '', '', '', '', '']);
-                setTimeout(() => inputRefs.current[0]?.focus(), 50);
+                // Clear OTP so user can re-enter
+                setOtp('');
+                setTimeout(() => otpRef.current?.focus(), 50);
             } else {
                 setError(msg);
             }
@@ -130,25 +114,21 @@ function ResetPasswordForm() {
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
-                {/* OTP input */}
+                {/* OTP input - same style as verify-email */}
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-3">OTP Code (6 digits)</label>
-                    <div className="flex gap-2 justify-between">
-                        {otp.map((digit, i) => (
-                            <input
-                                key={i}
-                                ref={el => { inputRefs.current[i] = el; }}
-                                type="text"
-                                inputMode="numeric"
-                                maxLength={1}
-                                value={digit}
-                                onChange={e => handleOtpChange(i, e.target.value)}
-                                onKeyDown={e => handleOtpKeyDown(i, e)}
-                                className={`w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 ${otpError ? 'border-red-400 bg-red-50' : 'border-slate-200'} rounded-xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none`}
-                            />
-                        ))}
-                    </div>
-                    {otpError && <p className="mt-2 text-red-500 text-xs font-medium">{otpError}</p>}
+                    <input
+                        ref={otpRef}
+                        type="text"
+                        maxLength={6}
+                        value={otp}
+                        onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); setOtpError(''); }}
+                        pattern="[0-9]*"
+                        inputMode="numeric"
+                        placeholder="123456"
+                        className={`text-center text-4xl tracking-[0.5em] font-black appearance-none block w-full px-3 py-6 bg-slate-50 border ${otpError ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all outline-none`}
+                    />
+                    {otpError && <p className="mt-2 text-center text-xs font-bold text-red-500 overflow-visible break-words">{otpError}</p>}
                 </div>
 
                 {/* New password */}
