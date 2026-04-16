@@ -19,12 +19,12 @@ const allowedDomains = ["gmail.com", "yahoo.com", "yahoo.co.id", "outlook.com"];
   const validateField = (field: string, value: string) => {
     switch (field) {
       case "name":
-        if (!value) return "name is required";
+        if (!value) return "Name is required";
         if (value.length < 2 || value.length > 16 || /[^a-zA-Z\s]/.test(value))
           return "Name must be 2-16 letters and only contain letters";
         return "";
       case "message":
-        if (!value) return "message is required";
+        if (!value) return "Message is required";
         if (value.length < 10) return "Message must be at least 10 characters.";
         if (value.length > 300) return "Message must be less than 300 characters.";
         return "";
@@ -34,8 +34,8 @@ const allowedDomains = ["gmail.com", "yahoo.com", "yahoo.co.id", "outlook.com"];
   };
 
   const validateEmail = (value: string) => {
-    if (!value) return "email is required";
-    if (!value.includes("@")) return "email must contain @";
+    if (!value) return "Email is required";
+    if (!value.includes("@")) return "Email must contain @";
 
     const parts = value.split('@');
     if (parts.length > 2) return "Invalid email format";

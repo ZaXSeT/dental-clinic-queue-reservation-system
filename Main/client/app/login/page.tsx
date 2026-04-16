@@ -41,12 +41,12 @@ export default function LoginPage() {
         const newFieldErrors = { email: '', password: '' };
 
         if (!email) {
-            newFieldErrors.email = 'name is required';
+            newFieldErrors.email = 'Email is required';
             hasError = true;
         }
 
         if (!password) {
-            newFieldErrors.password = 'password is required';
+            newFieldErrors.password = 'Password is required';
             hasError = true;
         }
 

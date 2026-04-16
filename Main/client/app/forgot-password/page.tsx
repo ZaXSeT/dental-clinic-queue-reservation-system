@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
         const email = formData.get('email') as string;
 
         if (!email) {
-            setFieldErrors({ email: 'email is required' });
+            setFieldErrors({ email: 'Email is required' });
             setLoading(false);
             return;
         }
