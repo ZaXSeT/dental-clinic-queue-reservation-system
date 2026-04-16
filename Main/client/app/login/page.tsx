@@ -131,7 +131,7 @@ export default function LoginPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Mail className={`h-5 w-5 ${fieldErrors.email ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="email" type="email" required maxLength={50} onChange={() => setFieldErrors(prev => ({ ...prev, email: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="you@example.com" />
+                                <input name="email" type="email" required maxLength={33} onChange={() => setFieldErrors(prev => ({ ...prev, email: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="you@example.com" />
                             </div>
                             {fieldErrors.email && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.email}</p>}
                         </div>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className={`h-5 w-5 ${fieldErrors.password ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="password" type="password" required maxLength={50} onChange={() => setFieldErrors(prev => ({ ...prev, password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
+                                <input name="password" type="password" required maxLength={16} onChange={() => setFieldErrors(prev => ({ ...prev, password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
                             </div>
                             {fieldErrors.password && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500">{fieldErrors.password}</p>}
                         </div>
