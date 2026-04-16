@@ -277,7 +277,7 @@ export default function RegisterPage() {
                                     name="email"
                                     type="email"
                                     required
-                                    maxLength={50}
+                                    maxLength={33}
                                     onBlur={handleEmailBlur}
                                     onChange={(e) => {
                                         const val = e.target.value;

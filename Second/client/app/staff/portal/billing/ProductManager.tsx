@@ -38,10 +38,17 @@ export default function ProductManager({ products: initialProducts, onClose }: P
     };
 
     const handleSave = async () => {
-        if (!formData.name || !formData.price) return;
+        if (!formData.name) {
+            alert("Name is required");
+            return;
+        }
+        if (formData.price === '') {
+            alert("Price is required");
+            return;
+        }
         const priceVal = Number(formData.price);
-        if (priceVal <= 0) {
-            alert("Price must be greater than 0");
+        if (priceVal < 0) {
+            alert("Price cannot be negative");
             return;
         }
         const stockVal = Number(formData.stock) || 0;
@@ -209,8 +216,8 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
-                                        maxLength={100}
-                                        placeholder="e.g. Paracetamol 500mg"
+                                        maxLength={16}
+                                        placeholder="e.g. Paracetamol"
                                     />
                                 </div>
 
@@ -221,7 +228,7 @@ export default function ProductManager({ products: initialProducts, onClose }: P
                                         value={formData.price}
                                         onChange={e => setFormData({ ...formData, price: e.target.value })}
                                         className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
-                                        min={1}
+                                        min={0}
                                         placeholder="0"
                                     />
                                 </div>

@@ -81,8 +81,8 @@ export default function AddProductModal({ invoice, products, onClose }: { invoic
                                 <input
                                     type="number"
                                     value={price}
-                                    onChange={e => setPrice(Math.max(1, parseInt(e.target.value) || 0))}
-                                    min={1}
+                                    onChange={e => setPrice(Math.max(0, parseInt(e.target.value) || 0))}
+                                    min={0}
                                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-lg"
                                 />
                             </div>
