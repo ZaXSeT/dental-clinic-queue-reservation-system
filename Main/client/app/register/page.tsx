@@ -65,6 +65,7 @@ export default function RegisterPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({ name: '', email: '', phone: '', password: '', confirm_password: '' });
     const [emailError, setEmailError] = useState('');
     const [emailSuggestion, setEmailSuggestion] = useState('');
 
@@ -100,6 +101,21 @@ export default function RegisterPage() {
         const password = formData.get('password') as string;
         const confirmPassword = formData.get('confirm_password') as string;
 
+        let hasError = false;
+        const newFieldErrors = { name: '', email: '', phone: '', password: '', confirm_password: '' };
+
+        if (!name) { newFieldErrors.name = 'Name is required'; hasError = true; }
+        if (!email) { newFieldErrors.email = 'Email is required'; hasError = true; }
+        if (!phone) { newFieldErrors.phone = 'Phone number is required'; hasError = true; }
+        if (!password) { newFieldErrors.password = 'Password is required'; hasError = true; }
+        if (!confirmPassword) { newFieldErrors.confirm_password = 'Confirm password is required'; hasError = true; }
+
+        if (hasError) {
+            setFieldErrors(newFieldErrors);
+            setLoading(false);
+            return;
+        }
+
         // Validasi domain email sebelum submit
         const emailCheck = validateEmailDomain(email);
         if (!emailCheck.valid) {
@@ -110,26 +126,30 @@ export default function RegisterPage() {
         }
 
         if (name.trim().length < 3) {
-            setError('Nama harus memiliki minimal 3 karakter.');
+            newFieldErrors.name = 'Nama harus memiliki minimal 3 karakter.';
+            setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
         }
 
         const phoneRegex = /^(\+62|62|0)8[1-9][0-9]{6,10}$/;
         if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
-            setError('Format nomor HP tidak valid (harus diawali 08, 628, atau +628 dan panjang 10-14 angka).');
+            newFieldErrors.phone = 'Format nomor HP tidak valid.';
+            setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
         }
 
         if (password.length < 6) {
-            setError('Password harus memiliki minimal 6 karakter.');
+            newFieldErrors.password = 'Password minimal 6 karakter.';
+            setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            newFieldErrors.confirm_password = 'Passwords do not match';
+            setFieldErrors({ ...newFieldErrors });
             setLoading(false);
             return;
         }
@@ -199,17 +219,18 @@ export default function RegisterPage() {
                             <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <User className="h-5 w-5 text-slate-400" />
+                                    <User className={`h-5 w-5 ${fieldErrors.name ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="name" type="text" required minLength={3} maxLength={16} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="John Doe" />
+                                <input name="name" type="text" required minLength={3} maxLength={16} onChange={() => setFieldErrors(p => ({ ...p, name: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="John Doe" />
                             </div>
+                            {fieldErrors.name && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.name}</p>}
                         </div>
 
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Email address</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Mail className={`h-5 w-5 ${emailError ? 'text-red-400' : 'text-slate-400'}`} />
+                                    <Mail className={`h-5 w-5 ${emailError || fieldErrors.email ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
                                 <input
                                     name="email"
@@ -217,15 +238,19 @@ export default function RegisterPage() {
                                     required
                                     maxLength={50}
                                     onBlur={handleEmailBlur}
-                                    onChange={handleEmailChange}
+                                    onChange={(e) => {
+                                        handleEmailChange();
+                                        setFieldErrors(p => ({ ...p, email: '' }));
+                                    }}
                                     className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:bg-white focus:ring-4 transition-all sm:text-sm font-medium outline-none ${
-                                        emailError
+                                        emailError || fieldErrors.email
                                             ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
                                             : 'border-slate-200 focus:ring-primary/10 focus:border-primary'
                                     }`}
                                     placeholder="you@gmail.com"
                                 />
                             </div>
+                            {fieldErrors.email && !emailError && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.email}</p>}
                             {emailError && (
                                 <div className="mt-2 bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl text-sm font-medium">
                                     ⚠️ {emailError}
@@ -242,30 +267,33 @@ export default function RegisterPage() {
                             <label className="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Phone className="h-5 w-5 text-slate-400" />
+                                    <Phone className={`h-5 w-5 ${fieldErrors.phone ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="phone" type="tel" required pattern="^(\+62|62|0)8[1-9][0-9]{6,10}$" maxLength={15} title="Format nomor HP harus diawali 08, 628, atau +628 dan panjang minimal 10 angka" className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="081234567890" />
+                                <input name="phone" type="tel" required pattern="^(\+62|62|0)8[1-9][0-9]{6,10}$" maxLength={15} onChange={() => setFieldErrors(p => ({ ...p, phone: '' }))} title="Format nomor HP harus diawali 08, 628, atau +628 dan panjang minimal 10 angka" className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.phone ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="081234567890" />
                             </div>
+                            {fieldErrors.phone && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.phone}</p>}
                         </div>
 
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-400" />
+                                    <Lock className={`h-5 w-5 ${fieldErrors.password ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="password" type="password" required minLength={6} maxLength={50} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="password" type="password" required minLength={6} maxLength={50} onChange={() => setFieldErrors(p => ({ ...p, password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
                             </div>
+                            {fieldErrors.password && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.password}</p>}
                         </div>
 
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Re-enter Password</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-400" />
+                                    <Lock className={`h-5 w-5 ${fieldErrors.confirm_password ? 'text-red-400' : 'text-slate-400'}`} />
                                 </div>
-                                <input name="confirm_password" type="password" required minLength={6} maxLength={50} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all sm:text-sm font-medium outline-none" placeholder="••••••••" />
+                                <input name="confirm_password" type="password" required minLength={6} maxLength={50} onChange={() => setFieldErrors(p => ({ ...p, confirm_password: '' }))} className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border ${fieldErrors.confirm_password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:ring-primary/10'} rounded-2xl focus:bg-white focus:ring-4 focus:border-primary transition-all sm:text-sm font-medium outline-none`} placeholder="••••••••" />
                             </div>
+                            {fieldErrors.confirm_password && <p className="mt-1.5 ml-1 text-xs font-bold text-red-500 overflow-visible break-words">{fieldErrors.confirm_password}</p>}
                         </div>
 
                         {error && (
