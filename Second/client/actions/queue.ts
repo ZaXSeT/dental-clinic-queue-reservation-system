@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore } from "next/cache";
 import { verifySession } from "./auth";
 import { Queue, Patient, Doctor } from "@prisma/client";
 
@@ -11,8 +11,20 @@ type PopulatedQueue = Queue & {
 };
 
 export async function getQueueState() {
+    unstable_noStore();
     try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
         const allRecentQueues: PopulatedQueue[] = await prisma.queue.findMany({
+            where: {
+                date: {
+                    gte: today,
+                    lt: tomorrow
+                }
+            },
             take: 50,
             orderBy: { createdAt: 'desc' },
             include: {
@@ -40,7 +52,10 @@ export async function getQueueState() {
             .sort((a, b) => a.number - b.number);
 
         const waitingCountSource = await prisma.queue.count({
-            where: { status: { in: waitingStatuses } }
+            where: { 
+                status: { in: waitingStatuses },
+                date: { gte: today, lt: tomorrow }
+            }
         });
 
         const nextHelper = waitingQueues.slice(0, 10);
