@@ -4,9 +4,17 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // We no longer block access to /booking here.
-    // Unauthenticated users can view the booking page and select doctors/slots,
-    // but they will be forced to log in at the very final step (Step 4) before confirming.
+    // Require patient_token cookie for the booking page
+    const patientToken = request.cookies.get('patient_token')?.value;
+
+    if (pathname.startsWith('/booking')) {
+        if (!patientToken) {
+            const url = request.nextUrl.clone();
+            url.pathname = '/login';
+            url.searchParams.set('callbackUrl', pathname);
+            return NextResponse.redirect(url);
+        }
+    }
 
     return NextResponse.next();
 }
