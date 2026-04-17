@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Check } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Doctor, DateInfo, BookingSelection, PatientType, BookingForType } from "@/lib/types";
@@ -42,36 +42,44 @@ export default function BookingPage() {
         if (stepParam) setStep(Number(stepParam));
     }, [searchParams]);
 
-    useEffect(() => {
-        const fetchDoctors = async () => {
-            try {
-                const res = await fetch('/api/doctors');
-                const result = await res.json();
-                if (result.success && result.data) {
-                    const mappedDoctors: Doctor[] = result.data.map((doc: any) => ({
-                        id: doc.id,
-                        name: doc.name,
-                        specialization: doc.specialization,
-                        image: doc.image,
-                        availability: doc.availability ? JSON.parse(doc.availability as string) : {},
-                        bookedSlots: doc.appointments || []
-                    }));
-                    setDentists(mappedDoctors);
+    const fetchDoctors = useCallback(async () => {
+        try {
+            const res = await fetch('/api/doctors', { cache: 'no-store' });
+            const result = await res.json();
+            if (result.success && result.data) {
+                const mappedDoctors: Doctor[] = result.data.map((doc: any) => ({
+                    id: doc.id,
+                    name: doc.name,
+                    specialization: doc.specialization,
+                    image: doc.image,
+                    availability: doc.availability ? JSON.parse(doc.availability as string) : {},
+                    bookedSlots: doc.appointments || []
+                }));
+                setDentists(mappedDoctors);
 
-                    const availabilityMap: Record<string, Record<string, string[]>> = {};
-                    mappedDoctors.forEach((doc) => {
-                        availabilityMap[doc.id] = doc.availability;
-                    });
-                    setDoctorAvailability(availabilityMap);
-                } else {
-                    console.error("Failed to load doctors:", result.error);
-                }
-            } catch (error) {
-                console.error("Failed to fetch doctors", error);
+                const availabilityMap: Record<string, Record<string, string[]>> = {};
+                mappedDoctors.forEach((doc) => {
+                    availabilityMap[doc.id] = doc.availability;
+                });
+                setDoctorAvailability(availabilityMap);
+            } else {
+                console.error("Failed to load doctors:", result.error);
             }
-        };
-        fetchDoctors();
+        } catch (error) {
+            console.error("Failed to fetch doctors", error);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchDoctors();
+
+        // Re-fetch when user comes back via browser back button (bfcache)
+        const handlePageShow = (e: PageTransitionEvent) => {
+            if (e.persisted) fetchDoctors();
+        };
+        window.addEventListener('pageshow', handlePageShow);
+        return () => window.removeEventListener('pageshow', handlePageShow);
+    }, [fetchDoctors]);
 
     useEffect(() => {
         const createDates = () => {
