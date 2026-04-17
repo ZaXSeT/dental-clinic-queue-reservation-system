@@ -40,10 +40,21 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
 
         const allDaySlots: string[] = parsedAvailability[dayStr] || [];
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        const currentTimeStr = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+        const currentMins = today.getHours() * 60 + today.getMinutes();
+
+        const parseTime12h = (time12h: string) => {
+            if (!time12h) return 0;
+            const [time, modifier] = time12h.split(' ');
+            if (!modifier) return 0;
+            let [hours, minutes] = time.split(':');
+            let hrs = parseInt(hours, 10);
+            if (hrs === 12) hrs = modifier === 'PM' ? 12 : 0;
+            else if (modifier === 'PM') hrs += 12;
+            return hrs * 60 + parseInt(minutes, 10);
+        };
 
         return allDaySlots.filter(t => {
-            if (t < currentTimeStr) return false;
+            if (parseTime12h(t) < currentMins) return false;
             const isBooked = selectedDoctor.appointments?.some((app: any) => {
                 const slDate = new Date(app.date);
                 const slDateStr = `${slDate.getFullYear()}-${String(slDate.getMonth() + 1).padStart(2, '0')}-${String(slDate.getDate()).padStart(2, '0')}`;
