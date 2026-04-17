@@ -193,7 +193,7 @@ export default function WalkInModal({ isOpen, onClose, onSubmit, isSubmitting, d
                             </button>
 
                             {doctorDropdownOpen && (
-                                <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                                <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 max-h-48 overflow-y-auto">
                                     <div
                                         onClick={() => { setDoctorId(""); setDoctorDropdownOpen(false); }}
                                         className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors ${!doctorId ? 'bg-primary/5' : ''}`}
