@@ -6,8 +6,8 @@ A web-based dental clinic management system with online appointment booking and 
 
 | Portal | Link |
 |--------|------|
-| 🏠 **Patient Portal** (Public) | [antrigigi.vercel.app](https://antrigigi.vercel.app/) |
-| 👨‍⚕️ **Staff Portal** (Admin) | [antrigigiadmin.vercel.app](https://antrigigiadmin.vercel.app/) |
+| 🏠 **Patient Portal** (Public) | [dentalpublic.vercel.app](https://dentalpublic.vercel.app/) |
+| 👨‍⚕️ **Staff Portal** (Admin) | [admindental.vercel.app](https://admindental.vercel.app/staff/login) |
 
 ## 🚀 Features
 
