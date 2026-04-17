@@ -13,7 +13,18 @@ type PopulatedQueue = Queue & {
 export async function getQueueState() {
     noStore();
     try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
         const allRecentQueues: PopulatedQueue[] = await prisma.queue.findMany({
+            where: {
+                date: {
+                    gte: today,
+                    lt: tomorrow
+                }
+            },
             take: 50,
             orderBy: { createdAt: 'desc' },
             include: {
