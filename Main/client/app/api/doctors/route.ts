@@ -17,7 +17,9 @@ export async function GET() {
                 }
             }
         });
-        return NextResponse.json({ success: true, data: doctors });
+        return NextResponse.json({ success: true, data: doctors }, {
+            headers: { 'Cache-Control': 'no-store' }
+        });
     } catch (error: any) {
         console.error("Error fetching doctors:", error);
         return NextResponse.json({ success: false, error: String(error), details: error?.message, stack: error?.stack }, { status: 500 });
