@@ -468,13 +468,22 @@ export default function Step4({
                     )}
 
                     <div className="pt-6 border-t border-slate-100">
-                        <button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                            className="w-full md:w-auto px-10 py-4 bg-[#009ae2] hover:opacity-90 text-white font-bold rounded-full shadow-lg shadow-[#009ae2]/40 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? "Booking..." : "Book appointment"}
-                        </button>
+                        {(!loggedInUser || !loggedInUser.email) ? (
+                            <button
+                                onClick={() => { window.location.href = '/login?callbackUrl=/booking'; }}
+                                className="w-full md:w-auto px-10 py-4 bg-slate-800 hover:opacity-90 text-white font-bold rounded-full shadow-lg shadow-slate-800/40 transition-all text-lg"
+                            >
+                                Login to book appointment
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                className="w-full md:w-auto px-10 py-4 bg-[#009ae2] hover:opacity-90 text-white font-bold rounded-full shadow-lg shadow-[#009ae2]/40 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? "Booking..." : "Book appointment"}
+                            </button>
+                        )}
                     </div>
                 </div>
 
