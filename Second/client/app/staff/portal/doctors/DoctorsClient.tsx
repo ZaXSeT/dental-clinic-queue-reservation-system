@@ -11,6 +11,37 @@ const HOURS = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2
 const MINUTES = ['00', '15', '30', '45'];
 const AMPM = ['AM', 'PM'];
 
+function CustomSelect({ options, value, onChange, placeholder = "" }: { options: string[], value: string, onChange: (v: string) => void, placeholder?: string }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <div className="relative w-full">
+            <div 
+                onClick={() => setOpen(!open)} 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 font-bold text-lg text-slate-700 cursor-pointer flex justify-between items-center hover:bg-slate-100 transition-colors"
+            >
+                <span className="mx-auto block text-center w-full">{value || placeholder}</span>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+            </div>
+            {open && (
+                <>
+                    <div className="fixed inset-0 z-[110]" onClick={() => setOpen(false)}></div>
+                    <div className="absolute left-0 right-0 top-[110%] mb-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-[120] max-h-56 overflow-y-auto animate-in fade-in zoom-in-95 origin-top [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                        {options.map(opt => (
+                            <div 
+                                key={opt} 
+                                onClick={() => { onChange(opt); setOpen(false); }} 
+                                className={`px-4 py-3 text-center font-bold cursor-pointer transition-colors text-slate-700 ${value === opt ? 'bg-primary text-white hover:bg-sky-600' : 'hover:bg-slate-50 hover:text-primary'}`}
+                            >
+                                {opt}
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
 export default function DoctorsClient({ doctors, userRole }: { doctors: any[], userRole?: string }) {
     const allDoctors = doctors;
     const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
@@ -233,30 +264,20 @@ export default function DoctorsClient({ doctors, userRole }: { doctors: any[], u
                             <div className="flex gap-2 mb-8">
                                 <div className="flex-1 space-y-1">
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">Hour</label>
-                                    <div className="relative">
-                                        <select
-                                            value={newTime.hour}
-                                            onChange={(e) => setNewTime({ ...newTime, hour: e.target.value })}
-                                            className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 font-bold text-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer text-center"
-                                        >
-                                            {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
+                                    <CustomSelect 
+                                        options={HOURS} 
+                                        value={newTime.hour} 
+                                        onChange={(v) => setNewTime({ ...newTime, hour: v })} 
+                                    />
                                 </div>
                                 <div className="flex items-center pt-5 text-slate-300 font-black text-xl">:</div>
                                 <div className="flex-1 space-y-1">
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">Min</label>
-                                    <div className="relative">
-                                        <select
-                                            value={newTime.minute}
-                                            onChange={(e) => setNewTime({ ...newTime, minute: e.target.value })}
-                                            className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 font-bold text-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer text-center"
-                                        >
-                                            {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
+                                    <CustomSelect 
+                                        options={MINUTES} 
+                                        value={newTime.minute} 
+                                        onChange={(v) => setNewTime({ ...newTime, minute: v })} 
+                                    />
                                 </div>
                                 <div className="flex-1 space-y-1">
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">Period</label>
