@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic'; // Disable Next.js static caching on this route
+
 export async function GET() {
     try {
         const doctors = await prisma.doctor.findMany({
