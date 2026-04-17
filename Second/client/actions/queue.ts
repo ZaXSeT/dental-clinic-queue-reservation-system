@@ -265,7 +265,9 @@ export async function resetQueue() {
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
     await prisma.queue.deleteMany({
-        where: { date: { gte: today } }
+        where: { 
+            date: { gte: today, lt: tomorrow } 
+        }
     });
 
     await prisma.appointment.deleteMany({
