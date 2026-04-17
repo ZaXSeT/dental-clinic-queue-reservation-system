@@ -194,7 +194,7 @@ export default function RegisterPage() {
         } else {
             const msg = res?.message || 'Registration failed';
             if (msg.includes('registered')) {
-                setEmailError('Email is already registered. Please click already have an account instead.');
+                setEmailError('Email is already registered');
             } else {
                 setError(msg);
             }
