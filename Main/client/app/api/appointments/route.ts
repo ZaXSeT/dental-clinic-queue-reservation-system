@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     if (slotTaken) {
       return NextResponse.json(
-        { success: false, error: "Slot ini sudah dibooking oleh pasien lain. Silakan pilih waktu yang lain." },
+        { success: false, error: "This slot has already been booked by another patient. Please choose a different time." },
         { status: 409 }
       );
     }
