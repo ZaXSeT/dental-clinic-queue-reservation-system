@@ -7,6 +7,37 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// ─── Print Helper ─────────────────────────────────────────────────────────────
+function printInvoice() {
+    const el = document.getElementById("invoice-print");
+    if (!el) return;
+
+    const printWindow = window.open("", "_blank", "width=860,height=1100");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Invoice Print</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #0f172a; }
+                @page { margin: 16mm; size: A4; }
+                @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+            </style>
+        </head>
+        <body>
+            ${el.innerHTML}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); printWindow.close(); }, 400);
+}
+
 // ─── Custom Confirm Modal ─────────────────────────────────────────────────────
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -145,7 +176,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                 </Link>
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => window.print()}
+                        onClick={() => printInvoice()}
                         className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
                     >
                         <Printer className="w-4 h-4" /> Print PDF
