@@ -29,22 +29,25 @@ model Owner {
 }
 
 model Patient {
-  id             String        @id @default(uuid())
-  name           String
-  phone          String?
-  email          String?
-  birthDate      DateTime?
-  address        String?
-  medicalHistory String?
-  bookingFor     String?       @default("Myself")
-  patientType    String?       @default("new")
-  guardianName   String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  appointments   Appointment[]
-  invoices       Invoice[]
-  queues         Queue[]
-  bookings       Booking[]
+  id                String        @id @default(uuid())
+  name              String
+  phone             String?
+  email             String?
+  password          String?
+  emailVerified     Boolean       @default(false)
+  verificationToken String?
+  birthDate         DateTime?
+  address           String?
+  medicalHistory    String?
+  bookingFor        String?       @default("Myself")
+  patientType       String?       @default("new")
+  guardianName      String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  appointments      Appointment[]
+  invoices          Invoice[]
+  queues            Queue[]
+  bookings          Booking[]
 }
 
 model Queue {
