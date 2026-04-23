@@ -162,8 +162,29 @@ export default function NewInvoicePage() {
                                     ) : filteredPatients.map(p => (
                                         <button
                                             key={p.id}
-                                            type="button"
-                                            onClick={() => { setSelectedPatient(p); setSearch(''); }}
+                                            onClick={() => { 
+                                                setSelectedPatient(p); 
+                                                setSearch(''); 
+                                                
+                                                // Auto-select doctor based on recent activity
+                                                let recentDoctorId = null;
+                                                const appt = p.appointments?.[0];
+                                                const queue = p.queues?.[0];
+                                                
+                                                // Prioritize queue if it exists (walk-ins), otherwise use appointment
+                                                if (queue && queue.doctorId) {
+                                                    recentDoctorId = queue.doctorId;
+                                                } else if (appt && appt.doctor?.id) {
+                                                    recentDoctorId = appt.doctor.id;
+                                                }
+                                                
+                                                if (recentDoctorId) {
+                                                    const doc = doctors.find(d => d.id === recentDoctorId);
+                                                    if (doc) setSelectedDoctor(doc);
+                                                } else {
+                                                    setSelectedDoctor(null);
+                                                }
+                                            }}
                                             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-50 text-left transition-colors border border-transparent hover:border-slate-200"
                                         >
                                             <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm flex-shrink-0">

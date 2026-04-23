@@ -25,7 +25,13 @@ export async function getPatients() {
                     orderBy: { date: 'desc' },
                     where: { status: { not: 'cancelled' } },
                     take: 1,
-                    select: { date: true, time: true, status: true, notes: true, doctor: { select: { name: true } } }
+                    select: { date: true, time: true, status: true, notes: true, doctor: { select: { id: true, name: true } } }
+                },
+                queues: {
+                    orderBy: { date: 'desc' },
+                    take: 1,
+                    select: { doctorId: true, date: true }
+                }
                 }
             }
         });
