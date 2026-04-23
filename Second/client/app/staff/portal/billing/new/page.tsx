@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createManualInvoice } from '@/actions/billing';
 import { getPatients } from '@/actions/patient';
+import { getDoctors } from '@/actions/doctor';
 import { ArrowLeft, Receipt, User, Stethoscope, DollarSign, Search, CheckCircle, ChevronDown, Check } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,8 +24,12 @@ const TREATMENTS = [
 export default function NewInvoicePage() {
     const router = useRouter();
     const [patients, setPatients] = useState<any[]>([]);
+    const [doctors, setDoctors] = useState<any[]>([]);
     const [search, setSearch] = useState('');
     const [selectedPatient, setSelectedPatient] = useState<any>(null);
+    const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+    const [doctorOpen, setDoctorOpen] = useState(false);
+    const doctorRef = useRef<HTMLDivElement>(null);
     const [treatment, setTreatment] = useState(TREATMENTS[0]);
     const [treatmentOpen, setTreatmentOpen] = useState(false);
     const treatmentRef = useRef<HTMLDivElement>(null);
@@ -39,6 +44,9 @@ export default function NewInvoicePage() {
             if (treatmentRef.current && !treatmentRef.current.contains(e.target as Node)) {
                 setTreatmentOpen(false);
             }
+            if (doctorRef.current && !doctorRef.current.contains(e.target as Node)) {
+                setDoctorOpen(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -47,6 +55,9 @@ export default function NewInvoicePage() {
     useEffect(() => {
         getPatients().then(res => {
             if (res.success && res.data) setPatients(res.data);
+        });
+        getDoctors().then(res => {
+            if (res.success && res.data) setDoctors(res.data);
         });
     }, []);
 
@@ -70,6 +81,7 @@ export default function NewInvoicePage() {
             patientId: selectedPatient.id,
             treatment: finalTreatment,
             fee: feeNum,
+            doctorId: selectedDoctor?.id || undefined,
         });
         setLoading(false);
 
@@ -169,6 +181,49 @@ export default function NewInvoicePage() {
                     </div>
 
                     
+                    {/* Doctor Selection */}
+                    <div className="bg-white border border-slate-200 rounded-2xl overflow-visible shadow-sm">
+                        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2 rounded-t-2xl">
+                            <Stethoscope className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-bold text-slate-700">Select Doctor</span>
+                            <span className="text-xs text-slate-400 font-normal">(Optional)</span>
+                        </div>
+                        <div className="p-5" ref={doctorRef}>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setDoctorOpen(o => !o)}
+                                    className="w-full h-11 px-4 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-left flex items-center justify-between hover:bg-white"
+                                >
+                                    <span className={selectedDoctor ? 'text-slate-800' : 'text-slate-400'}>
+                                        {selectedDoctor ? `${selectedDoctor.name} — ${selectedDoctor.specialization}` : 'Any / Not specified'}
+                                    </span>
+                                    <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${doctorOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                {doctorOpen && (
+                                    <div className="absolute z-50 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                                        <div className="max-h-52 overflow-y-auto py-1">
+                                            <button type="button" onClick={() => { setSelectedDoctor(null); setDoctorOpen(false); }}
+                                                className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors text-left ${!selectedDoctor ? 'bg-primary/8 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}>
+                                                <span>Any / Not specified</span>
+                                                {!selectedDoctor && <Check className="w-4 h-4 text-primary shrink-0" />}
+                                            </button>
+                                            <div className="border-t border-slate-100" />
+                                            {doctors.map(d => (
+                                                <button key={d.id} type="button" onClick={() => { setSelectedDoctor(d); setDoctorOpen(false); }}
+                                                    className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors text-left ${selectedDoctor?.id === d.id ? 'bg-primary/8 text-primary' : 'text-slate-700 hover:bg-slate-50'}`}>
+                                                    <span>{d.name} <span className="text-slate-400 text-xs">— {d.specialization}</span></span>
+                                                    {selectedDoctor?.id === d.id && <Check className="w-4 h-4 text-primary shrink-0" />}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Treatment */}
                     <div className="bg-white border border-slate-200 rounded-2xl overflow-visible shadow-sm">
                         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2 rounded-t-2xl">
                             <Stethoscope className="w-4 h-4 text-primary" />
