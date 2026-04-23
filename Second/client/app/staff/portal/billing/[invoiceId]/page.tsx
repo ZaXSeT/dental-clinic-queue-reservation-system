@@ -12,34 +12,25 @@ function printInvoice(invoice: any) {
     const printWindow = window.open("", "_blank", "width=900,height=1200");
     if (!printWindow) return;
 
-    const itemRows = (invoice.items || []).map((item: any) => `
+    const itemRows = (invoice.items || []).map((item: any, i: number) => `
         <tr>
-            <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="width:36px;height:36px;border-radius:10px;background:#f8fafc;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <span style="font-size:16px;">${item.type === 'service' ? '🦷' : '💊'}</span>
-                    </div>
-                    <div>
-                        <div style="font-weight:800;color:#0f172a;font-size:13px;">${item.description}</div>
-                        <div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">
-                            ${item.type === 'service' ? 'Treatment / Consultation' : 'Pharmacy / Medication'}
-                        </div>
-                    </div>
-                </div>
+            <td class="td-no">${i + 1}</td>
+            <td class="td-desc">
+                <strong>${item.description}</strong>
+                <span class="item-type">${item.type === 'service' ? 'Tindakan / Konsultasi' : 'Obat / Farmasi'}</span>
             </td>
-            <td style="padding:16px 8px;text-align:center;font-weight:800;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;">${item.quantity}</td>
-            <td style="padding:16px 0;text-align:right;font-weight:800;color:#0f172a;font-size:13px;border-bottom:1px solid #f1f5f9;">
-                Rp ${(item.price * item.quantity).toLocaleString('id-ID')}
-            </td>
+            <td class="td-center">${item.quantity}</td>
+            <td class="td-right">Rp ${Number(item.price).toLocaleString('id-ID')}</td>
+            <td class="td-right"><strong>Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</strong></td>
         </tr>
     `).join('');
 
-    const statusColor = invoice.status === 'paid' ? '#22c55e' : '#f97316';
-    const statusBg   = invoice.status === 'paid' ? 'rgba(34,197,94,0.15)' : 'rgba(249,115,22,0.15)';
-
+    const isPaid = invoice.status === 'paid';
     const createdDate = invoice.createdAt
-        ? new Date(invoice.createdAt).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) + ', ' +
-          new Date(invoice.createdAt).toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' })
+        ? new Date(invoice.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+        : '-';
+    const createdTime = invoice.createdAt
+        ? new Date(invoice.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
         : '-';
 
     printWindow.document.write(`
@@ -47,133 +38,281 @@ function printInvoice(invoice: any) {
 <html lang="id">
 <head>
     <meta charset="utf-8"/>
-    <title>Invoice – ${invoice.invoiceNumber}</title>
+    <title>Kwitansi ${invoice.invoiceNumber}</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;color:#0f172a;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-        @page{margin:10mm;size:A4;}
-        @media print{body{background:#fff;}}
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-        .page{max-width:720px;margin:32px auto;background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.1);overflow:hidden;}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ── Header ── */
-        .header{padding:40px 48px 32px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #f1f5f9;}
-        .clinic-name{font-size:22px;font-weight:900;color:#0f172a;letter-spacing:-0.03em;}
-        .clinic-sub{font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.18em;margin-top:6px;}
-        .invoice-title{text-align:right;}
-        .invoice-title h1{font-size:36px;font-weight:900;color:#0f172a;letter-spacing:-0.04em;text-transform:uppercase;}
-        .invoice-title p{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.12em;margin-top:4px;}
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 11pt;
+            line-height: 1.5;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
 
-        /* ── Accent stripe ── */
-        .stripe{height:4px;background:linear-gradient(90deg,#0ea5e9,#38bdf8,#7dd3fc);}
+        @page {
+            size: A4;
+            margin: 15mm 18mm 20mm 18mm;
+        }
 
-        /* ── Meta ── */
-        .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:28px 48px;background:#f8fafc;border-bottom:1px solid #f1f5f9;}
-        .meta-label{font-size:8px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.16em;margin-bottom:6px;}
-        .meta-value{font-size:13px;font-weight:800;color:#0f172a;}
+        /* ── Outer wrapper ── */
+        .sheet {
+            width: 100%;
+            max-width: 740px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* ── Letterhead ── */
+        .letterhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 16px;
+            border-bottom: 3px solid #0ea5e9;
+            margin-bottom: 24px;
+        }
+        .clinic-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .logo-icon {
+            width: 52px;
+            height: 52px;
+            background: #0ea5e9;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+        .clinic-name { font-size: 18pt; font-weight: 800; color: #0f172a; line-height: 1.1; }
+        .clinic-sub  { font-size: 8pt; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
+        .clinic-address { font-size: 8pt; color: #94a3b8; margin-top: 4px; }
+
+        .doc-title { text-align: right; }
+        .doc-title h1 { font-size: 26pt; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; text-transform: uppercase; }
+        .doc-title .inv-no { font-size: 10pt; color: #0ea5e9; font-weight: 700; margin-top: 4px; }
+        .doc-title .inv-date { font-size: 9pt; color: #64748b; margin-top: 2px; }
+
+        /* ── Info grid ── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            margin-bottom: 28px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .info-cell {
+            padding: 12px 16px;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-cell:nth-child(2n) { border-right: none; }
+        .info-cell:nth-last-child(-n+2) { border-bottom: none; }
+        .info-label { font-size: 8pt; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+        .info-value { font-size: 11pt; font-weight: 700; color: #0f172a; }
 
         /* ── Table ── */
-        .table-wrap{padding:36px 48px 24px;}
-        table{width:100%;border-collapse:collapse;}
-        thead th{font-size:9px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.14em;padding-bottom:16px;border-bottom:2px solid #e2e8f0;}
-        thead th:first-child{text-align:left;}
-        thead th:nth-child(2){text-align:center;}
-        thead th:last-child{text-align:right;}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+        thead tr {
+            background: #0f172a;
+            color: #fff;
+        }
+        thead th {
+            padding: 10px 12px;
+            font-size: 8.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            text-align: left;
+        }
+        thead th.td-center { text-align: center; }
+        thead th.td-right  { text-align: right; }
+        thead th.td-no     { text-align: center; width: 36px; }
 
-        /* ── Totals ── */
-        .totals{padding:0 48px 32px;display:flex;justify-content:flex-end;}
-        .totals-inner{width:300px;}
-        .totals-row{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;padding:6px 0;border-bottom:1px solid #f1f5f9;}
-        .totals-row span:last-child{color:#475569;}
-        .total-box{margin-top:16px;background:#0f172a;border-radius:16px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;}
-        .total-label{font-size:9px;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px;}
-        .total-amount{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.03em;}
-        .status-pill{display:inline-block;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:${statusColor};background:${statusBg};}
+        tbody tr { border-bottom: 1px solid #f1f5f9; }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        tbody tr:last-child { border-bottom: 2px solid #e2e8f0; }
+
+        .td-no     { text-align: center; padding: 11px 12px; font-size: 9pt; color: #94a3b8; width: 36px; }
+        .td-desc   { padding: 11px 12px; }
+        .td-center { text-align: center; padding: 11px 12px; font-size: 10pt; }
+        .td-right  { text-align: right; padding: 11px 12px; font-size: 10pt; white-space: nowrap; }
+
+        .item-type {
+            display: block;
+            font-size: 8pt;
+            color: #94a3b8;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* ── Total section ── */
+        .totals-wrap {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0;
+        }
+        .totals-table {
+            width: 280px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+        }
+        .totals-table td {
+            padding: 9px 14px;
+            font-size: 10pt;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .totals-table td:last-child { text-align: right; font-weight: 600; }
+        .total-final {
+            background: #0f172a;
+            color: #fff;
+        }
+        .total-final td { border-bottom: none !important; font-weight: 800 !important; font-size: 11pt !important; }
+        .total-final td:first-child { color: #7dd3fc; font-size: 9pt !important; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        /* ── Status stamp ── */
+        .stamp-area {
+            margin-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .stamp-box {
+            border: 2.5px solid ${isPaid ? '#22c55e' : '#f97316'};
+            border-radius: 8px;
+            padding: 10px 22px;
+            text-align: center;
+        }
+        .stamp-label { font-size: 8pt; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+        .stamp-value { font-size: 18pt; font-weight: 900; color: ${isPaid ? '#22c55e' : '#f97316'}; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        .signature-area { text-align: center; width: 180px; }
+        .sig-line { border-top: 1px solid #cbd5e1; margin-top: 48px; padding-top: 6px; font-size: 9pt; color: #64748b; }
 
         /* ── Footer ── */
-        .footer{padding:28px 48px;background:#f8fafc;border-top:1px solid #f1f5f9;}
-        .footer-title{font-size:9px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.16em;margin-bottom:12px;}
-        .footer ol{padding-left:16px;color:#64748b;font-size:11px;font-weight:600;line-height:1.8;}
-        .watermark{text-align:center;padding:16px 48px 24px;font-size:9px;font-weight:800;color:#cbd5e1;text-transform:uppercase;letter-spacing:0.12em;}
+        .footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        .footer-notice { font-size: 8pt; color: #94a3b8; line-height: 1.7; }
+        .footer-notice strong { color: #64748b; }
+        .footer-bottom {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 7.5pt;
+            color: #cbd5e1;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
     </style>
 </head>
 <body>
-<div class="page">
-    <div class="stripe"></div>
+<div class="sheet">
 
-    <div class="header">
-        <div>
-            <div class="clinic-name">Go Dental Clinic</div>
-            <div class="clinic-sub">Certified Dental Health Services</div>
+    <!-- Letterhead -->
+    <div class="letterhead">
+        <div class="clinic-logo">
+            <div class="logo-icon">🦷</div>
+            <div>
+                <div class="clinic-name">Go Dental Clinic</div>
+                <div class="clinic-sub">Certified Dental Health Services</div>
+                <div class="clinic-address">Jl. Kesehatan No. 1, Indonesia &bull; Telp. (021) 123-4567</div>
+            </div>
         </div>
-        <div class="invoice-title">
+        <div class="doc-title">
             <h1>Kwitansi</h1>
-            <p>Official Payment Receipt</p>
+            <div class="inv-no">${invoice.invoiceNumber}</div>
+            <div class="inv-date">${createdDate} &bull; ${createdTime} WIB</div>
         </div>
     </div>
 
-    <div class="meta">
-        <div>
-            <div class="meta-label">Invoice No.</div>
-            <div class="meta-value">${invoice.invoiceNumber}</div>
+    <!-- Info -->
+    <div class="info-grid">
+        <div class="info-cell">
+            <div class="info-label">Nama Pasien</div>
+            <div class="info-value">${invoice.patient?.name || '-'}</div>
         </div>
-        <div>
-            <div class="meta-label">Date / Time</div>
-            <div class="meta-value">${createdDate}</div>
+        <div class="info-cell">
+            <div class="info-label">Dokter Pemeriksa</div>
+            <div class="info-value">Dr. ${invoice.appointment?.doctor?.name || 'TBD'}</div>
         </div>
-        <div>
-            <div class="meta-label">Patient Name</div>
-            <div class="meta-value">${invoice.patient?.name || '-'}</div>
+        <div class="info-cell">
+            <div class="info-label">Tanggal Kunjungan</div>
+            <div class="info-value">${createdDate}</div>
         </div>
-        <div>
-            <div class="meta-label">Doctor In Charge</div>
-            <div class="meta-value">Dr. ${invoice.appointment?.doctor?.name || 'TBD'}</div>
+        <div class="info-cell">
+            <div class="info-label">Waktu</div>
+            <div class="info-value">${createdTime} WIB</div>
         </div>
     </div>
 
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Description &amp; Details</th>
-                    <th>Qty</th>
-                    <th>Subtotal (Rp)</th>
-                </tr>
-            </thead>
-            <tbody>${itemRows}</tbody>
+    <!-- Items table -->
+    <table>
+        <thead>
+            <tr>
+                <th class="td-no">No</th>
+                <th>Deskripsi Tindakan / Item</th>
+                <th class="td-center">Qty</th>
+                <th class="td-right">Harga Satuan</th>
+                <th class="td-right">Jumlah</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${itemRows}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-wrap">
+        <table class="totals-table">
+            <tr><td>Subtotal</td><td>Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</td></tr>
+            <tr><td>Pembulatan</td><td>Rp 0</td></tr>
+            <tr class="total-final"><td>Total Tagihan</td><td>Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</td></tr>
         </table>
     </div>
 
-    <div class="totals">
-        <div class="totals-inner">
-            <div class="totals-row"><span>Subtotal</span><span>Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</span></div>
-            <div class="totals-row"><span>Rounding</span><span>Rp 0</span></div>
-            <div class="total-box">
-                <div>
-                    <div class="total-label">Total Net Payable</div>
-                    <div class="total-amount">Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Status</div>
-                    <span class="status-pill">${invoice.status}</span>
-                </div>
-            </div>
+    <!-- Stamp & Signature -->
+    <div class="stamp-area">
+        <div class="stamp-box">
+            <div class="stamp-label">Status Pembayaran</div>
+            <div class="stamp-value">${isPaid ? '✓ Lunas' : 'Belum Lunas'}</div>
+        </div>
+        <div class="signature-area">
+            <div class="sig-line">Petugas Kasir / Cashier</div>
         </div>
     </div>
 
+    <!-- Footer -->
     <div class="footer">
-        <div class="footer-title">Notice / Perhatian</div>
-        <ol>
-            <li>Receipt ini merupakan tanda terima pembayaran resmi.</li>
-            <li>Obat yang sudah dibeli tidak dapat ditukar/dikembalikan.</li>
-            <li>Simpan kuitansi ini untuk klaim asuransi jika diperlukan.</li>
-        </ol>
+        <div class="footer-notice">
+            <strong>Perhatian:</strong>
+            Kwitansi ini merupakan bukti pembayaran yang sah. Obat yang telah dibeli tidak dapat dikembalikan.
+            Simpan kwitansi ini untuk keperluan klaim asuransi jika diperlukan.
+        </div>
+        <div class="footer-bottom">
+            N.P.W.P: 01.234.567.8-901.000 &bull; Go Dental Clinic &bull; Diterbitkan oleh Bagian Keuangan
+        </div>
     </div>
 
-    <div class="watermark">N.P.W.P Clinic: 01.234.567.8-901.000 &bull; Issued by Go Dental Financial Dept.</div>
 </div>
-<script>window.onload=function(){window.print();}</script>
+<script>window.onload = function() { window.print(); }</script>
 </body>
 </html>
     `);
