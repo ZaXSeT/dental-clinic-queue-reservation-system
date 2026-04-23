@@ -8,34 +8,176 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 // ─── Print Helper ─────────────────────────────────────────────────────────────
-function printInvoice() {
-    const el = document.getElementById("invoice-print");
-    if (!el) return;
-
-    const printWindow = window.open("", "_blank", "width=860,height=1100");
+function printInvoice(invoice: any) {
+    const printWindow = window.open("", "_blank", "width=900,height=1200");
     if (!printWindow) return;
 
+    const itemRows = (invoice.items || []).map((item: any) => `
+        <tr>
+            <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:36px;height:36px;border-radius:10px;background:#f8fafc;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span style="font-size:16px;">${item.type === 'service' ? '🦷' : '💊'}</span>
+                    </div>
+                    <div>
+                        <div style="font-weight:800;color:#0f172a;font-size:13px;">${item.description}</div>
+                        <div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">
+                            ${item.type === 'service' ? 'Treatment / Consultation' : 'Pharmacy / Medication'}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td style="padding:16px 8px;text-align:center;font-weight:800;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;">${item.quantity}</td>
+            <td style="padding:16px 0;text-align:right;font-weight:800;color:#0f172a;font-size:13px;border-bottom:1px solid #f1f5f9;">
+                Rp ${(item.price * item.quantity).toLocaleString('id-ID')}
+            </td>
+        </tr>
+    `).join('');
+
+    const statusColor = invoice.status === 'paid' ? '#22c55e' : '#f97316';
+    const statusBg   = invoice.status === 'paid' ? 'rgba(34,197,94,0.15)' : 'rgba(249,115,22,0.15)';
+
+    const createdDate = invoice.createdAt
+        ? new Date(invoice.createdAt).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) + ', ' +
+          new Date(invoice.createdAt).toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' })
+        : '-';
+
     printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8" />
-            <title>Invoice Print</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #0f172a; }
-                @page { margin: 16mm; size: A4; }
-                @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-            </style>
-        </head>
-        <body>
-            ${el.innerHTML}
-        </body>
-        </html>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <title>Invoice – ${invoice.invoiceNumber}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;color:#0f172a;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+        @page{margin:10mm;size:A4;}
+        @media print{body{background:#fff;}}
+
+        .page{max-width:720px;margin:32px auto;background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.1);overflow:hidden;}
+
+        /* ── Header ── */
+        .header{padding:40px 48px 32px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #f1f5f9;}
+        .clinic-name{font-size:22px;font-weight:900;color:#0f172a;letter-spacing:-0.03em;}
+        .clinic-sub{font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.18em;margin-top:6px;}
+        .invoice-title{text-align:right;}
+        .invoice-title h1{font-size:36px;font-weight:900;color:#0f172a;letter-spacing:-0.04em;text-transform:uppercase;}
+        .invoice-title p{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.12em;margin-top:4px;}
+
+        /* ── Accent stripe ── */
+        .stripe{height:4px;background:linear-gradient(90deg,#0ea5e9,#38bdf8,#7dd3fc);}
+
+        /* ── Meta ── */
+        .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:28px 48px;background:#f8fafc;border-bottom:1px solid #f1f5f9;}
+        .meta-label{font-size:8px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.16em;margin-bottom:6px;}
+        .meta-value{font-size:13px;font-weight:800;color:#0f172a;}
+
+        /* ── Table ── */
+        .table-wrap{padding:36px 48px 24px;}
+        table{width:100%;border-collapse:collapse;}
+        thead th{font-size:9px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.14em;padding-bottom:16px;border-bottom:2px solid #e2e8f0;}
+        thead th:first-child{text-align:left;}
+        thead th:nth-child(2){text-align:center;}
+        thead th:last-child{text-align:right;}
+
+        /* ── Totals ── */
+        .totals{padding:0 48px 32px;display:flex;justify-content:flex-end;}
+        .totals-inner{width:300px;}
+        .totals-row{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;padding:6px 0;border-bottom:1px solid #f1f5f9;}
+        .totals-row span:last-child{color:#475569;}
+        .total-box{margin-top:16px;background:#0f172a;border-radius:16px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;}
+        .total-label{font-size:9px;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px;}
+        .total-amount{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.03em;}
+        .status-pill{display:inline-block;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:${statusColor};background:${statusBg};}
+
+        /* ── Footer ── */
+        .footer{padding:28px 48px;background:#f8fafc;border-top:1px solid #f1f5f9;}
+        .footer-title{font-size:9px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.16em;margin-bottom:12px;}
+        .footer ol{padding-left:16px;color:#64748b;font-size:11px;font-weight:600;line-height:1.8;}
+        .watermark{text-align:center;padding:16px 48px 24px;font-size:9px;font-weight:800;color:#cbd5e1;text-transform:uppercase;letter-spacing:0.12em;}
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="stripe"></div>
+
+    <div class="header">
+        <div>
+            <div class="clinic-name">Go Dental Clinic</div>
+            <div class="clinic-sub">Certified Dental Health Services</div>
+        </div>
+        <div class="invoice-title">
+            <h1>Kwitansi</h1>
+            <p>Official Payment Receipt</p>
+        </div>
+    </div>
+
+    <div class="meta">
+        <div>
+            <div class="meta-label">Invoice No.</div>
+            <div class="meta-value">${invoice.invoiceNumber}</div>
+        </div>
+        <div>
+            <div class="meta-label">Date / Time</div>
+            <div class="meta-value">${createdDate}</div>
+        </div>
+        <div>
+            <div class="meta-label">Patient Name</div>
+            <div class="meta-value">${invoice.patient?.name || '-'}</div>
+        </div>
+        <div>
+            <div class="meta-label">Doctor In Charge</div>
+            <div class="meta-value">Dr. ${invoice.appointment?.doctor?.name || 'TBD'}</div>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Description &amp; Details</th>
+                    <th>Qty</th>
+                    <th>Subtotal (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+        </table>
+    </div>
+
+    <div class="totals">
+        <div class="totals-inner">
+            <div class="totals-row"><span>Subtotal</span><span>Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</span></div>
+            <div class="totals-row"><span>Rounding</span><span>Rp 0</span></div>
+            <div class="total-box">
+                <div>
+                    <div class="total-label">Total Net Payable</div>
+                    <div class="total-amount">Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Status</div>
+                    <span class="status-pill">${invoice.status}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-title">Notice / Perhatian</div>
+        <ol>
+            <li>Receipt ini merupakan tanda terima pembayaran resmi.</li>
+            <li>Obat yang sudah dibeli tidak dapat ditukar/dikembalikan.</li>
+            <li>Simpan kuitansi ini untuk klaim asuransi jika diperlukan.</li>
+        </ol>
+    </div>
+
+    <div class="watermark">N.P.W.P Clinic: 01.234.567.8-901.000 &bull; Issued by Go Dental Financial Dept.</div>
+</div>
+<script>window.onload=function(){window.print();}</script>
+</body>
+</html>
     `);
     printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); printWindow.close(); }, 400);
 }
 
 // ─── Custom Confirm Modal ─────────────────────────────────────────────────────
@@ -176,7 +318,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                 </Link>
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => printInvoice()}
+                        onClick={() => printInvoice(invoice)}
                         className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
                     >
                         <Printer className="w-4 h-4" /> Print PDF
