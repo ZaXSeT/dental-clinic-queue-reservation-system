@@ -32,7 +32,6 @@ export async function getPatients() {
                     take: 1,
                     select: { doctorId: true, date: true }
                 }
-                }
             }
         });
 
