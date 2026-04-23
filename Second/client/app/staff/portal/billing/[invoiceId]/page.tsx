@@ -251,7 +251,7 @@ function printInvoice(invoice: any) {
         </div>
         <div class="info-cell">
             <div class="info-label">Dokter Pemeriksa</div>
-            <div class="info-value">Dr. ${invoice.appointment?.doctor?.name || 'TBD'}</div>
+            <div class="info-value">Dr. ${invoice.doctor?.name || invoice.appointment?.doctor?.name || 'TBD'}</div>
         </div>
         <div class="info-cell">
             <div class="info-label">Tanggal Kunjungan</div>
@@ -508,7 +508,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                     </div>
                     <div>
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Doctor In Charge</p>
-                        <p className="font-black text-slate-900 text-sm">Dr. {invoice.appointment?.doctor?.name || 'TBD'}</p>
+                        <p className="font-black text-slate-900 text-sm">Dr. {invoice.doctor?.name || invoice.appointment?.doctor?.name || 'TBD'}</p>
                     </div>
                 </div>
 

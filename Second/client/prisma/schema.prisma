@@ -92,6 +92,7 @@ model Doctor {
   appointments   Appointment[]
   queues         Queue[]
   bookings       Booking[]
+  invoices       Invoice[]
 }
 
 model Invoice {
@@ -99,6 +100,7 @@ model Invoice {
   invoiceNumber String        @unique
   appointmentId String?       @unique
   patientId     String
+  doctorId      String?
   totalAmount   Float         @default(0)
   status        String        @default("unpaid")
   billingCode   String?       @unique
@@ -106,6 +108,7 @@ model Invoice {
   updatedAt     DateTime      @updatedAt
   appointment   Appointment?  @relation(fields: [appointmentId], references: [id])
   patient       Patient       @relation(fields: [patientId], references: [id])
+  doctor        Doctor?       @relation(fields: [doctorId], references: [id])
   items         InvoiceItem[]
 }
 
