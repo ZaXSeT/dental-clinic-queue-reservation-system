@@ -29,24 +29,25 @@ model Owner {
 }
 
 model Patient {
-  id             String        @id @default(uuid())
-  name           String
-  phone          String?
-  email          String?
-  password       String?
-  emailVerified  Boolean       @default(false)
+  id                String        @id @default(uuid())
+  name              String
+  phone             String?
+  email             String?
+  password          String?
+  emailVerified     Boolean       @default(false)
   verificationToken String?
-  birthDate      DateTime?
-  address        String?
-  medicalHistory String?
-  bookingFor     String?       @default("Myself")
-  patientType    String?       @default("new")
-  guardianName   String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  appointments   Appointment[]
-  invoices       Invoice[]
-  queues         Queue[]
+  birthDate         DateTime?
+  address           String?
+  medicalHistory    String?
+  bookingFor        String?       @default("Myself")
+  patientType       String?       @default("new")
+  guardianName      String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  appointments      Appointment[]
+  invoices          Invoice[]
+  queues            Queue[]
+  bookings          Booking[]
 }
 
 model Queue {
@@ -82,17 +83,19 @@ model Appointment {
 }
 
 model Doctor {
-  id             String        @id @default(uuid())
+  id             String   @id @default(uuid())
   name           String
   specialization String
   image          String?
   availability   String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   password       String?
-  username       String?       @unique
+  username       String?  @unique
   appointments   Appointment[]
   queues         Queue[]
+  bookings       Booking[]
+  invoices       Invoice[]
 }
 
 model Invoice {
@@ -100,6 +103,7 @@ model Invoice {
   invoiceNumber String        @unique
   appointmentId String?       @unique
   patientId     String
+  doctorId      String?
   totalAmount   Float         @default(0)
   status        String        @default("unpaid")
   billingCode   String?       @unique
@@ -107,7 +111,34 @@ model Invoice {
   updatedAt     DateTime      @updatedAt
   appointment   Appointment?  @relation(fields: [appointmentId], references: [id])
   patient       Patient       @relation(fields: [patientId], references: [id])
+  doctor        Doctor?       @relation(fields: [doctorId], references: [id])
   items         InvoiceItem[]
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  patientId String
+
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  doctorId  String
+
+  room      Room     @relation(fields: [roomId], references: [id])
+  roomId    String
+
+  startTime DateTime
+  endTime   DateTime
+
+  createdAt DateTime @default(now())
+
+  @@unique([roomId, startTime]) // prevents double booking same room/time
+}
+
+model Room {
+  id          String @id @default(uuid())
+  name        String 
+  bookings    Booking[]
 }
 
 model InvoiceItem {

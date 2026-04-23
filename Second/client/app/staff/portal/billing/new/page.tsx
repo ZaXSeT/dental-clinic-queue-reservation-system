@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createManualInvoice } from '@/actions/billing';
 import { getPatients } from '@/actions/patient';
-import { getDoctors } from '@/actions/doctor';
+import { getAllDoctors } from '@/actions/doctor';
 import { ArrowLeft, Receipt, User, Stethoscope, DollarSign, Search, CheckCircle, ChevronDown, Check } from 'lucide-react';
 import Link from 'next/link';
 
@@ -56,7 +56,7 @@ export default function NewInvoicePage() {
         getPatients().then(res => {
             if (res.success && res.data) setPatients(res.data);
         });
-        getDoctors().then(res => {
+        getAllDoctors().then(res => {
             if (res.success && res.data) setDoctors(res.data);
         });
     }, []);
