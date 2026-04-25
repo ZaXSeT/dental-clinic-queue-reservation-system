@@ -194,11 +194,11 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                 {}
                 <div className="px-12 py-10 bg-slate-50 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-8 text-[10px]">
                     <div>
-                        <p className="font-black text-slate-400 uppercase tracking-widest mb-3">Notice / Perhatian</p>
+                        <p className="font-black text-slate-400 uppercase tracking-widest mb-3">Notice</p>
                         <ol className="list-decimal list-inside space-y-1 text-slate-500 font-bold leading-relaxed">
-                            <li>Receipt ini merupakan tanda terima pembayaran resmi.</li>
-                            <li>Obat yang sudah dibeli tidak dapat ditukar/dikembalikan.</li>
-                            <li>Simpan kuitansi ini untuk klaim asuransi jika diperlukan.</li>
+                            <li>This receipt is an official proof of payment.</li>
+                            <li>Purchased medicines cannot be exchanged or returned.</li>
+                            <li>Please retain this receipt for insurance claim purposes if needed.</li>
                         </ol>
                     </div>
                     <div className="flex flex-col items-center justify-center">

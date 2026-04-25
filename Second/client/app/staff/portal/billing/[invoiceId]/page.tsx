@@ -17,7 +17,7 @@ function printInvoice(invoice: any) {
             <td class="td-no">${i + 1}</td>
             <td class="td-desc">
                 <strong>${item.description}</strong>
-                <span class="item-type">${item.type === 'service' ? 'Tindakan / Konsultasi' : 'Obat / Farmasi'}</span>
+                <span class="item-type">${item.type === 'service' ? 'Treatment / Consultation' : 'Pharmacy / Medication'}</span>
             </td>
             <td class="td-center">${item.quantity}</td>
             <td class="td-right">Rp ${Number(item.price).toLocaleString('id-ID')}</td>
@@ -38,7 +38,7 @@ function printInvoice(invoice: any) {
 <html lang="id">
 <head>
     <meta charset="utf-8"/>
-    <title>Kwitansi ${invoice.invoiceNumber}</title>
+    <title>Receipt ${invoice.invoiceNumber}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -234,7 +234,7 @@ function printInvoice(invoice: any) {
             </div>
         </div>
         <div class="doc-title">
-            <h1>Kwitansi</h1>
+            <h1>RECEIPT</h1>
             <div class="inv-no">${invoice.invoiceNumber}</div>
             <div class="inv-date">${createdDate} &bull; ${createdTime} WIB</div>
         </div>
@@ -243,20 +243,20 @@ function printInvoice(invoice: any) {
     <!-- Info -->
     <div class="info-grid">
         <div class="info-cell">
-            <div class="info-label">Nama Pasien</div>
+            <div class="info-label">Patient Name</div>
             <div class="info-value">${invoice.patient?.name || '-'}</div>
         </div>
         <div class="info-cell">
-            <div class="info-label">Dokter Pemeriksa</div>
+            <div class="info-label">Examining Doctor</div>
             <div class="info-value">Dr. ${invoice.doctor?.name || invoice.appointment?.doctor?.name || 'TBD'}</div>
         </div>
         <div class="info-cell">
-            <div class="info-label">Tanggal Kunjungan</div>
+            <div class="info-label">Visit Date</div>
             <div class="info-value">${createdDate}</div>
         </div>
         <div class="info-cell">
-            <div class="info-label">Waktu</div>
-            <div class="info-value">${createdTime} WIB</div>
+            <div class="info-label">Time</div>
+            <div class="info-value">${createdTime}</div>
         </div>
     </div>
 
@@ -265,10 +265,10 @@ function printInvoice(invoice: any) {
         <thead>
             <tr>
                 <th class="td-no">No</th>
-                <th>Deskripsi Tindakan / Item</th>
+                <th>Treatment Description / Item</th>
                 <th class="td-center">Qty</th>
-                <th class="td-right">Harga Satuan</th>
-                <th class="td-right">Jumlah</th>
+                <th class="td-right">Unit Price</th>
+                <th class="td-right">Total</th>
             </tr>
         </thead>
         <tbody>
@@ -280,16 +280,16 @@ function printInvoice(invoice: any) {
     <div class="totals-wrap">
         <table class="totals-table">
             <tr><td>Subtotal</td><td>Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</td></tr>
-            <tr><td>Pembulatan</td><td>Rp 0</td></tr>
-            <tr class="total-final"><td>Total Tagihan</td><td>Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</td></tr>
+            <tr><td>Rounding</td><td>Rp 0</td></tr>
+            <tr class="total-final"><td>Total Bill</td><td>Rp ${invoice.totalAmount?.toLocaleString('id-ID')}</td></tr>
         </table>
     </div>
 
     <!-- Stamp & Signature -->
     <div class="stamp-area">
         <div class="stamp-box">
-            <div class="stamp-label">Status Pembayaran</div>
-            <div class="stamp-value">${isPaid ? '✓ Lunas' : 'Belum Lunas'}</div>
+            <div class="stamp-label">Payment Status</div>
+            <div class="stamp-value">${isPaid ? '✓ PAID' : 'UNPAID'}</div>
         </div>
         <div class="signature-area">
             <div class="sig-line">Petugas Kasir / Cashier</div>
@@ -299,12 +299,12 @@ function printInvoice(invoice: any) {
     <!-- Footer -->
     <div class="footer">
         <div class="footer-notice">
-            <strong>Perhatian:</strong>
-            Kwitansi ini merupakan bukti pembayaran yang sah. Obat yang telah dibeli tidak dapat dikembalikan.
-            Simpan kwitansi ini untuk keperluan klaim asuransi jika diperlukan.
+            <strong>Notice:</strong>
+            This receipt is an official proof of payment. Purchased medicines cannot be returned.
+            Please retain this receipt for insurance claim purposes if needed.
         </div>
         <div class="footer-bottom">
-            N.P.W.P: 01.234.567.8-901.000 &bull; Go Dental Clinic &bull; Diterbitkan oleh Bagian Keuangan
+            N.P.W.P: 01.234.567.8-901.000 &bull; Go Dental Clinic &bull; Issued by Finance Department
         </div>
     </div>
 
@@ -581,11 +581,11 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                 {/* Footer */}
                 <div className="px-12 py-10 bg-slate-50 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-8 text-[10px]">
                     <div>
-                        <p className="font-black text-slate-400 uppercase tracking-widest mb-3">Notice / Perhatian</p>
+                        <p className="font-black text-slate-400 uppercase tracking-widest mb-3">Notice</p>
                         <ol className="list-decimal list-inside space-y-1 text-slate-500 font-bold leading-relaxed">
-                            <li>Receipt ini merupakan tanda terima pembayaran resmi.</li>
-                            <li>Obat yang sudah dibeli tidak dapat ditukar/dikembalikan.</li>
-                            <li>Simpan kuitansi ini untuk klaim asuransi jika diperlukan.</li>
+                            <li>This receipt is an official proof of payment.</li>
+                            <li>Purchased medicines cannot be exchanged or returned.</li>
+                            <li>Please retain this receipt for insurance claim purposes if needed.</li>
                         </ol>
                     </div>
                 </div>
