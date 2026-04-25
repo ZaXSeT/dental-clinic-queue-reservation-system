@@ -484,7 +484,7 @@ export default function InvoiceDetailsPage({ params }: { params: { invoiceId: st
                         </div>
                     </div>
                     <div className="text-right">
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase mb-2">KWITANSI</h1>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase mb-2">RECEIPT</h1>
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Official Payment Receipt</p>
                     </div>
                 </div>
